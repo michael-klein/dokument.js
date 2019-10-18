@@ -9,6 +9,7 @@ export interface DocContextValue {
     rehypePlugins: Function[];
     rootPath: string;
     componentList: ComponentList;
+    title: string;
     search: (query: string) => DocSearchResult[];
 }
 export declare const docContextValue: DocContextValue;

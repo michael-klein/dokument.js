@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Navbar } from '../document_handling/document_provider';
+import { Navbar } from '../utils/document_provider';
+import { PreviousAndNextProps } from './previous_and_next';
 export interface ComponentList {
     DocumentRenderer: React.FunctionComponent<{
         slug: string;
@@ -17,4 +18,5 @@ export interface ComponentList {
     SideBar: React.FunctionComponent;
     Main: React.FunctionComponent;
     Search: React.FunctionComponent;
+    PreviousAndNext: React.FunctionComponent<PreviousAndNextProps>;
 }

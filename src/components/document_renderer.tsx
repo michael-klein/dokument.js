@@ -2,7 +2,7 @@ import * as React from 'react';
 
 // tslint:disable
 import MDX from '@mdx-js/runtime';
-import { useSaveDocumentByNavId } from '../store/hooks/use_document';
+import { useSaveDocument } from '../store/hooks/use_save_document';
 import { useDocContext } from '../hooks/use_doc_context';
 import { DocumentData } from '../utils/document_provider';
 import { Link } from 'react-router-dom';
@@ -46,15 +46,17 @@ const components: { [key: string]: React.FunctionComponent } = {
   };
 });
 
-export function DocumentRenderer(props: {
+export interface DocumentRendererProps {
   slug: string;
   headingSlug: string;
-}): JSX.Element {
+}
+
+export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
   const { rehypePlugins, remarkPlugins, componentList } = useDocContext();
   const { PreviousAndNext } = componentList;
   const Provider = mdxContext.Provider;
 
-  const currentDocument = useSaveDocumentByNavId(props.slug);
+  const currentDocument = useSaveDocument(props.slug);
   React.useEffect(() => {
     const heading: HTMLElement = document.getElementById(props.headingSlug);
     if (heading) {

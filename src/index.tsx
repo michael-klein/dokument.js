@@ -13,6 +13,7 @@ export interface DocsOptions {
   remarkPlugins: Function[];
   rehypePlugins: Function[];
   componentList: ComponentList;
+  title?: string;
 }
 
 async function load(options: DocsOptions) {
@@ -35,6 +36,7 @@ export async function docs(
     rootPath: '/',
     remarkPlugins: [],
     rehypePlugins: [],
+    title: 'Documentation',
     ...optionsIn,
     componentList: {
       ...componentListValue,

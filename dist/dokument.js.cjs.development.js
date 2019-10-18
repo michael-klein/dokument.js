@@ -499,7 +499,8 @@ var docContextValue = {
   rehypePlugins: [],
   rootPath: './',
   componentList: undefined,
-  search: search
+  search: search,
+  title: ''
 };
 var docContext =
 /*#__PURE__*/
@@ -518,9 +519,9 @@ function Docs() {
   }, React.createElement(reactRouterDom.HashRouter, null, React.createElement(SideBar, null), React.createElement(Main, null)));
 }
 
-function useSaveDocumentByNavId(id) {
-  if (id === void 0) {
-    id = '';
+function useSaveDocument(slug) {
+  if (slug === void 0) {
+    slug = '';
   }
 
   var documentMap = docStore.getRawState().documentMap;
@@ -529,15 +530,15 @@ function useSaveDocumentByNavId(id) {
       reRenderCount = _React$useState[0],
       setReRenderCount = _React$useState[1];
 
-  var docRef = React.useRef(documentMap[id]);
+  var docRef = React.useRef(documentMap[slug]);
   React.useEffect(function () {
-    if (!docRef.current) {
-      docStoreActions.getSaveDocumentByNavId(id).then(function (document) {
+    if (!docRef.current || docRef.current.slug !== slug) {
+      docStoreActions.getSaveDocumentByNavId(slug).then(function (document) {
         docRef.current = document;
         setReRenderCount(reRenderCount + 1);
       });
     }
-  }, []);
+  }, [slug]);
   return docRef.current;
 }
 
@@ -588,7 +589,7 @@ function DocumentRenderer(props) {
 
   var PreviousAndNext = componentList.PreviousAndNext;
   var Provider = mdxContext.Provider;
-  var currentDocument = useSaveDocumentByNavId(props.slug);
+  var currentDocument = useSaveDocument(props.slug);
   React.useEffect(function () {
     var heading = document.getElementById(props.headingSlug);
 
@@ -634,6 +635,135 @@ function DocumentRenderer(props) {
   })) : React.createElement("div", null, "loading document...");
 }
 
+function Nav() {
+  var _useDocStore = useDocStore(function (state) {
+    return [state.documentsLoaded, state.navbar];
+  }),
+      documentsLoaded = _useDocStore[0],
+      navbar = _useDocStore[1];
+
+  var NavLevel = useDocContext().componentList.NavLevel;
+  return !documentsLoaded ? React.createElement("div", null, "loading navbar...") : React.createElement("nav", null, React.createElement(NavLevel, Object.assign({}, {
+    navbar: navbar
+  })));
+}
+
+function SideBar() {
+  var _useDocContext = useDocContext(),
+      componentList = _useDocContext.componentList,
+      title = _useDocContext.title;
+
+  var Nav = componentList.Nav,
+      Search = componentList.Search;
+  return React.createElement("aside", {
+    className: "sidebar"
+  }, React.createElement("h1", null, title), React.createElement(Search, null), React.createElement(Nav, null));
+}
+
+function RenderArticle() {
+  var DocumentRenderer = useDocContext().componentList.DocumentRenderer;
+
+  var _useParams = reactRouter.useParams(),
+      slug = _useParams.slug,
+      headingSlug = _useParams.headingSlug;
+
+  return React.createElement(DocumentRenderer, {
+    slug: slug,
+    headingSlug: headingSlug
+  });
+}
+
+function Main() {
+  return React.createElement("main", null, React.createElement("article", null, React.createElement(reactRouter.Switch, null, React.createElement(reactRouter.Route, {
+    path: "/document/:slug?/:headingSlug?"
+  }, React.createElement(RenderArticle, null)), React.createElement(reactRouter.Route, {
+    path: "/"
+  }, React.createElement(RenderArticle, null)))));
+}
+
+function useClearSearchOnLinkClicked(setSearchQuery) {
+  React.useEffect(function () {
+    var listener = function listener(event) {
+      console.log(event);
+      var target = event.target;
+
+      while (target !== document.body) {
+        if (target instanceof HTMLAnchorElement) {
+          if (target.href.replace(window.location.href.replace(window.location.hash, ''), '')[0] === '#') {
+            setSearchQuery('');
+            return;
+          }
+        }
+
+        target = target.parentElement;
+      }
+    };
+
+    document.body.addEventListener('click', listener);
+    return function () {
+      document.body.removeEventListener('click', listener);
+    };
+  }, []);
+}
+
+function Search() {
+  var SearchResults = useDocContext().componentList.SearchResults;
+
+  var _React$useState = React.useState(''),
+      searchQuery = _React$useState[0],
+      setSearchQuery = _React$useState[1];
+
+  var location = reactRouterDom.useLocation();
+  React.useEffect(function () {
+    setSearchQuery('');
+  }, [location]);
+  useClearSearchOnLinkClicked(setSearchQuery);
+  return React.createElement("div", {
+    className: "search"
+  }, searchQuery.length > 0 && React.createElement(SearchResults, {
+    searchQuery: searchQuery
+  }), React.createElement("input", {
+    type: "text",
+    value: searchQuery,
+    placeholder: "search...",
+    onChange: function onChange(e) {
+      return setSearchQuery(e.currentTarget.value);
+    },
+    onKeyUp: function onKeyUp(e) {
+      if (e.key === 'Escape') {
+        setSearchQuery('');
+      }
+    }
+  }));
+}
+
+function useGetTo() {
+  var _useDocContext = useDocContext(),
+      rootPath = _useDocContext.rootPath;
+
+  return function (doc) {
+    var topHeading = doc && doc.headings[0] && doc.headings[0].size === 1 ? doc.headings[0] : undefined;
+    return join('/document', rootPath, doc.slug, topHeading ? topHeading.slug : '');
+  };
+}
+
+function PreviousAndNext(props) {
+  var previous = props.previous,
+      next = props.next;
+  var getTo = useGetTo();
+  return React.createElement("div", {
+    className: "previous-next"
+  }, previous && React.createElement("div", {
+    className: "previous"
+  }, React.createElement("span", null, React.createElement(reactRouterDom.Link, {
+    to: getTo(previous)
+  }, previous.title))), next && React.createElement("div", {
+    className: "next"
+  }, React.createElement("span", null, React.createElement(reactRouterDom.Link, {
+    to: getTo(next)
+  }, next.title))));
+}
+
 function NavItem(props) {
   var documentMap = useDocStore(function (state) {
     return state.documentMap;
@@ -655,6 +785,7 @@ function NavItem(props) {
     }, heading.text);
   })));
 }
+
 function NavLevel(props) {
   var navbar = props.navbar;
   var _useDocContext$compon = useDocContext().componentList,
@@ -686,57 +817,28 @@ function NavLevel(props) {
     }
   }));
 }
-function Nav() {
-  var _useDocStore = useDocStore(function (state) {
-    return [state.documentsLoaded, state.navbar];
-  }),
-      documentsLoaded = _useDocStore[0],
-      navbar = _useDocStore[1];
 
-  var NavLevel = useDocContext().componentList.NavLevel;
-  return !documentsLoaded ? React.createElement("div", null, "loading navbar...") : React.createElement("nav", null, React.createElement(NavLevel, Object.assign({}, {
-    navbar: navbar
-  })));
-}
+function SearchResults(props) {
+  var searchQuery = props.searchQuery;
 
-function SideBar() {
-  var _useDocContext$compon = useDocContext().componentList,
-      Nav = _useDocContext$compon.Nav,
-      Search = _useDocContext$compon.Search;
-  return React.createElement("aside", {
-    className: "sidebar"
-  }, React.createElement("h1", null, "Dokument.js"), React.createElement(Search, null), React.createElement(Nav, null));
-}
-
-function RenderArticle() {
-  var DocumentRenderer = useDocContext().componentList.DocumentRenderer;
-
-  var _useParams = reactRouter.useParams(),
-      slug = _useParams.slug,
-      headingSlug = _useParams.headingSlug;
-
-  return React.createElement(DocumentRenderer, {
-    slug: slug,
-    headingSlug: headingSlug
-  });
-}
-
-function Main() {
-  return React.createElement("main", null, React.createElement("article", null, React.createElement(reactRouter.Switch, null, React.createElement(reactRouter.Route, {
-    path: "/"
-  }, React.createElement(RenderArticle, null)), React.createElement(reactRouter.Route, {
-    path: "/document/:slug?/:headingSlug?"
-  }, React.createElement(RenderArticle, null)))));
-}
-
-function useGetTo() {
   var _useDocContext = useDocContext(),
-      rootPath = _useDocContext.rootPath;
+      search = _useDocContext.search,
+      componentList = _useDocContext.componentList;
 
-  return function (doc) {
-    var topHeading = doc && doc.headings[0] && doc.headings[0].size === 1 ? doc.headings[0] : undefined;
-    return join('/document', rootPath, doc.slug, topHeading ? topHeading.slug : '');
-  };
+  var SearchResultsItem = componentList.SearchResultsItem;
+  var documentMap = useDocStore(function (state) {
+    return state.documentMap;
+  });
+  var result = search(searchQuery);
+  return React.createElement("div", {
+    className: 'search-results'
+  }, React.createElement("h1", null, "Listing ", result.length, " document", result.length !== 1 ? 's' : '', " with search results for ", searchQuery, ":"), React.createElement("ul", null, result.map(function (r) {
+    var doc = documentMap[r.slug];
+    return React.createElement(SearchResultsItem, {
+      doc: doc,
+      searchQuery: searchQuery
+    });
+  })));
 }
 
 function getSentencesWithSearchResults(text, searchWords) {
@@ -745,102 +847,29 @@ function getSentencesWithSearchResults(text, searchWords) {
   });
 }
 
-function SearchResults(props) {
-  var searchQuery = props.searchQuery;
-
-  var _useDocContext = useDocContext(),
-      search = _useDocContext.search;
-
-  var documentMap = useDocStore(function (state) {
-    return state.documentMap;
-  });
-  var result = search(searchQuery);
+function SearchResultsItem(props) {
+  var doc = props.doc,
+      searchQuery = props.searchQuery;
   var getTo = useGetTo();
-  return React.createElement("div", {
-    className: 'search-results'
-  }, React.createElement("h1", null, "Listing ", result.length, " document", result.length !== 1 ? 's' : '', " with search results for ", searchQuery, ":"), React.createElement("ul", null, result.map(function (r) {
-    var doc = documentMap[r.slug];
-    return React.createElement("li", {
-      key: doc.slug
-    }, React.createElement("label", null, React.createElement(reactRouterDom.Link, {
-      to: getTo(doc)
+  return React.createElement("li", {
+    key: doc.slug
+  }, React.createElement("label", null, React.createElement(reactRouterDom.Link, {
+    to: getTo(doc)
+  }, React.createElement(Highlighter, {
+    highlightClassName: "search-highlight",
+    searchWords: [searchQuery],
+    autoEscape: true,
+    textToHighlight: doc.title
+  }))), getSentencesWithSearchResults(removeMarkdown(doc.content), [searchQuery]).map(function (item) {
+    return React.createElement("pre", {
+      key: item
     }, React.createElement(Highlighter, {
       highlightClassName: "search-highlight",
       searchWords: [searchQuery],
       autoEscape: true,
-      textToHighlight: doc.title
-    }))), getSentencesWithSearchResults(removeMarkdown(doc.content), [searchQuery]).map(function (item) {
-      return React.createElement("pre", {
-        key: item
-      }, React.createElement(Highlighter, {
-        highlightClassName: "search-highlight",
-        searchWords: [searchQuery],
-        autoEscape: true,
-        textToHighlight: item
-      }));
+      textToHighlight: item
     }));
-  })));
-}
-function Search() {
-  var _React$useState = React.useState(''),
-      searchQuery = _React$useState[0],
-      setSearchQuery = _React$useState[1];
-
-  var location = reactRouterDom.useLocation();
-  React.useEffect(function () {
-    setSearchQuery('');
-  }, [location]);
-  React.useEffect(function () {
-    var listener = function listener(event) {
-      console.log(event);
-      var target = event.target;
-
-      while (target !== document.body) {
-        if (target instanceof HTMLAnchorElement) {
-          if (target.href.replace(window.location.href.replace(window.location.hash, ''), '')[0] === '#') {
-            setSearchQuery('');
-            return;
-          }
-        }
-
-        target = target.parentElement;
-      }
-    };
-
-    document.body.addEventListener('click', listener);
-    return function () {
-      document.body.removeEventListener('click', listener);
-    };
-  }, []);
-  return React.createElement("div", {
-    className: "search"
-  }, searchQuery.length > 0 && React.createElement(SearchResults, {
-    searchQuery: searchQuery
-  }), React.createElement("input", {
-    type: "text",
-    value: searchQuery,
-    placeholder: "search...",
-    onChange: function onChange(e) {
-      return setSearchQuery(e.currentTarget.value);
-    }
   }));
-}
-
-function PreviousAndNext(props) {
-  var previous = props.previous,
-      next = props.next;
-  var getTo = useGetTo();
-  return React.createElement("div", {
-    className: "previous-next"
-  }, previous && React.createElement("div", {
-    className: "previous"
-  }, React.createElement("span", null, React.createElement(reactRouterDom.Link, {
-    to: getTo(previous)
-  }, previous.title))), next && React.createElement("div", {
-    className: "next"
-  }, React.createElement("span", null, React.createElement(reactRouterDom.Link, {
-    to: getTo(next)
-  }, next.title))));
 }
 
 var componentListValue = {
@@ -851,7 +880,9 @@ var componentListValue = {
   SideBar: SideBar,
   Main: Main,
   Search: Search,
-  PreviousAndNext: PreviousAndNext
+  PreviousAndNext: PreviousAndNext,
+  SearchResults: SearchResults,
+  SearchResultsItem: SearchResultsItem
 };
 
 var docs = function docs(container, optionsIn) {
@@ -863,7 +894,8 @@ var docs = function docs(container, optionsIn) {
     var options = _extends({
       rootPath: '/',
       remarkPlugins: [],
-      rehypePlugins: []
+      rehypePlugins: [],
+      title: 'Documentation'
     }, optionsIn, {
       componentList: _extends({}, componentListValue, {}, optionsIn.componentList || {})
     });

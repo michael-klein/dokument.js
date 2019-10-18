@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "parcel src/index.html -d .",
-    "build": "parcel build src/index.html -d ."
+    "build": "parcel build src/index.html -d . && node post_build.js"
   },
   "dependencies": {
     "react-app-polyfill": "^1.0.0"

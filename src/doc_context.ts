@@ -10,6 +10,7 @@ export interface DocContextValue {
   rehypePlugins: Function[];
   rootPath: string;
   componentList: ComponentList;
+  title: string;
   search: (query: string) => DocSearchResult[];
 }
 export const docContextValue: DocContextValue = {
@@ -19,6 +20,7 @@ export const docContextValue: DocContextValue = {
   rootPath: './',
   componentList: undefined,
   search: search,
+  title: '',
 };
 
 export const docContext = React.createContext(docContextValue);

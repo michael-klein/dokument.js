@@ -1,23 +1,20 @@
 import * as React from 'react';
-import { Navbar } from '../utils/document_provider';
 import { PreviousAndNextProps } from './previous_and_next';
+import { NavItemProps } from './nav_item';
+import { NavLevelProps } from './nav_level';
+import { DocumentRendererProps } from './document_renderer';
+import { SearchResultsProps } from './search_results';
+import { SearchResultsItemProps } from './search_results_item';
 
 export interface ComponentList {
-  DocumentRenderer: React.FunctionComponent<{
-    slug: string;
-    headingSlug: string;
-  }>;
-  NavItem: React.FunctionComponent<{
-    path: string;
-    children: React.ReactNode;
-    slug?: string;
-  }>;
-  NavLevel: React.FunctionComponent<{
-    navbar: Navbar;
-  }>;
+  DocumentRenderer: React.FunctionComponent<DocumentRendererProps>;
+  NavLevel: React.FunctionComponent<NavLevelProps>;
   Nav: React.FunctionComponent;
   SideBar: React.FunctionComponent;
   Main: React.FunctionComponent;
   Search: React.FunctionComponent;
   PreviousAndNext: React.FunctionComponent<PreviousAndNextProps>;
+  NavItem: React.FunctionComponent<NavItemProps>;
+  SearchResults: React.FunctionComponent<SearchResultsProps>;
+  SearchResultsItem: React.FunctionComponent<SearchResultsItemProps>;
 }

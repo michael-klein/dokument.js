@@ -5,5 +5,6 @@ export interface DocsOptions {
     remarkPlugins: Function[];
     rehypePlugins: Function[];
     componentList: ComponentList;
+    title?: string;
 }
 export declare function docs(container: HTMLElement, optionsIn?: Partial<DocsOptions>): Promise<void>;

@@ -4,7 +4,8 @@ export interface MDXContext {
     currentDocument?: DocumentData;
 }
 export declare const mdxContext: React.Context<MDXContext>;
-export declare function DocumentRenderer(props: {
+export interface DocumentRendererProps {
     slug: string;
     headingSlug: string;
-}): JSX.Element;
+}
+export declare function DocumentRenderer(props: DocumentRendererProps): JSX.Element;
