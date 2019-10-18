@@ -921,6 +921,7 @@ var docs = function docs(container, optionsIn) {
       componentList: _extends({}, componentListValue, {}, optionsIn.componentList || {})
     });
 
+    document.title = options.title;
     load(options);
     var Provider = docContext.Provider;
     ReactDOM.render(React.createElement(Provider, {

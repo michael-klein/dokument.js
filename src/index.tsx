@@ -43,7 +43,7 @@ export async function docs(
       ...(optionsIn.componentList || {}),
     },
   };
-
+  document.title = options.title;
   load(options);
   const Provider = docContext.Provider;
   ReactDOM.render(
