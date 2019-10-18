@@ -33,7 +33,7 @@ export async function docs(
   optionsIn: Partial<DocsOptions> = {}
 ): Promise<void> {
   const options: DocsOptions = {
-    rootPath: '/',
+    rootPath: './',
     remarkPlugins: [],
     rehypePlugins: [],
     title: 'Documentation',

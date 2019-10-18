@@ -892,7 +892,7 @@ var docs = function docs(container, optionsIn) {
 
   try {
     var options = _extends({
-      rootPath: '/',
+      rootPath: './',
       remarkPlugins: [],
       rehypePlugins: [],
       title: 'Documentation'
