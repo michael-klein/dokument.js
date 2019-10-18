@@ -4,7 +4,7 @@ import {
   Navbar,
   NavbarItemType,
   DocumentHeading,
-} from '../document_handling/document_provider';
+} from '../utils/document_provider';
 import { useDocStore } from '../store/hooks/use_doc_store';
 import { useDocContext } from '../hooks/use_doc_context';
 

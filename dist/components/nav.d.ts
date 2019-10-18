@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Navbar } from '../document_handling/document_provider';
+import { Navbar } from '../utils/document_provider';
 export declare function NavItem(props: {
     path: string;
     slug?: string;

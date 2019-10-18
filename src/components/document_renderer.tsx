@@ -4,9 +4,10 @@ import * as React from 'react';
 import MDX from '@mdx-js/runtime';
 import { useSaveDocumentByNavId } from '../store/hooks/use_document';
 import { useDocContext } from '../hooks/use_doc_context';
-import { DocumentData } from '../document_handling/document_provider';
+import { DocumentData } from '../utils/document_provider';
 import { Link } from 'react-router-dom';
 import innerText from 'react-innertext';
+import { useDocStore } from '../store/hooks/use_doc_store';
 
 export interface MDXContext {
   currentDocument?: DocumentData;
@@ -49,7 +50,8 @@ export function DocumentRenderer(props: {
   slug: string;
   headingSlug: string;
 }): JSX.Element {
-  const { rehypePlugins, remarkPlugins } = useDocContext();
+  const { rehypePlugins, remarkPlugins, componentList } = useDocContext();
+  const { PreviousAndNext } = componentList;
   const Provider = mdxContext.Provider;
 
   const currentDocument = useSaveDocumentByNavId(props.slug);
@@ -59,15 +61,34 @@ export function DocumentRenderer(props: {
       heading.scrollIntoView({ behavior: 'smooth' });
     }
   }, [props.headingSlug, currentDocument]);
+
+  const documentMap = useDocStore(state => state.documentMap);
+
+  let previous: DocumentData;
+  let next: DocumentData;
+  if (currentDocument) {
+    const slugs: string[] = Object.keys(documentMap);
+    const docIndex: number = slugs.indexOf(currentDocument.slug);
+    if (docIndex > 0) {
+      previous = documentMap[slugs[docIndex - 1]];
+    }
+    if (docIndex < slugs.length - 1) {
+      next = documentMap[slugs[docIndex + 1]];
+    }
+  }
   return currentDocument ? (
     <Provider value={{ currentDocument }}>
-      <MDX
-        components={components}
-        remarkPlugins={remarkPlugins}
-        rehypePlugins={rehypePlugins}
-      >
-        {currentDocument.content}
-      </MDX>
+      <PreviousAndNext previous={previous} next={next}></PreviousAndNext>
+      <div>
+        <MDX
+          components={components}
+          remarkPlugins={remarkPlugins}
+          rehypePlugins={rehypePlugins}
+        >
+          {currentDocument.content}
+        </MDX>
+      </div>
+      <PreviousAndNext previous={previous} next={next}></PreviousAndNext>
     </Provider>
   ) : (
     <div>loading document...</div>

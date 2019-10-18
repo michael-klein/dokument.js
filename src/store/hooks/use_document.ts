@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DocumentData } from '../../document_handling/document_provider';
+import { DocumentData } from '../../utils/document_provider';
 import { docStoreActions, docStore } from '../docStore';
 
 export function useSaveDocumentByNavId(id: string = ''): DocumentData {

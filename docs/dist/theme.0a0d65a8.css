@@ -1058,6 +1058,7 @@ body {
   height: 100%;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
   margin: 0;
+  padding-bottom: 100px;
 }
 #docs-app .sidebar .search-results {
   position: fixed;
@@ -1084,6 +1085,12 @@ body {
   border-radius: 4px;
   padding: 20px;
   margin-bottom: 20px;
+}
+#docs-app .sidebar .search-results ul li pre {
+  margin: 5px 0;
+  padding: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 #docs-app .sidebar .search-results ul label {
   font-weight: bold;
@@ -1147,6 +1154,7 @@ body {
   height: 100%;
   max-width: initial;
   margin: 0;
+  padding-bottom: 100px;
 }
 #docs-app main article {
   max-width: 700px;
@@ -1154,6 +1162,47 @@ body {
 }
 #docs-app main article > *:first-child {
   padding-top: 34px;
+}
+#docs-app main article > *:last-child {
+  margin-bottom: 100px;
+}
+#docs-app main .previous-next {
+  display: flex;
+}
+#docs-app main .previous-next:not(:first-child) {
+  margin-top: 40px;
+}
+#docs-app main .previous-next .previous,
+#docs-app main .previous-next .next {
+  flex: auto;
+  font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 16px;
+  font-weight: 600;
+}
+#docs-app main .previous-next .previous span,
+#docs-app main .previous-next .next span {
+  background: #efefef;
+  padding: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border-radius: 4px;
+}
+#docs-app main .previous-next .previous span {
+  margin-left: -10px;
+}
+#docs-app main .previous-next .previous span:before {
+  content: "<< ";
+  color: #2580b3;
+}
+#docs-app main .previous-next .next {
+  text-align: right;
+}
+#docs-app main .previous-next .next span {
+  margin-right: -10px;
+}
+#docs-app main .previous-next .next span:after {
+  content: " >>";
+  color: #2580b3;
 }
 
 /*# sourceMappingURL=/theme.0a0d65a8.css.map */

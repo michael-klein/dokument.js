@@ -8,6 +8,7 @@ function RenderArticle() {
     <DocumentRenderer slug={slug} headingSlug={headingSlug}></DocumentRenderer>
   );
 }
+
 export function Main(): JSX.Element {
   return (
     <main>

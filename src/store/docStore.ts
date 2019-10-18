@@ -5,7 +5,7 @@ import {
   DocumentMap,
   fetchDocuments,
   DocumentData,
-} from '../document_handling/document_provider';
+} from '../utils/document_provider';
 
 export interface DocStoreState {
   navbar?: Navbar;

@@ -1,5 +1,5 @@
 import { Store } from 'pullstate';
-import { Navbar, DocumentMap, DocumentData } from '../document_handling/document_provider';
+import { Navbar, DocumentMap, DocumentData } from '../utils/document_provider';
 export interface DocStoreState {
     navbar?: Navbar;
     documentMap: DocumentMap;

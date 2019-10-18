@@ -4,8 +4,7 @@ import { useDocStore } from '../store/hooks/use_doc_store';
 import removeMarkdown from 'remove-markdown';
 import Highlighter from 'react-highlight-words';
 import { Link, useLocation } from 'react-router-dom';
-import { DocumentHeading } from '../document_handling/document_provider';
-import { join } from '../document_handling/file_utils';
+import { useGetTo } from '../hooks/use_to';
 
 function getSentencesWithSearchResults(
   text: string,
@@ -18,9 +17,10 @@ function getSentencesWithSearchResults(
 
 export function SearchResults(props: { searchQuery: string }): JSX.Element {
   const { searchQuery } = props;
-  const { search, rootPath } = useDocContext();
+  const { search } = useDocContext();
   const documentMap = useDocStore(state => state.documentMap);
   const result = search(searchQuery);
+  const getTo = useGetTo();
   return (
     <div className={'search-results'}>
       <h1>
@@ -30,20 +30,10 @@ export function SearchResults(props: { searchQuery: string }): JSX.Element {
       <ul>
         {result.map(r => {
           const doc = documentMap[r.slug];
-          const topHeading: DocumentHeading =
-            doc && doc.headings[0] && doc.headings[0].size === 1
-              ? doc.headings[0]
-              : undefined;
-          const to: string = join(
-            '/document',
-            rootPath,
-            doc.slug,
-            topHeading ? topHeading.slug : ''
-          );
           return (
             <li key={doc.slug}>
               <label>
-                <Link to={to}>
+                <Link to={getTo(doc)}>
                   <Highlighter
                     highlightClassName="search-highlight"
                     searchWords={[searchQuery]}
@@ -52,17 +42,18 @@ export function SearchResults(props: { searchQuery: string }): JSX.Element {
                   />
                 </Link>
               </label>
-              <pre>
-                <Highlighter
-                  highlightClassName="search-highlight"
-                  searchWords={[searchQuery]}
-                  autoEscape={true}
-                  textToHighlight={getSentencesWithSearchResults(
-                    removeMarkdown(doc.content),
-                    [searchQuery]
-                  ).join('\n')}
-                />
-              </pre>
+              {getSentencesWithSearchResults(removeMarkdown(doc.content), [
+                searchQuery,
+              ]).map(item => (
+                <pre key={item}>
+                  <Highlighter
+                    highlightClassName="search-highlight"
+                    searchWords={[searchQuery]}
+                    autoEscape={true}
+                    textToHighlight={item}
+                  />
+                </pre>
+              ))}
             </li>
           );
         })}
@@ -80,14 +71,20 @@ export function Search(): JSX.Element {
   React.useEffect(() => {
     const listener: (event: MouseEvent) => void = event => {
       console.log(event);
-      if (
-        event.target instanceof HTMLAnchorElement &&
-        event.target.href.replace(
-          window.location.href.replace(window.location.hash, ''),
-          ''
-        )[0] === '#'
-      ) {
-        setSearchQuery('');
+      let target: HTMLElement = event.target as HTMLElement;
+      while (target !== document.body) {
+        if (target instanceof HTMLAnchorElement) {
+          if (
+            target.href.replace(
+              window.location.href.replace(window.location.hash, ''),
+              ''
+            )[0] === '#'
+          ) {
+            setSearchQuery('');
+            return;
+          }
+        }
+        target = target.parentElement;
       }
     };
     document.body.addEventListener('click', listener);

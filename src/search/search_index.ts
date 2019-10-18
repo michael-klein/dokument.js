@@ -1,5 +1,5 @@
 import elasticlunr from 'elasticlunr';
-import { DocumentData } from '../document_handling/document_provider';
+import { DocumentData } from '../utils/document_provider';
 
 const index: any = elasticlunr(function(this: any): void {
   this.addField('title');
