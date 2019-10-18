@@ -9,6 +9,7 @@ import { NavItem } from './nav_item';
 import { NavLevel } from './nav_level';
 import { SearchResults } from './search_results';
 import { SearchResultsItem } from './search_results_item';
+import { Loading } from './loading';
 
 export const componentListValue: ComponentList = {
   DocumentRenderer,
@@ -21,4 +22,5 @@ export const componentListValue: ComponentList = {
   PreviousAndNext,
   SearchResults,
   SearchResultsItem,
+  Loading,
 };

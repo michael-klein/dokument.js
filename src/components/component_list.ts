@@ -17,4 +17,5 @@ export interface ComponentList {
   NavItem: React.FunctionComponent<NavItemProps>;
   SearchResults: React.FunctionComponent<SearchResultsProps>;
   SearchResultsItem: React.FunctionComponent<SearchResultsItemProps>;
+  Loading: React.FunctionComponent;
 }

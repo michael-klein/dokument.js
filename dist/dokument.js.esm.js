@@ -506,13 +506,21 @@ function useDocContext() {
   return useContext(docContext);
 }
 
+function useDocStore(getSubState) {
+  return useStoreState(docStore, getSubState);
+}
+
 function Docs() {
   var _useDocContext$compon = useDocContext().componentList,
       SideBar = _useDocContext$compon.SideBar,
-      Main = _useDocContext$compon.Main;
+      Main = _useDocContext$compon.Main,
+      Loading = _useDocContext$compon.Loading;
+  var documentsLoaded = useDocStore(function (state) {
+    return state.documentsLoaded;
+  });
   return createElement("div", {
     className: "docs"
-  }, createElement(HashRouter, null, createElement(SideBar, null), createElement(Main, null)));
+  }, documentsLoaded ? createElement(HashRouter, null, createElement(SideBar, null), createElement(Main, null)) : createElement(Loading, null));
 }
 
 function useSaveDocument(slug) {
@@ -536,10 +544,6 @@ function useSaveDocument(slug) {
     }
   }, [slug]);
   return docRef.current;
-}
-
-function useDocStore(getSubState) {
-  return useStoreState(docStore, getSubState);
 }
 
 var hCount = 0;
@@ -868,6 +872,22 @@ function SearchResultsItem(props) {
   }));
 }
 
+function Loading() {
+  return createElement(Fragment, null, createElement("style", {
+    type: "text/css"
+  }, "\n                .loading {\n                    margin: 20px auto;\n                    width: 40px;\n                    height: 40px;\n                    position: relative;\n                    -webkit-transform: rotateZ(45deg);\n                        transform: rotateZ(45deg);\n                }\n\n                .loading .cube {\n                float: left;\n                width: 50%;\n                height: 50%;\n                position: relative;\n                -webkit-transform: scale(1.1);\n                    -ms-transform: scale(1.1);\n                        transform: scale(1.1); \n                }\n                .loading .cube:before {\n                content: '';\n                position: absolute;\n                top: 0;\n                left: 0;\n                width: 100%;\n                height: 100%;\n                background-color: #333;\n                -webkit-animation: sk-foldCubeAngle 2.4s infinite linear both;\n                        animation: sk-foldCubeAngle 2.4s infinite linear both;\n                -webkit-transform-origin: 100% 100%;\n                    -ms-transform-origin: 100% 100%;\n                        transform-origin: 100% 100%;\n                }\n                .loading .cube2 {\n                -webkit-transform: scale(1.1) rotateZ(90deg);\n                        transform: scale(1.1) rotateZ(90deg);\n                }\n                .loading .cube3 {\n                -webkit-transform: scale(1.1) rotateZ(180deg);\n                        transform: scale(1.1) rotateZ(180deg);\n                }\n                .loading .cube4 {\n                -webkit-transform: scale(1.1) rotateZ(270deg);\n                        transform: scale(1.1) rotateZ(270deg);\n                }\n                .loading .cube2:before {\n                -webkit-animation-delay: 0.3s;\n                        animation-delay: 0.3s;\n                }\n                .loading .cube3:before {\n                -webkit-animation-delay: 0.6s;\n                        animation-delay: 0.6s; \n                }\n                .loading .cube4:before {\n                -webkit-animation-delay: 0.9s;\n                        animation-delay: 0.9s;\n                }\n                @-webkit-keyframes sk-foldCubeAngle {\n                0%, 10% {\n                    -webkit-transform: perspective(140px) rotateX(-180deg);\n                            transform: perspective(140px) rotateX(-180deg);\n                    opacity: 0; \n                } 25%, 75% {\n                    -webkit-transform: perspective(140px) rotateX(0deg);\n                            transform: perspective(140px) rotateX(0deg);\n                    opacity: 1; \n                } 90%, 100% {\n                    -webkit-transform: perspective(140px) rotateY(180deg);\n                            transform: perspective(140px) rotateY(180deg);\n                    opacity: 0; \n                } \n                }\n\n                @keyframes sk-foldCubeAngle {\n                0%, 10% {\n                    -webkit-transform: perspective(140px) rotateX(-180deg);\n                            transform: perspective(140px) rotateX(-180deg);\n                    opacity: 0; \n                } 25%, 75% {\n                    -webkit-transform: perspective(140px) rotateX(0deg);\n                            transform: perspective(140px) rotateX(0deg);\n                    opacity: 1; \n                } 90%, 100% {\n                    -webkit-transform: perspective(140px) rotateY(180deg);\n                            transform: perspective(140px) rotateY(180deg);\n                    opacity: 0; \n                }\n                }\n        "), createElement("div", {
+    className: "loading"
+  }, createElement("div", {
+    className: "cube1 cube"
+  }), createElement("div", {
+    className: "cube2 cube"
+  }), createElement("div", {
+    className: "cube4 cube"
+  }), createElement("div", {
+    className: "cube3 cube"
+  })));
+}
+
 var componentListValue = {
   DocumentRenderer: DocumentRenderer,
   NavItem: NavItem,
@@ -878,7 +898,8 @@ var componentListValue = {
   Search: Search,
   PreviousAndNext: PreviousAndNext,
   SearchResults: SearchResults,
-  SearchResultsItem: SearchResultsItem
+  SearchResultsItem: SearchResultsItem,
+  Loading: Loading
 };
 
 var docs = function docs(container, optionsIn) {
