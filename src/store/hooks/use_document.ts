@@ -6,7 +6,6 @@ export function useSaveDocumentByNavId(id: string = ''): DocumentData {
   const documentMap = docStore.getRawState().documentMap;
   const [reRenderCount, setReRenderCount] = React.useState(0);
   const docRef = React.useRef(documentMap[id]);
-  docRef.current = documentMap[id];
   React.useEffect(() => {
     if (!docRef.current) {
       docStoreActions.getSaveDocumentByNavId(id).then(document => {

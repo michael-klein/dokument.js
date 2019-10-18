@@ -14,7 +14,10 @@ export function Main(): JSX.Element {
     <main>
       <article>
         <Switch>
-          <Route path={`/document/:slug/:headingSlug?`}>
+          <Route path={`/`}>
+            <RenderArticle></RenderArticle>
+          </Route>
+          <Route path={`/document/:slug?/:headingSlug?`}>
             <RenderArticle></RenderArticle>
           </Route>
         </Switch>

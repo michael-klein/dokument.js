@@ -530,7 +530,6 @@ function useSaveDocumentByNavId(id) {
       setReRenderCount = _React$useState[1];
 
   var docRef = React.useRef(documentMap[id]);
-  docRef.current = documentMap[id];
   React.useEffect(function () {
     if (!docRef.current) {
       docStoreActions.getSaveDocumentByNavId(id).then(function (document) {
@@ -724,7 +723,9 @@ function RenderArticle() {
 
 function Main() {
   return React.createElement("main", null, React.createElement("article", null, React.createElement(reactRouter.Switch, null, React.createElement(reactRouter.Route, {
-    path: "/document/:slug/:headingSlug?"
+    path: "/"
+  }, React.createElement(RenderArticle, null)), React.createElement(reactRouter.Route, {
+    path: "/document/:slug?/:headingSlug?"
   }, React.createElement(RenderArticle, null)))));
 }
 
