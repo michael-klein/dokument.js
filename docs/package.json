@@ -8,7 +8,9 @@
     "build": "parcel build src/index.html -d . && node post_build.js"
   },
   "dependencies": {
-    "react-app-polyfill": "^1.0.0"
+    "prism-react-renderer": "^1.0.2",
+    "react-app-polyfill": "^1.0.0",
+    "react-syntax-highlighter": "^11.0.2"
   },
   "alias": {
     "react": "../node_modules/react",

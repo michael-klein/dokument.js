@@ -1161,6 +1161,11 @@ body {
   margin: 0;
   padding-bottom: 100px;
 }
+#docs-app main .prism-code {
+  background: #193a4e !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
 #docs-app main article {
   max-width: 700px;
   width: 100%;

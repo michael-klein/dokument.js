@@ -12,6 +12,11 @@ export interface DocContextValue {
   componentList: ComponentList;
   title: string;
   search: (query: string) => DocSearchResult[];
+  mdxComponents: {
+    [key: string]:
+      | React.Component<any, any, any>
+      | React.FunctionComponent<any>;
+  };
 }
 export const docContextValue: DocContextValue = {
   docStore,
@@ -21,6 +26,7 @@ export const docContextValue: DocContextValue = {
   componentList: undefined,
   search: search,
   title: '',
+  mdxComponents: {},
 };
 
 export const docContext = React.createContext(docContextValue);

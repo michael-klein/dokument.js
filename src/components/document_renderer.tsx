@@ -52,7 +52,12 @@ export interface DocumentRendererProps {
 }
 
 export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
-  const { rehypePlugins, remarkPlugins, componentList } = useDocContext();
+  const {
+    rehypePlugins,
+    remarkPlugins,
+    componentList,
+    mdxComponents,
+  } = useDocContext();
   const { PreviousAndNext } = componentList;
   const Provider = mdxContext.Provider;
 
@@ -83,7 +88,7 @@ export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
       <PreviousAndNext previous={previous} next={next}></PreviousAndNext>
       <div>
         <MDX
-          components={components}
+          components={{ ...components, ...mdxComponents }}
           remarkPlugins={remarkPlugins}
           rehypePlugins={rehypePlugins}
         >

@@ -13,6 +13,11 @@ export interface DocsOptions {
   remarkPlugins: Function[];
   rehypePlugins: Function[];
   componentList: ComponentList;
+  mdxComponents: {
+    [key: string]:
+      | React.Component<any, any, any>
+      | React.FunctionComponent<any>;
+  };
   title?: string;
 }
 
@@ -37,6 +42,7 @@ export async function docs(
     remarkPlugins: [],
     rehypePlugins: [],
     title: 'Documentation',
+    mdxComponents: {},
     ...optionsIn,
     componentList: {
       ...componentListValue,

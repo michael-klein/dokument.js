@@ -11,6 +11,9 @@ export interface DocContextValue {
     componentList: ComponentList;
     title: string;
     search: (query: string) => DocSearchResult[];
+    mdxComponents: {
+        [key: string]: React.Component<any, any, any> | React.FunctionComponent<any>;
+    };
 }
 export declare const docContextValue: DocContextValue;
 export declare const docContext: React.Context<DocContextValue>;

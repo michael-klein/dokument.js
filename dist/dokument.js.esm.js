@@ -496,7 +496,8 @@ var docContextValue = {
   rootPath: './',
   componentList: undefined,
   search: search,
-  title: ''
+  title: '',
+  mdxComponents: {}
 };
 var docContext =
 /*#__PURE__*/
@@ -585,7 +586,8 @@ function DocumentRenderer(props) {
   var _useDocContext = useDocContext(),
       rehypePlugins = _useDocContext.rehypePlugins,
       remarkPlugins = _useDocContext.remarkPlugins,
-      componentList = _useDocContext.componentList;
+      componentList = _useDocContext.componentList,
+      mdxComponents = _useDocContext.mdxComponents;
 
   var PreviousAndNext = componentList.PreviousAndNext;
   var Provider = mdxContext.Provider;
@@ -626,7 +628,7 @@ function DocumentRenderer(props) {
     previous: previous,
     next: next
   }), createElement("div", null, createElement(MDX, {
-    components: components,
+    components: _extends({}, components, {}, mdxComponents),
     remarkPlugins: remarkPlugins,
     rehypePlugins: rehypePlugins
   }, currentDocument.content)), createElement(PreviousAndNext, {
@@ -912,7 +914,8 @@ var docs = function docs(container, optionsIn) {
       rootPath: './',
       remarkPlugins: [],
       rehypePlugins: [],
-      title: 'Documentation'
+      title: 'Documentation',
+      mdxComponents: {}
     }, optionsIn, {
       componentList: _extends({}, componentListValue, {}, optionsIn.componentList || {})
     });
