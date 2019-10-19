@@ -1,6 +1,16 @@
 const { readFileSync, writeFileSync } = require('fs');
-let index = readFileSync('./index.html').toString();
+const copydir = require('copy-dir');
 
-index = index.replace('src="/', 'src="./').replace('href="/', 'href="./');
+let index = readFileSync('./dist/index.html').toString();
+
+index = index
+  .replace('src="/', 'src="./dist/')
+  .replace('href="/', 'href="./dist/');
 
 writeFileSync('./index.html', index);
+
+copydir.sync('./src/documents', './documents', {
+  utimes: true,
+  mode: true,
+  cover: true,
+});
