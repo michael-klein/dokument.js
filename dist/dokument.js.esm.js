@@ -911,5 +911,9 @@ var load = function load(options) {
   }
 };
 
-export { docs };
+var defaultComponentList =
+/*#__PURE__*/
+_extends({}, componentListValue);
+
+export { defaultComponentList, docs };
 //# sourceMappingURL=dokument.js.esm.js.map

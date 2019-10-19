@@ -35,9 +35,15 @@ async function load(options: DocsOptions) {
   console.log(docStore);
 }
 
+export const defaultComponentList: ComponentList = { ...componentListValue };
+
 export async function docs(
   container: HTMLElement,
-  optionsIn: Partial<DocsOptions> = {}
+  optionsIn: Partial<
+    Omit<DocsOptions, 'componentList'> & {
+      componentList: Partial<ComponentList>;
+    }
+  > = {}
 ): Promise<void> {
   const options: DocsOptions = {
     rootPath: './',

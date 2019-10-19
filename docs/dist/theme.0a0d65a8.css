@@ -1065,6 +1065,18 @@ body {
   margin: 0;
   padding-bottom: 100px;
 }
+#docs-app .sidebar .license {
+  z-index: 1;
+  position: sticky;
+  padding-left: 24px;
+  top: 55px;
+  background: #efefef;
+  box-shadow: 0px 11px 20px #efefef;
+}
+#docs-app .sidebar .license img {
+  height: 17px;
+  margin-right: 5px;
+}
 #docs-app .sidebar .search-results {
   position: fixed;
   left: 300px;
@@ -1104,15 +1116,17 @@ body {
 #docs-app .sidebar > h1 {
   color: white;
   padding: 20px;
-  padding-top: 40px;
-  font-size: 1.9em;
-  background-image: linear-gradient(-225deg, #cbbacc 0%, #2580b3 100%);
   margin-top: 0;
   padding: 20px;
-  padding-top: 80px;
   color: white;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
   box-shadow: 0px 0px 2px white;
+  background: #2580b3;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 1.4em;
+  letter-spacing: 0.1em;
+  font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 #docs-app .sidebar nav {
   line-height: 1.7em;
@@ -1133,7 +1147,7 @@ body {
 #docs-app .sidebar .search {
   position: sticky;
   top: 0px;
-  background: linear-gradient(to top, #ffffff00, #efefef 80%);
+  background: #efefef;
   padding: 20px;
   padding-top: 10px;
   padding-bottom: 10px;

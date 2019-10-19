@@ -12,4 +12,7 @@ export interface DocsOptions {
     };
     title?: string;
 }
-export declare function docs(container: HTMLElement, optionsIn?: Partial<DocsOptions>): Promise<void>;
+export declare const defaultComponentList: ComponentList;
+export declare function docs(container: HTMLElement, optionsIn?: Partial<Omit<DocsOptions, 'componentList'> & {
+    componentList: Partial<ComponentList>;
+}>): Promise<void>;

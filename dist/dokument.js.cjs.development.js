@@ -915,5 +915,10 @@ var load = function load(options) {
   }
 };
 
+var defaultComponentList =
+/*#__PURE__*/
+_extends({}, componentListValue);
+
+exports.defaultComponentList = defaultComponentList;
 exports.docs = docs;
 //# sourceMappingURL=dokument.js.cjs.development.js.map
