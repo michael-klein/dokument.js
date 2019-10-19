@@ -1,5 +1,5 @@
 import { Store } from 'pullstate';
-import { Navbar, DocumentMap, DocumentData } from '../utils/document_provider';
+import { Navbar, DocumentMap } from '../utils/document_provider';
 export interface DocStoreState {
     navbar?: Navbar;
     documentMap: DocumentMap;
@@ -9,6 +9,5 @@ export declare const docStore: Store<DocStoreState>;
 export declare const docStoreActions: {
     loadNavbar(path: string): Promise<void>;
     loadDocuments(rootPath: string, navbar: Navbar): Promise<void>;
-    getSaveDocumentByNavId(slug?: string): Promise<DocumentData>;
     getNavbar(): Promise<Navbar>;
 };

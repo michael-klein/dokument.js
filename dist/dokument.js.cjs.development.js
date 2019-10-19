@@ -400,43 +400,11 @@ var docStoreActions = {
       return Promise.reject(e);
     }
   },
-  getSaveDocumentByNavId: function getSaveDocumentByNavId(slug) {
-    try {
-      var document = docStore.getRawState().documentMap[slug];
-
-      var _temp3 = function () {
-        if (!document) {
-          return Promise.resolve(new Promise(function (resolve) {
-            var unsubscribe = docStore.subscribe(function (state) {
-              return state.documentMap;
-            }, function (documentMap) {
-              if (!slug) {
-                slug = Object.keys(documentMap)[0];
-              }
-
-              if (documentMap[slug]) {
-                resolve(documentMap[slug]);
-                unsubscribe();
-              }
-            });
-          })).then(function (_temp) {
-            document = _temp;
-          });
-        }
-      }();
-
-      return Promise.resolve(_temp3 && _temp3.then ? _temp3.then(function () {
-        return document;
-      }) : document);
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  },
   getNavbar: function getNavbar() {
     try {
       var navbar = docStore.getRawState().navbar;
 
-      var _temp6 = function () {
+      var _temp3 = function () {
         if (!navbar) {
           return Promise.resolve(new Promise(function (resolve) {
             var unsubscribe = docStore.subscribe(function (state) {
@@ -447,13 +415,13 @@ var docStoreActions = {
                 unsubscribe();
               }
             });
-          })).then(function (_temp4) {
-            navbar = _temp4;
+          })).then(function (_temp) {
+            navbar = _temp;
           });
         }
       }();
 
-      return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(function () {
+      return Promise.resolve(_temp3 && _temp3.then ? _temp3.then(function () {
         return navbar;
       }) : navbar);
     } catch (e) {
@@ -533,22 +501,17 @@ function useSaveDocument(slug) {
     slug = '';
   }
 
+  var _useDocContext = useDocContext(),
+      docStore = _useDocContext.docStore;
+
   var documentMap = docStore.getRawState().documentMap;
+  var document = documentMap[slug];
 
-  var _React$useState = React.useState(0),
-      reRenderCount = _React$useState[0],
-      setReRenderCount = _React$useState[1];
+  if (!document) {
+    return Object.values(documentMap)[0];
+  }
 
-  var docRef = React.useRef(documentMap[slug]);
-  React.useEffect(function () {
-    if (!docRef.current || docRef.current.slug !== slug) {
-      docStoreActions.getSaveDocumentByNavId(slug).then(function (document) {
-        docRef.current = document;
-        setReRenderCount(reRenderCount + 1);
-      });
-    }
-  }, [slug]);
-  return docRef.current;
+  return document;
 }
 
 var hCount = 0;
@@ -919,7 +882,8 @@ var docs = function docs(container, optionsIn) {
       remarkPlugins: [],
       rehypePlugins: [],
       title: 'Documentation',
-      mdxComponents: {}
+      mdxComponents: {},
+      navbarPath: ''
     }, optionsIn, {
       componentList: _extends({}, componentListValue, {}, optionsIn.componentList || {})
     });
@@ -938,7 +902,7 @@ var docs = function docs(container, optionsIn) {
 
 var load = function load(options) {
   try {
-    return Promise.resolve(docStoreActions.loadNavbar(options.rootPath)).then(function () {
+    return Promise.resolve(docStoreActions.loadNavbar(join(options.rootPath, options.navbarPath))).then(function () {
       return Promise.resolve(docStoreActions.loadDocuments(options.rootPath, docStore.getRawState().navbar)).then(function () {
         Object.values(docStore.getRawState().documentMap).forEach(function (doc) {
           addDocumentToIndex(doc);

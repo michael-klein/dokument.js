@@ -4,7 +4,6 @@ import {
   fetchNavbar,
   DocumentMap,
   fetchDocuments,
-  DocumentData,
 } from '../utils/document_provider';
 
 export interface DocStoreState {
@@ -32,27 +31,6 @@ export const docStoreActions = {
       state.documentMap = { ...state.documentMap, ...documentMap };
       state.documentsLoaded = true;
     });
-  },
-
-  async getSaveDocumentByNavId(slug?: string): Promise<DocumentData> {
-    let document: DocumentData = docStore.getRawState().documentMap[slug];
-    if (!document) {
-      document = await new Promise(resolve => {
-        let unsubscribe = docStore.subscribe(
-          state => state.documentMap,
-          documentMap => {
-            if (!slug) {
-              slug = Object.keys(documentMap)[0];
-            }
-            if (documentMap[slug]) {
-              resolve(documentMap[slug]);
-              unsubscribe();
-            }
-          }
-        );
-      });
-    }
-    return document;
   },
 
   async getNavbar(): Promise<Navbar> {

@@ -33,4 +33,5 @@ docs(document.querySelector('#docs-app') as HTMLElement, {
   mdxComponents: {
     Code: Code,
   },
+  navbarPath: 'documents/',
 });

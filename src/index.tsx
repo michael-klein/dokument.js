@@ -7,9 +7,11 @@ import { docContext, docContextValue } from './doc_context';
 import { ComponentList } from './components/component_list';
 import { componentListValue } from './components/component_list_value';
 import { addDocumentToIndex } from './search/search_index';
+import { join } from './utils/file_utils';
 
 export interface DocsOptions {
   rootPath: string;
+  navbarPath: string;
   remarkPlugins: Function[];
   rehypePlugins: Function[];
   componentList: ComponentList;
@@ -22,7 +24,7 @@ export interface DocsOptions {
 }
 
 async function load(options: DocsOptions) {
-  await docStoreActions.loadNavbar(options.rootPath);
+  await docStoreActions.loadNavbar(join(options.rootPath, options.navbarPath));
   await docStoreActions.loadDocuments(
     options.rootPath,
     docStore.getRawState().navbar
@@ -43,6 +45,7 @@ export async function docs(
     rehypePlugins: [],
     title: 'Documentation',
     mdxComponents: {},
+    navbarPath: '',
     ...optionsIn,
     componentList: {
       ...componentListValue,

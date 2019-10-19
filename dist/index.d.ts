@@ -3,6 +3,7 @@ import '@babel/polyfill';
 import { ComponentList } from './components/component_list';
 export interface DocsOptions {
     rootPath: string;
+    navbarPath: string;
     remarkPlugins: Function[];
     rehypePlugins: Function[];
     componentList: ComponentList;
