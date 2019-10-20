@@ -563,9 +563,15 @@ function DocumentRenderer(props) {
     var heading = document.getElementById(props.headingSlug);
 
     if (heading) {
-      heading.scrollIntoView({
-        behavior: 'smooth'
-      });
+      if (heading.parentElement.firstElementChild === heading) {
+        document.querySelector('article').scrollIntoView({
+          behavior: 'smooth'
+        });
+      } else {
+        heading.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }
     }
   }, [props.headingSlug, currentDocument]);
   var documentMap = useDocStore(function (state) {

@@ -65,7 +65,13 @@ export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
   React.useEffect(() => {
     const heading: HTMLElement = document.getElementById(props.headingSlug);
     if (heading) {
-      heading.scrollIntoView({ behavior: 'smooth' });
+      if (heading.parentElement.firstElementChild === heading) {
+        document
+          .querySelector('article')
+          .scrollIntoView({ behavior: 'smooth' });
+      } else {
+        heading.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   }, [props.headingSlug, currentDocument]);
 
