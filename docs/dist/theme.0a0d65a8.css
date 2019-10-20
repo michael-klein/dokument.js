@@ -1113,7 +1113,7 @@ body {
   font-weight: bold;
   font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
-#docs-app .sidebar > h1 {
+#docs-app .sidebar .branding h1 {
   color: white;
   padding: 20px;
   margin-top: 0;
@@ -1127,6 +1127,7 @@ body {
   font-size: 1.4em;
   letter-spacing: 0.1em;
   font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  display: flex;
 }
 #docs-app .sidebar nav {
   line-height: 1.7em;
@@ -1143,6 +1144,12 @@ body {
   padding-inline-start: 0px;
   padding-left: 15px;
   padding-right: 15px;
+}
+#docs-app .sidebar nav > ul > li {
+  margin-bottom: 20px;
+}
+#docs-app .sidebar nav > ul > li > a, #docs-app .sidebar nav > ul > li > .nav-category {
+  font-size: 1.15em;
 }
 #docs-app .sidebar .search {
   position: sticky;
@@ -1177,7 +1184,6 @@ body {
 }
 #docs-app main .prism-code {
   background: #193a4e !important;
-  padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
 #docs-app main article {

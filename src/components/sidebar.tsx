@@ -3,10 +3,10 @@ import { useDocContext } from '../hooks/use_doc_context';
 
 export function SideBar(): JSX.Element {
   const { componentList, title } = useDocContext();
-  const { Nav, Search } = componentList;
+  const { Nav, Search, Branding } = componentList;
   return (
     <aside className="sidebar">
-      <h1>{title}</h1>
+      <Branding>{title}</Branding>
       <Search></Search>
       <Nav></Nav>
     </aside>

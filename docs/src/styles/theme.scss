@@ -91,7 +91,7 @@ body {
       }
     }
 
-    & > h1 {
+    .branding h1 {
       color: white;
       padding: 20px;
       margin-top: 0;
@@ -105,6 +105,7 @@ body {
       font-size: 1.4em;
       letter-spacing: 0.1em;
       font-family: $sans-serif;
+      display: flex;
     }
 
     nav {
@@ -123,6 +124,13 @@ body {
         padding-inline-start: 0px;
         padding-left: 15px;
         padding-right: 15px;
+        & > li {
+          margin-bottom: 20px;
+          & > a,
+          & > .nav-category {
+            font-size: 1.15em;
+          }
+        }
       }
     }
 
@@ -162,7 +170,6 @@ body {
 
     .prism-code {
       background: rgb(25, 58, 78) !important;
-      padding-top: 0 !important;
       padding-bottom: 0 !important;
     }
 

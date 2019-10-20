@@ -619,10 +619,11 @@ function SideBar() {
       title = _useDocContext.title;
 
   var Nav = componentList.Nav,
-      Search = componentList.Search;
+      Search = componentList.Search,
+      Branding = componentList.Branding;
   return createElement("aside", {
     className: "sidebar"
-  }, createElement("h1", null, title), createElement(Search, null), createElement(Nav, null));
+  }, createElement(Branding, null, title), createElement(Search, null), createElement(Nav, null));
 }
 
 function RenderArticle() {
@@ -708,7 +709,7 @@ function useGetTo() {
 
   return function (doc) {
     var topHeading = doc && doc.headings[0] && doc.headings[0].size === 1 ? doc.headings[0] : undefined;
-    return join('/document', rootPath, doc.slug, topHeading ? topHeading.slug : '');
+    return [join('/document', rootPath, doc.slug, topHeading ? topHeading.slug : ''), topHeading];
   };
 }
 
@@ -753,29 +754,56 @@ function NavItem(props) {
 
 function NavLevel(props) {
   var navbar = props.navbar;
-  var _useDocContext$compon = useDocContext().componentList,
-      NavItem = _useDocContext$compon.NavItem,
-      NavLevel = _useDocContext$compon.NavLevel;
+
+  var _useDocContext = useDocContext(),
+      componentList = _useDocContext.componentList;
+
+  var docMap = useDocStore(function (state) {
+    return state.documentMap;
+  });
+  var NavItem = componentList.NavItem,
+      NavLevel = componentList.NavLevel;
+  var titles = Object.keys(navbar);
+  var docArray = Object.values(docMap);
+  var prevDocument = docArray[0];
+  var getTo = useGetTo();
   return createElement("ul", {
     className: "nav"
-  }, Object.keys(navbar).map(function (title) {
+  }, titles.map(function (title) {
     var _navbar$title = navbar[title],
         type = _navbar$title.type,
         children = _navbar$title.children,
         slug = _navbar$title.slug;
 
     if (type === NavbarItemType.CATEGORY) {
-      return createElement("li", {
-        className: "nav-item sub-nav",
-        key: slug + type
-      }, createElement("div", {
-        className: "nav-category"
-      }, title), createElement(NavLevel, Object.assign({}, {
-        navbar: children
-      })));
+      var next = docArray[docArray.indexOf(prevDocument) + 1];
+
+      if (next && next.slug) {
+        var _getTo = getTo(next),
+            to = _getTo[0];
+
+        return createElement("li", {
+          className: "nav-item sub-nav",
+          key: slug
+        }, createElement(Link, {
+          to: to
+        }, title), createElement(NavLevel, Object.assign({}, {
+          navbar: children
+        })));
+      } else {
+        return createElement("li", {
+          className: "nav-item sub-nav",
+          key: slug
+        }, createElement("div", {
+          className: "nav-category"
+        }, title), createElement(NavLevel, Object.assign({}, {
+          navbar: children
+        })));
+      }
     } else {
+      prevDocument = docMap[slug];
       return createElement(NavItem, {
-        key: slug + type,
+        key: slug,
         path: '/document/' + slug,
         slug: slug
       }, title);
@@ -853,6 +881,10 @@ function Loading() {
   })));
 }
 
+function Branding(props) {
+  return createElement("h1", null, props.children);
+}
+
 var componentListValue = {
   DocumentRenderer: DocumentRenderer,
   NavItem: NavItem,
@@ -864,7 +896,8 @@ var componentListValue = {
   PreviousAndNext: PreviousAndNext,
   SearchResults: SearchResults,
   SearchResultsItem: SearchResultsItem,
-  Loading: Loading
+  Loading: Loading,
+  Branding: Branding
 };
 
 var docs = function docs(container, optionsIn) {

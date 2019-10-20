@@ -10,6 +10,7 @@ import { NavLevel } from './nav_level';
 import { SearchResults } from './search_results';
 import { SearchResultsItem } from './search_results_item';
 import { Loading } from './loading';
+import { Branding } from './branding';
 
 export const componentListValue: ComponentList = {
   DocumentRenderer,
@@ -23,4 +24,5 @@ export const componentListValue: ComponentList = {
   SearchResults,
   SearchResultsItem,
   Loading,
+  Branding,
 };
