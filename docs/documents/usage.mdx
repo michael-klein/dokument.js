@@ -4,13 +4,83 @@ _Note: The library is not yet ready for use and thus not yet available on npm!_
 
 ## Basics
 
+You can just drop dokument.js into your page and hand it a root element to render to, like so:
+
 ```
-import {docs} from 'dokument.js';
-docs(document.querySelector('#docs-app'));
+import {dokument} from 'dokument.js';
+dokument(document.querySelector('#docs-app'));
 ```
+
+Additionally, the dokument function takes an options bag as second argument:
+
+```
+import {dokument} from 'dokument.js';
+dokument(document.querySelector('#docs-app'), {
+    title: "Hello world"
+});
+```
+
+The options object accepts the following values:
+
+| Option        | Description                                                                      |
+| ------------- | -------------------------------------------------------------------------------- |
+| title         | Title of your documentation.                                                     |
+| rootPath      | The root folder to fetch documens from. _Default: '.'_                           |
+| navbarPath    | You may specify a different path (relativ to the root) to fetch your navbar from |
+| remarkPlugins | An array of remark plugins to load.                                              |
+| rehypePlugins | An array of rehype plugins to load.                                              |
+| mdxComponents | Object with additional components you want to be available in your documents     |
+| componentList | Override components used in the theme                                            |
 
 ## Theming
 
+Dokument.js ships with a default theme that is composed of react components and styles written in SCSS. You may import theme.scss and modify it to your liking or write completely new styles.
+
+You may also change the page structure by exchanging or wrapping the ract component used to generate it. The options object has a `componentList` property for this purpose (defined in the ComponentList interface). For example, in order to add a document icon to the title of this documentation and badges below the search inputs, we overrode the Branding component:
+
+```
+
+import {dokument} from 'dokument.js';
+dokument(document.querySelector('#docs-app'), {
+ title: "Hello world",
+ componentList: {
+    Branding: ({ children }) => {
+      return (
+        <div className="branding">
+          <h1>
+            <i className="ri-article-line"></i>
+            {children}
+          </h1>
+        </div>
+      );
+    },
+    Search: () => {
+      return (
+        <>
+          <defaultComponentList.Search></defaultComponentList.Search>
+          <div className="license">
+            <img
+              alt="GitHub"
+              src="https://img.shields.io/github/license/michael-klein/dokument.js?color=%232580b3&style=flat-square"
+            />
+            <img
+              alt="GitHub last commit"
+              src="https://img.shields.io/github/last-commit/michael-klein/dokument.js?color=%232580b3&style=flat-square"
+            ></img>
+          </div>
+        </>
+      );
+    },
+  }
+});
+```
+
+defaultComponentList contains all default components that you may want to wrap.
+
 ## MDX Components
 
+TODO
+
 ## Plugins
+
+TODO

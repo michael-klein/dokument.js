@@ -11,3 +11,12 @@ Dokument.js is heavily inspired by [docsify](https://docsify.js.org/#/), but aim
 - Leverages the power of React components to enhance your documents
 - Easy to use (just drop it into your file system and point it to some documents)
 - ... but very extensible (Theming, overwriting of Components, plugins...)
+- Written in Typescipt
+
+## Roadmap
+
+Dokument.js is not yet read for prime time, so here's a roadmap of features and improvements that we intend to ship:
+
+- markdown-only mode (no JSX) for smaller bundle sizes
+  - The MDX runtime adds significant overhead to the bundle size, so a mode that uses just a simple markdown compiler is desireable by some users.
+- Explore if there could be a MDX runtime with a significanty smaller memory footprint

@@ -14,14 +14,14 @@ export function PreviousAndNext(props: PreviousAndNextProps): JSX.Element {
       {previous && (
         <div className="previous">
           <span>
-            <Link to={getTo(previous)}>{previous.title}</Link>
+            <Link to={getTo(previous)[0]}>{previous.title}</Link>
           </span>
         </div>
       )}
       {next && (
         <div className="next">
           <span>
-            <Link to={getTo(next)}>{next.title}</Link>
+            <Link to={getTo(next)[0]}>{next.title}</Link>
           </span>
         </div>
       )}

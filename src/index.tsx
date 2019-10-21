@@ -37,7 +37,7 @@ async function load(options: DocsOptions) {
 
 export const defaultComponentList: ComponentList = { ...componentListValue };
 
-export async function docs(
+export async function dokument(
   container: HTMLElement,
   optionsIn: Partial<
     Omit<DocsOptions, 'componentList'> & {

@@ -25,7 +25,7 @@ export function SearchResultsItem(props: SearchResultsItemProps) {
   return (
     <li key={doc.slug}>
       <label>
-        <Link to={getTo(doc)}>
+        <Link to={getTo(doc)[0]}>
           <Highlighter
             highlightClassName="search-highlight"
             searchWords={[searchQuery]}

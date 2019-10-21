@@ -17,4 +17,7 @@ export interface ComponentList {
     SearchResults: React.FunctionComponent<SearchResultsProps>;
     SearchResultsItem: React.FunctionComponent<SearchResultsItemProps>;
     Loading: React.FunctionComponent;
+    Branding: React.FunctionComponent<{
+        children: React.ReactNode;
+    }>;
 }

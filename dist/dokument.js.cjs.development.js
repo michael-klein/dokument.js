@@ -732,11 +732,11 @@ function PreviousAndNext(props) {
   }, previous && React.createElement("div", {
     className: "previous"
   }, React.createElement("span", null, React.createElement(reactRouterDom.Link, {
-    to: getTo(previous)
+    to: getTo(previous)[0]
   }, previous.title))), next && React.createElement("div", {
     className: "next"
   }, React.createElement("span", null, React.createElement(reactRouterDom.Link, {
-    to: getTo(next)
+    to: getTo(next)[0]
   }, next.title))));
 }
 
@@ -857,7 +857,7 @@ function SearchResultsItem(props) {
   return React.createElement("li", {
     key: doc.slug
   }, React.createElement("label", null, React.createElement(reactRouterDom.Link, {
-    to: getTo(doc)
+    to: getTo(doc)[0]
   }, React.createElement(Highlighter, {
     highlightClassName: "search-highlight",
     searchWords: [searchQuery],
@@ -910,7 +910,7 @@ var componentListValue = {
   Branding: Branding
 };
 
-var docs = function docs(container, optionsIn) {
+var dokument = function dokument(container, optionsIn) {
   if (optionsIn === void 0) {
     optionsIn = {};
   }
@@ -959,5 +959,5 @@ var defaultComponentList =
 _extends({}, componentListValue);
 
 exports.defaultComponentList = defaultComponentList;
-exports.docs = docs;
+exports.dokument = dokument;
 //# sourceMappingURL=dokument.js.cjs.development.js.map

@@ -728,11 +728,11 @@ function PreviousAndNext(props) {
   }, previous && createElement("div", {
     className: "previous"
   }, createElement("span", null, createElement(Link, {
-    to: getTo(previous)
+    to: getTo(previous)[0]
   }, previous.title))), next && createElement("div", {
     className: "next"
   }, createElement("span", null, createElement(Link, {
-    to: getTo(next)
+    to: getTo(next)[0]
   }, next.title))));
 }
 
@@ -853,7 +853,7 @@ function SearchResultsItem(props) {
   return createElement("li", {
     key: doc.slug
   }, createElement("label", null, createElement(Link, {
-    to: getTo(doc)
+    to: getTo(doc)[0]
   }, createElement(Highlighter, {
     highlightClassName: "search-highlight",
     searchWords: [searchQuery],
@@ -906,7 +906,7 @@ var componentListValue = {
   Branding: Branding
 };
 
-var docs = function docs(container, optionsIn) {
+var dokument = function dokument(container, optionsIn) {
   if (optionsIn === void 0) {
     optionsIn = {};
   }
@@ -954,5 +954,5 @@ var defaultComponentList =
 /*#__PURE__*/
 _extends({}, componentListValue);
 
-export { defaultComponentList, docs };
+export { defaultComponentList, dokument };
 //# sourceMappingURL=dokument.js.esm.js.map
