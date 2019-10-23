@@ -11,6 +11,7 @@ import { SearchResults } from './search_results';
 import { SearchResultsItem } from './search_results_item';
 import { Loading } from './loading';
 import { Branding } from './branding';
+import { LastChanged } from './last_changed';
 
 export const componentListValue: ComponentList = {
   DocumentRenderer,
@@ -25,4 +26,5 @@ export const componentListValue: ComponentList = {
   SearchResultsItem,
   Loading,
   Branding,
+  LastChanged,
 };

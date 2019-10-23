@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useDocContext } from '../hooks/use_doc_context';
-import { useDocStore } from '../store/hooks/use_doc_store';
+import { useDocContext } from '../../hooks/use_doc_context';
+import { useDocStore } from '../../store/hooks/use_doc_store';
 
 export interface SearchResultsProps {
   searchQuery: string;

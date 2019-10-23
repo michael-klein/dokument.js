@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { docStore, DocStoreState } from './store/docStore';
 import { Store } from 'pullstate';
-import { ComponentList } from './components/component_list';
+import { ComponentList } from './theme/components/component_list';
 import { search, DocSearchResult } from './search/search_index';
 
 export interface DocContextValue {

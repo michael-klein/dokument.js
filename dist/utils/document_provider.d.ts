@@ -30,6 +30,7 @@ export interface DocumentData {
     slug: string;
     content: string;
     headings: DocumentHeading[];
+    lastModified: number;
 }
 export interface DocumentMap {
     [slug: string]: DocumentData;

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useDocContext } from '../hooks/use_doc_context';
+import { useDocContext } from '../../hooks/use_doc_context';
 import { Switch, Route, useParams } from 'react-router';
 function RenderArticle() {
   const { DocumentRenderer } = useDocContext().componentList;

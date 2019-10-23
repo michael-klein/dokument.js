@@ -102,6 +102,18 @@ body {
       ul {
         padding-inline-start: 15px;
         list-style: none;
+        position: relative;
+        li {
+          position: relative;
+          .arrow {
+            position: absolute;
+            right: 0px;
+            transform: rotate(-90deg);
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2580b3;
+          }
+        }
       }
 
       & > ul {
@@ -151,6 +163,14 @@ body {
     max-width: initial;
     margin: 0;
     padding-bottom: 100px;
+
+    .last-changed {
+      font-family: $sans-serif;
+      color: $primary;
+      font-size: 0.8em;
+      font-weight: bold;
+      text-align: right;
+    }
 
     article {
       max-width: 700px;

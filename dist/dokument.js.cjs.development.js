@@ -194,6 +194,19 @@ function _forOf(target, body, check) {
 
 const _asyncIteratorSymbol = /*#__PURE__*/ typeof Symbol !== "undefined" ? (Symbol.asyncIterator || (Symbol.asyncIterator = Symbol("Symbol.asyncIterator"))) : "@@asyncIterator";
 
+// Asynchronously call a function and send errors to recovery continuation
+function _catch(body, recover) {
+	try {
+		var result = body();
+	} catch(e) {
+		return recover(e);
+	}
+	if (result && result.then) {
+		return result.then(void 0, recover);
+	}
+	return result;
+}
+
 var getJSON = function getJSON(filePath) {
   try {
     return Promise.resolve(ky.get(filePath).json());
@@ -204,6 +217,15 @@ var getJSON = function getJSON(filePath) {
 var getFile = function getFile(filePath) {
   try {
     return Promise.resolve(ky.get(filePath).text());
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+var getHeaders = function getHeaders(filePath) {
+  try {
+    return Promise.resolve(ky.head(filePath).then(function (r) {
+      return r.headers;
+    }));
   } catch (e) {
     return Promise.reject(e);
   }
@@ -247,36 +269,76 @@ function (_fetchDocuments) {
   try {
     var documentMap = {};
 
-    var _temp3 = _forOf(Object.keys(navbar), function (title) {
+    var _temp6 = _forOf(Object.keys(navbar), function (title) {
       var _navbar$title = navbar[title],
           slug = _navbar$title.slug,
           children = _navbar$title.children,
           type = _navbar$title.type,
           path = _navbar$title.path;
 
-      var _temp = function () {
+      var _temp4 = function () {
         if (type === NavbarItemType.CATEGORY) {
           return Promise.resolve(fetchDocuments(rootPath, children)).then(function (subResult) {
             documentMap = _extends({}, documentMap, {}, subResult);
           });
         } else {
-          var docPath = join(rootPath, path);
-          return Promise.resolve(getFile(docPath)).then(function (content) {
-            documentMap[slug] = {
-              title: title,
-              content: content,
-              path: docPath,
-              slug: slug,
-              headings: findHeadings(content)
-            };
-          });
+          var _temp7 = function _temp7() {
+            var lastModified = _headers && _headers.get('last-modified');
+
+            var lastModifiedTimestamp = -1;
+
+            if (lastModified) {
+              lastModifiedTimestamp = new Date(lastModified).getTime();
+            }
+
+            if (_document) {
+              if (_document.lastModified === lastModifiedTimestamp) {
+                documentMap[slug] = _document;
+                return;
+              }
+            }
+
+            var _temp = _catch(function () {
+              return Promise.resolve(getFile(_docPath)).then(function (content) {
+                documentMap[slug] = {
+                  title: title,
+                  content: content,
+                  path: _docPath,
+                  slug: slug,
+                  headings: findHeadings(content),
+                  lastModified: lastModifiedTimestamp
+                };
+                Promise.resolve().then(function () {
+                  return localStorage.setItem(slug, JSON.stringify(documentMap[slug]));
+                });
+              });
+            }, function () {
+              documentMap[slug] = _document;
+            });
+
+            if (_temp && _temp.then) return _temp.then(function () {});
+          };
+
+          var _docPath = join(rootPath, path);
+
+          var _document = JSON.parse(localStorage.getItem(slug));
+
+          var _headers;
+
+          var _temp8 = _catch(function () {
+            return Promise.resolve(getHeaders(_docPath)).then(function (_getHeaders) {
+              _headers = _getHeaders;
+            });
+          }, function () {});
+
+          return _temp8 && _temp8.then ? _temp8.then(_temp7) : _temp7(_temp8);
         }
       }();
 
-      if (_temp && _temp.then) return _temp.then(function () {});
+      if (_temp4 && _temp4.then) return _temp4.then(function () {});
     });
 
-    return Promise.resolve(_temp3 && _temp3.then ? _temp3.then(function () {
+    return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(function () {
       return documentMap;
     }) : documentMap);
   } catch (e) {
@@ -514,6 +576,12 @@ function useSaveDocument(slug) {
   return document;
 }
 
+function LastChanged(props) {
+  return React.createElement("div", {
+    className: "last-changed"
+  }, React.createElement("div", null, "last changed: "), React.createElement("div", null, new Date(props.timestamp).toLocaleString()));
+}
+
 var hCount = 0;
 var mdxContext =
 /*#__PURE__*/
@@ -607,6 +675,8 @@ function DocumentRenderer(props) {
   }, currentDocument.content)), React.createElement(PreviousAndNext, {
     previous: previous,
     next: next
+  }), currentDocument.lastModified > -1 && React.createElement(LastChanged, {
+    timestamp: currentDocument.lastModified
   })) : React.createElement("div", null, "loading document...");
 }
 
@@ -907,7 +977,8 @@ var componentListValue = {
   SearchResults: SearchResults,
   SearchResultsItem: SearchResultsItem,
   Loading: Loading,
-  Branding: Branding
+  Branding: Branding,
+  LastChanged: LastChanged
 };
 
 var dokument = function dokument(container, optionsIn) {

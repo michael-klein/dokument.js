@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { DocumentHeading } from '../utils/document_provider';
-import { useDocStore } from '../store/hooks/use_doc_store';
+import { DocumentHeading } from '../../utils/document_provider';
+import { useDocStore } from '../../store/hooks/use_doc_store';
 
 export interface NavItemProps {
   path: string;

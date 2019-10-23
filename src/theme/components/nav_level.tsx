@@ -4,11 +4,11 @@ import {
   NavbarItemType,
   DocumentData,
   DocumentMap,
-} from '../utils/document_provider';
-import { useDocContext } from '../hooks/use_doc_context';
-import { useDocStore } from '../store/hooks/use_doc_store';
+} from '../../utils/document_provider';
+import { useDocContext } from '../../hooks/use_doc_context';
+import { useDocStore } from '../../store/hooks/use_doc_store';
 import { Link } from 'react-router-dom';
-import { useGetTo } from '../hooks/use_to';
+import { useGetTo } from '../../hooks/use_to';
 
 export interface NavLevelProps {
   navbar: Navbar;

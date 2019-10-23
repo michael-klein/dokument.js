@@ -16,6 +16,10 @@ export function join(...args: string[]): string {
   return newParts.join('/') || (newParts.length ? '/' : '.');
 }
 
+export async function getHeaders(filePath: string): Promise<Headers> {
+  return ky.head(filePath).then(r => r.headers);
+}
+
 export async function getFile(filePath: string): Promise<string> {
   return ky.get(filePath).text();
 }

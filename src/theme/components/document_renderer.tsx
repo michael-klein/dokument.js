@@ -2,12 +2,13 @@ import * as React from 'react';
 
 // tslint:disable
 import MDX from '@mdx-js/runtime';
-import { useDocContext } from '../hooks/use_doc_context';
-import { DocumentData } from '../utils/document_provider';
+import { useDocContext } from '../../hooks/use_doc_context';
+import { DocumentData } from '../../utils/document_provider';
 import { Link } from 'react-router-dom';
 import innerText from 'react-innertext';
-import { useDocStore } from '../store/hooks/use_doc_store';
-import { useSaveDocument } from '../hooks/use_save_document';
+import { useDocStore } from '../../store/hooks/use_doc_store';
+import { useSaveDocument } from '../../hooks/use_save_document';
+import { LastChanged } from './last_changed';
 
 export interface MDXContext {
   currentDocument?: DocumentData;
@@ -102,6 +103,9 @@ export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
         </MDX>
       </div>
       <PreviousAndNext previous={previous} next={next}></PreviousAndNext>
+      {currentDocument.lastModified > -1 && (
+        <LastChanged timestamp={currentDocument.lastModified}></LastChanged>
+      )}
     </Provider>
   ) : (
     <div>loading document...</div>

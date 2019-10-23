@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useDocContext } from '../hooks/use_doc_context';
+import { useDocContext } from '../../hooks/use_doc_context';
 
 function useClearSearchOnLinkClicked(setSearchQuery: (query: string) => void) {
   React.useEffect(() => {

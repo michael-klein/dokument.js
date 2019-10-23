@@ -5,6 +5,8 @@ import { NavLevelProps } from './nav_level';
 import { DocumentRendererProps } from './document_renderer';
 import { SearchResultsProps } from './search_results';
 import { SearchResultsItemProps } from './search_results_item';
+import { LastChangedProps } from './last_changed';
+import { BrandingProps } from './branding';
 
 export interface ComponentList {
   DocumentRenderer: React.FunctionComponent<DocumentRendererProps>;
@@ -18,5 +20,6 @@ export interface ComponentList {
   SearchResults: React.FunctionComponent<SearchResultsProps>;
   SearchResultsItem: React.FunctionComponent<SearchResultsItemProps>;
   Loading: React.FunctionComponent;
-  Branding: React.FunctionComponent<{ children: React.ReactNode }>;
+  Branding: React.FunctionComponent<BrandingProps>;
+  LastChanged: React.FunctionComponent<LastChangedProps>;
 }

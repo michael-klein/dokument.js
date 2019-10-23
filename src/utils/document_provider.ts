@@ -1,4 +1,4 @@
-import { getFile, getJSON, join } from './file_utils';
+import { getFile, getJSON, join, getHeaders } from './file_utils';
 import removeMarkdown from 'remove-markdown';
 
 export interface DocumentProvider {
@@ -37,6 +37,7 @@ export interface DocumentData {
   slug: string;
   content: string;
   headings: DocumentHeading[];
+  lastModified: number;
 }
 export interface DocumentMap {
   [slug: string]: DocumentData;
@@ -127,14 +128,39 @@ export async function fetchDocuments(
       documentMap = { ...documentMap, ...subResult };
     } else {
       const docPath: string = join(rootPath, path);
-      const content: string = await getFile(docPath);
-      documentMap[slug] = {
-        title,
-        content,
-        path: docPath,
-        slug,
-        headings: findHeadings(content),
-      };
+      const document: DocumentData = JSON.parse(localStorage.getItem(slug));
+      let headers: Headers;
+      try {
+        headers = await getHeaders(docPath);
+      } catch (e) {}
+      const lastModified: string = headers && headers.get('last-modified');
+
+      let lastModifiedTimestamp: number = -1;
+      if (lastModified) {
+        lastModifiedTimestamp = new Date(lastModified).getTime();
+      }
+      if (document) {
+        if (document.lastModified === lastModifiedTimestamp) {
+          documentMap[slug] = document;
+          continue;
+        }
+      }
+      try {
+        const content: string = await getFile(docPath);
+        documentMap[slug] = {
+          title,
+          content,
+          path: docPath,
+          slug,
+          headings: findHeadings(content),
+          lastModified: lastModifiedTimestamp,
+        };
+        Promise.resolve().then(() =>
+          localStorage.setItem(slug, JSON.stringify(documentMap[slug]))
+        );
+      } catch (e) {
+        documentMap[slug] = document;
+      }
     }
   }
 

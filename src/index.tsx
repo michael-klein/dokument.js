@@ -1,13 +1,13 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import '@babel/polyfill';
-import { Docs } from './components/docs';
+import { Docs } from './theme/components/docs';
 import { docStore, docStoreActions } from './store/docStore';
 import { docContext, docContextValue } from './doc_context';
-import { ComponentList } from './components/component_list';
-import { componentListValue } from './components/component_list_value';
 import { addDocumentToIndex } from './search/search_index';
 import { join } from './utils/file_utils';
+import { ComponentList } from './theme/components/component_list';
+import { componentListValue } from './theme/components/component_list_value';
 
 export interface DocsOptions {
   rootPath: string;
