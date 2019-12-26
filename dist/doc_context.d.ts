@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { DocStoreState } from './store/docStore';
-import { Store } from 'pullstate';
 import { ComponentList } from './theme/components/component_list';
 import { DocSearchResult } from './search/search_index';
 import { HtmdxOptions } from 'htmdx';
+import { Store } from 'forimmer';
 export interface DocContextValue {
-    docStore: Store<DocStoreState>;
+    dokumentStore: Store<DocStoreState>;
     rootPath: string;
     componentList: ComponentList;
     title: string;

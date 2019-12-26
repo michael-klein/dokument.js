@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useDocContext } from '../../hooks/use_doc_context';
-import { useDocStore } from '../../store/hooks/use_doc_store';
+import { useStoreState } from 'forimmer';
 
 export interface SearchResultsProps {
   searchQuery: string;
@@ -10,7 +10,11 @@ export function SearchResults(props: SearchResultsProps): JSX.Element {
   const { searchQuery } = props;
   const { search, componentList } = useDocContext();
   const { SearchResultsItem } = componentList;
-  const documentMap = useDocStore(state => state.documentMap);
+
+  const { dokumentStore } = useDocContext();
+  const [documentMap] = useStoreState(dokumentStore, state => [
+    state.documentMap,
+  ]);
   const result = search(searchQuery);
   return (
     <div className={'search-results'}>

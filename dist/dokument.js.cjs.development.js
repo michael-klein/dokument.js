@@ -5,9 +5,9 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var React = require('react');
 var ReactDOM = require('react-dom');
 require('@babel/polyfill');
-var pullstate = require('pullstate');
 var ky = _interopDefault(require('ky'));
 var removeMarkdown = _interopDefault(require('remove-markdown'));
+var forimmer = require('forimmer');
 var elasticlunr = _interopDefault(require('elasticlunr'));
 var reactRouterDom = require('react-router-dom');
 var htmdx = require('htmdx');
@@ -432,65 +432,45 @@ function slugify(path) {
   }).replace(/&/g, '-and-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
 }
 
-var docStore =
+var dokumentStore =
 /*#__PURE__*/
-new pullstate.Store({
-  documentMap: {},
-  documentsLoaded: false
-});
-var docStoreActions = {
-  loadNavbar: function loadNavbar(path) {
-    try {
-      return Promise.resolve(fetchNavbar(path)).then(function (navbar) {
-        docStore.update(function (state) {
-          state.navbar = navbar;
-        });
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  },
-  loadDocuments: function loadDocuments(rootPath, navbar) {
-    try {
-      return Promise.resolve(fetchDocuments(rootPath, navbar)).then(function (documentMap) {
-        docStore.update(function (state) {
-          state.documentMap = _extends({}, state.documentMap, {}, documentMap);
-          state.documentsLoaded = true;
-        });
-      });
-    } catch (e) {
-      return Promise.reject(e);
-    }
-  },
-  getNavbar: function getNavbar() {
-    try {
-      var navbar = docStore.getRawState().navbar;
-
-      var _temp3 = function () {
-        if (!navbar) {
-          return Promise.resolve(new Promise(function (resolve) {
-            var unsubscribe = docStore.subscribe(function (state) {
-              return state.navbar;
-            }, function (navbar) {
-              if (navbar) {
-                resolve(navbar);
-                unsubscribe();
-              }
-            });
-          })).then(function (_temp) {
-            navbar = _temp;
-          });
-        }
-      }();
-
-      return Promise.resolve(_temp3 && _temp3.then ? _temp3.then(function () {
-        return navbar;
-      }) : navbar);
-    } catch (e) {
-      return Promise.reject(e);
-    }
+forimmer.createStore({});
+var loadNavBar =
+/*#__PURE__*/
+dokumentStore.createStoreAction(function (path) {
+  try {
+    return Promise.resolve(fetchNavbar(path)).then(function (navbar) {
+      return function (draft) {
+        draft.navbar = navbar;
+      };
+    });
+  } catch (e) {
+    return Promise.reject(e);
   }
-};
+});
+var setCurrentDocument =
+/*#__PURE__*/
+dokumentStore.createStoreAction(function (currentDocument) {
+  return Promise.resolve(function (draft) {
+    draft.currentDocument = currentDocument;
+  });
+});
+var loadDocuments =
+/*#__PURE__*/
+dokumentStore.createStoreAction(function (_ref) {
+  var rootPath = _ref.rootPath,
+      navbar = _ref.navbar;
+
+  try {
+    return Promise.resolve(fetchDocuments(rootPath, navbar)).then(function (documentMap) {
+      return function (draft) {
+        draft.documentMap = documentMap;
+      };
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+});
 
 var index =
 /*#__PURE__*/
@@ -524,7 +504,7 @@ function search(query) {
 }
 
 var docContextValue = {
-  docStore: docStore,
+  dokumentStore: dokumentStore,
   rootPath: './',
   componentList: undefined,
   search: search,
@@ -539,39 +519,13 @@ function useDocContext() {
   return React.useContext(docContext);
 }
 
-function useDocStore(getSubState) {
-  return pullstate.useStoreState(docStore, getSubState);
-}
-
 function Docs() {
   var _useDocContext$compon = useDocContext().componentList,
       SideBar = _useDocContext$compon.SideBar,
-      Main = _useDocContext$compon.Main,
-      Loading = _useDocContext$compon.Loading;
-  var documentsLoaded = useDocStore(function (state) {
-    return state.documentsLoaded;
-  });
+      Main = _useDocContext$compon.Main;
   return React.createElement("div", {
     className: "docs"
-  }, documentsLoaded ? React.createElement(reactRouterDom.HashRouter, null, React.createElement(SideBar, null), React.createElement(Main, null)) : React.createElement(Loading, null));
-}
-
-function useSaveDocument(slug) {
-  if (slug === void 0) {
-    slug = '';
-  }
-
-  var _useDocContext = useDocContext(),
-      docStore = _useDocContext.docStore;
-
-  var documentMap = docStore.getRawState().documentMap;
-  var document = documentMap[slug];
-
-  if (!document) {
-    return Object.values(documentMap)[0];
-  }
-
-  return document;
+  }, React.createElement(reactRouterDom.HashRouter, null, React.createElement(SideBar, null), React.createElement(Main, null)));
 }
 
 function LastChanged(props) {
@@ -621,15 +575,19 @@ function DocumentRenderer(props) {
       _useDocContext$htmdxO = _useDocContext.htmdxOptions,
       htmdxOptions = _useDocContext$htmdxO === void 0 ? {
     components: {}
-  } : _useDocContext$htmdxO;
+  } : _useDocContext$htmdxO,
+      dokumentStore = _useDocContext.dokumentStore;
 
   var PreviousAndNext = componentList.PreviousAndNext;
   var Provider = mdxContext.Provider;
-  var currentDocument = useSaveDocument(props.slug);
+
+  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
+    return [state.documentMap, state.currentDocument];
+  }),
+      documentMap = _useStoreState[0],
+      currentDocument = _useStoreState[1];
+
   React.useEffect(function () {
-    docStore.update(function (state) {
-      state.currentDocument = currentDocument;
-    });
     var heading = document.getElementById(props.headingSlug);
 
     if (heading) {
@@ -644,9 +602,6 @@ function DocumentRenderer(props) {
       }
     }
   }, [props.headingSlug, currentDocument]);
-  var documentMap = useDocStore(function (state) {
-    return state.documentMap;
-  });
   var previous;
   var next;
 
@@ -663,7 +618,7 @@ function DocumentRenderer(props) {
     }
   }
 
-  return currentDocument ? React.createElement(Provider, {
+  return React.createElement(Provider, {
     value: {
       currentDocument: currentDocument
     }
@@ -677,18 +632,20 @@ function DocumentRenderer(props) {
     next: next
   }), currentDocument.lastModified > -1 && React.createElement(LastChanged, {
     timestamp: currentDocument.lastModified
-  })) : React.createElement("div", null, "loading document...");
+  }));
 }
 
 function Nav() {
-  var _useDocStore = useDocStore(function (state) {
-    return [state.documentsLoaded, state.navbar];
+  var _useDocContext = useDocContext(),
+      dokumentStore = _useDocContext.dokumentStore;
+
+  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
+    return [state.navbar];
   }),
-      documentsLoaded = _useDocStore[0],
-      navbar = _useDocStore[1];
+      navbar = _useStoreState[0];
 
   var NavLevel = useDocContext().componentList.NavLevel;
-  return !documentsLoaded ? React.createElement("div", null, "loading navbar...") : React.createElement("nav", null, React.createElement(NavLevel, Object.assign({}, {
+  return React.createElement("nav", null, React.createElement(NavLevel, Object.assign({}, {
     navbar: navbar
   })));
 }
@@ -704,16 +661,36 @@ function SideBar() {
       Recent = componentList.Recent;
   return React.createElement("aside", {
     className: "sidebar"
-  }, React.createElement(Branding, null, title), React.createElement(Search, null), React.createElement(Nav, null), React.createElement(Recent, null));
+  }, React.createElement(Branding, null, title), React.createElement(Search, null), React.createElement(React.Suspense, {
+    fallback: ""
+  }, React.createElement(Nav, null)), React.createElement(React.Suspense, {
+    fallback: ""
+  }, React.createElement(Recent, null)));
 }
 
 function RenderArticle() {
-  var DocumentRenderer = useDocContext().componentList.DocumentRenderer;
+  var _useDocContext = useDocContext(),
+      componentList = _useDocContext.componentList,
+      dokumentStore = _useDocContext.dokumentStore;
+
+  var DocumentRenderer = componentList.DocumentRenderer;
+
+  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
+    return [state.documentMap, state.currentDocument || null];
+  }),
+      documentMap = _useStoreState[0];
 
   var _useParams = reactRouter.useParams(),
       slug = _useParams.slug,
       headingSlug = _useParams.headingSlug;
 
+  React.useEffect(function () {
+    if (documentMap[slug]) {
+      setCurrentDocument(documentMap[slug]);
+    } else {
+      setCurrentDocument(Object.values(documentMap)[0]);
+    }
+  }, [slug]);
   return React.createElement(DocumentRenderer, {
     slug: slug,
     headingSlug: headingSlug
@@ -721,11 +698,16 @@ function RenderArticle() {
 }
 
 function Main() {
+  var Loading = useDocContext().componentList.Loading;
   return React.createElement("main", null, React.createElement("article", null, React.createElement(reactRouter.Switch, null, React.createElement(reactRouter.Route, {
     path: "/document/:slug?/:headingSlug?"
-  }, React.createElement(RenderArticle, null)), React.createElement(reactRouter.Route, {
+  }, React.createElement(React.Suspense, {
+    fallback: React.createElement(Loading, null)
+  }, React.createElement(RenderArticle, null))), React.createElement(reactRouter.Route, {
     path: "/"
-  }, React.createElement(RenderArticle, null)))));
+  }, React.createElement(React.Suspense, {
+    fallback: React.createElement(Loading, null)
+  }, React.createElement(RenderArticle, null))))));
 }
 
 function useClearSearchOnLinkClicked(setSearchQuery) {
@@ -811,9 +793,14 @@ function PreviousAndNext(props) {
 }
 
 function NavItem(props) {
-  var documentMap = useDocStore(function (state) {
-    return state.documentMap;
-  });
+  var _useDocContext = useDocContext(),
+      dokumentStore = _useDocContext.dokumentStore;
+
+  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
+    return [state.documentMap];
+  }),
+      documentMap = _useStoreState[0];
+
   var document = documentMap[props.slug];
   var topHeading = document && document.headings[0] && document.headings[0].size === 1 ? document.headings[0] : undefined;
   return React.createElement("li", {
@@ -838,9 +825,14 @@ function NavLevel(props) {
   var _useDocContext = useDocContext(),
       componentList = _useDocContext.componentList;
 
-  var docMap = useDocStore(function (state) {
-    return state.documentMap;
-  });
+  var _useDocContext2 = useDocContext(),
+      dokumentStore = _useDocContext2.dokumentStore;
+
+  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
+    return [state.documentMap];
+  }),
+      docMap = _useStoreState[0];
+
   var NavItem = componentList.NavItem,
       NavLevel = componentList.NavLevel;
   var titles = Object.keys(navbar);
@@ -899,9 +891,15 @@ function SearchResults(props) {
       componentList = _useDocContext.componentList;
 
   var SearchResultsItem = componentList.SearchResultsItem;
-  var documentMap = useDocStore(function (state) {
-    return state.documentMap;
-  });
+
+  var _useDocContext2 = useDocContext(),
+      dokumentStore = _useDocContext2.dokumentStore;
+
+  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
+    return [state.documentMap];
+  }),
+      documentMap = _useStoreState[0];
+
   var result = search(searchQuery);
   return React.createElement("div", {
     className: 'search-results'
@@ -948,7 +946,7 @@ function SearchResultsItem(props) {
 function Loading() {
   return React.createElement(React.Fragment, null, React.createElement("style", {
     type: "text/css"
-  }, "\n                .loading {\n                    margin: 20px auto;\n                    width: 40px;\n                    height: 40px;\n                    position: relative;\n                    -webkit-transform: rotateZ(45deg);\n                        transform: rotateZ(45deg);\n                }\n\n                .loading .cube {\n                float: left;\n                width: 50%;\n                height: 50%;\n                position: relative;\n                -webkit-transform: scale(1.1);\n                    -ms-transform: scale(1.1);\n                        transform: scale(1.1); \n                }\n                .loading .cube:before {\n                content: '';\n                position: absolute;\n                top: 0;\n                left: 0;\n                width: 100%;\n                height: 100%;\n                background-color: #333;\n                -webkit-animation: sk-foldCubeAngle 2.4s infinite linear both;\n                        animation: sk-foldCubeAngle 2.4s infinite linear both;\n                -webkit-transform-origin: 100% 100%;\n                    -ms-transform-origin: 100% 100%;\n                        transform-origin: 100% 100%;\n                }\n                .loading .cube2 {\n                -webkit-transform: scale(1.1) rotateZ(90deg);\n                        transform: scale(1.1) rotateZ(90deg);\n                }\n                .loading .cube3 {\n                -webkit-transform: scale(1.1) rotateZ(180deg);\n                        transform: scale(1.1) rotateZ(180deg);\n                }\n                .loading .cube4 {\n                -webkit-transform: scale(1.1) rotateZ(270deg);\n                        transform: scale(1.1) rotateZ(270deg);\n                }\n                .loading .cube2:before {\n                -webkit-animation-delay: 0.3s;\n                        animation-delay: 0.3s;\n                }\n                .loading .cube3:before {\n                -webkit-animation-delay: 0.6s;\n                        animation-delay: 0.6s; \n                }\n                .loading .cube4:before {\n                -webkit-animation-delay: 0.9s;\n                        animation-delay: 0.9s;\n                }\n                @-webkit-keyframes sk-foldCubeAngle {\n                0%, 10% {\n                    -webkit-transform: perspective(140px) rotateX(-180deg);\n                            transform: perspective(140px) rotateX(-180deg);\n                    opacity: 0; \n                } 25%, 75% {\n                    -webkit-transform: perspective(140px) rotateX(0deg);\n                            transform: perspective(140px) rotateX(0deg);\n                    opacity: 1; \n                } 90%, 100% {\n                    -webkit-transform: perspective(140px) rotateY(180deg);\n                            transform: perspective(140px) rotateY(180deg);\n                    opacity: 0; \n                } \n                }\n\n                @keyframes sk-foldCubeAngle {\n                0%, 10% {\n                    -webkit-transform: perspective(140px) rotateX(-180deg);\n                            transform: perspective(140px) rotateX(-180deg);\n                    opacity: 0; \n                } 25%, 75% {\n                    -webkit-transform: perspective(140px) rotateX(0deg);\n                            transform: perspective(140px) rotateX(0deg);\n                    opacity: 1; \n                } 90%, 100% {\n                    -webkit-transform: perspective(140px) rotateY(180deg);\n                            transform: perspective(140px) rotateY(180deg);\n                    opacity: 0; \n                }\n                }\n        "), React.createElement("div", {
+  }, "\n                .loading {\n                    margin: 20px auto;\n                    margin-top: 50%;\n                    width: 40px;\n                    height: 40px;\n                    position: relative;\n                    -webkit-transform: rotateZ(45deg);\n                        transform: rotateZ(45deg);\n                }\n\n                .loading .cube {\n                float: left;\n                width: 50%;\n                height: 50%;\n                position: relative;\n                -webkit-transform: scale(1.1);\n                    -ms-transform: scale(1.1);\n                        transform: scale(1.1); \n                }\n                .loading .cube:before {\n                content: '';\n                position: absolute;\n                top: 0;\n                left: 0;\n                width: 100%;\n                height: 100%;\n                background-color: #333;\n                -webkit-animation: sk-foldCubeAngle 2.4s infinite linear both;\n                        animation: sk-foldCubeAngle 2.4s infinite linear both;\n                -webkit-transform-origin: 100% 100%;\n                    -ms-transform-origin: 100% 100%;\n                        transform-origin: 100% 100%;\n                }\n                .loading .cube2 {\n                -webkit-transform: scale(1.1) rotateZ(90deg);\n                        transform: scale(1.1) rotateZ(90deg);\n                }\n                .loading .cube3 {\n                -webkit-transform: scale(1.1) rotateZ(180deg);\n                        transform: scale(1.1) rotateZ(180deg);\n                }\n                .loading .cube4 {\n                -webkit-transform: scale(1.1) rotateZ(270deg);\n                        transform: scale(1.1) rotateZ(270deg);\n                }\n                .loading .cube2:before {\n                -webkit-animation-delay: 0.3s;\n                        animation-delay: 0.3s;\n                }\n                .loading .cube3:before {\n                -webkit-animation-delay: 0.6s;\n                        animation-delay: 0.6s; \n                }\n                .loading .cube4:before {\n                -webkit-animation-delay: 0.9s;\n                        animation-delay: 0.9s;\n                }\n                @-webkit-keyframes sk-foldCubeAngle {\n                0%, 10% {\n                    -webkit-transform: perspective(140px) rotateX(-180deg);\n                            transform: perspective(140px) rotateX(-180deg);\n                    opacity: 0; \n                } 25%, 75% {\n                    -webkit-transform: perspective(140px) rotateX(0deg);\n                            transform: perspective(140px) rotateX(0deg);\n                    opacity: 1; \n                } 90%, 100% {\n                    -webkit-transform: perspective(140px) rotateY(180deg);\n                            transform: perspective(140px) rotateY(180deg);\n                    opacity: 0; \n                } \n                }\n\n                @keyframes sk-foldCubeAngle {\n                0%, 10% {\n                    -webkit-transform: perspective(140px) rotateX(-180deg);\n                            transform: perspective(140px) rotateX(-180deg);\n                    opacity: 0; \n                } 25%, 75% {\n                    -webkit-transform: perspective(140px) rotateX(0deg);\n                            transform: perspective(140px) rotateX(0deg);\n                    opacity: 1; \n                } 90%, 100% {\n                    -webkit-transform: perspective(140px) rotateY(180deg);\n                            transform: perspective(140px) rotateY(180deg);\n                    opacity: 0; \n                }\n                }\n        "), React.createElement("div", {
     className: "loading"
   }, React.createElement("div", {
     className: "cube1 cube"
@@ -966,9 +964,13 @@ function Branding(props) {
 }
 
 function Recent() {
-  var currentDocument = useDocStore(function (state) {
-    return state.currentDocument;
-  });
+  var _useDocContext = useDocContext(),
+      dokumentStore = _useDocContext.dokumentStore;
+
+  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
+    return [state.currentDocument];
+  }),
+      currentDocument = _useStoreState[0];
 
   var _React$useState = React.useState(localStorage.getItem('recent-document') ? JSON.parse(localStorage.getItem('recent-document')) : []),
       recentDocuments = _React$useState[0],
@@ -1004,7 +1006,9 @@ function Recent() {
         to = _getTo[0],
         heading = _getTo[1];
 
-    return React.createElement("li", null, React.createElement("span", {
+    return React.createElement("li", {
+      key: heading.text + timestamp
+    }, React.createElement("span", {
       className: "recent-time"
     }, new Date(timestamp).toLocaleString()), React.createElement(reactRouterDom.Link, {
       to: to
@@ -1058,9 +1062,12 @@ var dokument = function dokument(container, optionsIn) {
 
 var load = function load(options) {
   try {
-    return Promise.resolve(docStoreActions.loadNavbar(join(options.rootPath, options.navbarPath))).then(function () {
-      return Promise.resolve(docStoreActions.loadDocuments(options.rootPath, docStore.getRawState().navbar)).then(function () {
-        Object.values(docStore.getRawState().documentMap).forEach(function (doc) {
+    return Promise.resolve(loadNavBar(join(options.rootPath, options.navbarPath))).then(function () {
+      return Promise.resolve(loadDocuments({
+        navbar: dokumentStore.getCurrentState().navbar,
+        rootPath: options.rootPath
+      })).then(function () {
+        Object.values(dokumentStore.getCurrentState().documentMap).forEach(function (doc) {
           addDocumentToIndex(doc);
         });
       });

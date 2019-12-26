@@ -5,10 +5,8 @@ import { useDocContext } from '../../hooks/use_doc_context';
 import { DocumentData } from '../../utils/document_provider';
 import { Link } from 'react-router-dom';
 import innerText from 'react-innertext';
-import { useDocStore } from '../../store/hooks/use_doc_store';
-import { useSaveDocument } from '../../hooks/use_save_document';
 import { LastChanged } from './last_changed';
-import { docStore } from '../../store/docStore';
+import { useStoreState } from 'forimmer';
 
 export interface MDXContext {
   currentDocument?: DocumentData;
@@ -53,15 +51,20 @@ export interface DocumentRendererProps {
 }
 
 export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
-  const { componentList, htmdxOptions = { components: {} } } = useDocContext();
+  const {
+    componentList,
+    htmdxOptions = { components: {} },
+    dokumentStore,
+  } = useDocContext();
   const { PreviousAndNext } = componentList;
   const Provider = mdxContext.Provider;
 
-  const currentDocument = useSaveDocument(props.slug);
+  const [documentMap, currentDocument] = useStoreState(dokumentStore, state => [
+    state.documentMap,
+    state.currentDocument,
+  ]);
+
   React.useEffect(() => {
-    docStore.update(state => {
-      state.currentDocument = currentDocument;
-    });
     const heading: HTMLElement = document.getElementById(props.headingSlug);
     if (heading) {
       if (heading.parentElement.firstElementChild === heading) {
@@ -73,8 +76,6 @@ export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
       }
     }
   }, [props.headingSlug, currentDocument]);
-
-  const documentMap = useDocStore(state => state.documentMap);
 
   let previous: DocumentData;
   let next: DocumentData;
@@ -88,7 +89,7 @@ export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
       next = documentMap[slugs[docIndex + 1]];
     }
   }
-  return currentDocument ? (
+  return (
     <Provider value={{ currentDocument }}>
       <PreviousAndNext previous={previous} next={next}></PreviousAndNext>
       <div>
@@ -102,7 +103,5 @@ export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
         <LastChanged timestamp={currentDocument.lastModified}></LastChanged>
       )}
     </Provider>
-  ) : (
-    <div>loading document...</div>
   );
 }

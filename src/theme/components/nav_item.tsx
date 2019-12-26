@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { DocumentHeading } from '../../utils/document_provider';
-import { useDocStore } from '../../store/hooks/use_doc_store';
+import { useStoreState } from 'forimmer';
+import { useDocContext } from '../../hooks/use_doc_context';
 
 export interface NavItemProps {
   path: string;
@@ -9,7 +10,11 @@ export interface NavItemProps {
   children: React.ReactNode;
 }
 export function NavItem(props: NavItemProps): JSX.Element {
-  const documentMap = useDocStore(state => state.documentMap);
+  const { dokumentStore } = useDocContext();
+  const [documentMap] = useStoreState(dokumentStore, state => [
+    state.documentMap,
+  ]);
+
   const document = documentMap[props.slug];
   const topHeading: DocumentHeading =
     document && document.headings[0] && document.headings[0].size === 1

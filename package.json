@@ -41,16 +41,12 @@
     "typescript": "^3.7.4"
   },
   "dependencies": {
-    "@mdx-js/runtime": "^1.5.1",
     "@types/react-router": "^5.1.2",
     "@types/react-router-dom": "^5.1.0",
-    "components": "^0.1.0",
     "elasticlunr": "^0.9.5",
     "forimmer": "^0.1.0",
-    "hooks": "^0.3.2",
     "htmdx": "^0.3.0",
     "ky": "^0.15.0",
-    "pullstate": "^1.7.1",
     "react-highlight-words": "^0.16.0",
     "react-innertext": "^1.1.5",
     "react-router-dom": "^5.1.2",

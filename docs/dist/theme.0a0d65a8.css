@@ -1044,11 +1044,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-#docs-app .loading {
-  position: fixed;
-  top: calc(50% - 30px);
-  left: calc(50% - 30px);
-}
 #docs-app .docs {
   flex: auto;
   display: flex;

@@ -3,12 +3,11 @@ import {
   Navbar,
   NavbarItemType,
   DocumentData,
-  DocumentMap,
 } from '../../utils/document_provider';
 import { useDocContext } from '../../hooks/use_doc_context';
-import { useDocStore } from '../../store/hooks/use_doc_store';
 import { Link } from 'react-router-dom';
 import { useGetTo } from '../../hooks/use_to';
+import { useStoreState } from 'forimmer';
 
 export interface NavLevelProps {
   navbar: Navbar;
@@ -16,7 +15,9 @@ export interface NavLevelProps {
 export function NavLevel(props: NavLevelProps): JSX.Element {
   const { navbar } = props;
   const { componentList } = useDocContext();
-  const docMap: DocumentMap = useDocStore(state => state.documentMap);
+  const { dokumentStore } = useDocContext();
+  const [docMap] = useStoreState(dokumentStore, state => [state.documentMap]);
+
   const { NavItem, NavLevel } = componentList;
   const titles: string[] = Object.keys(navbar);
   const docArray: DocumentData[] = Object.values(docMap);

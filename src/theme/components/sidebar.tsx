@@ -8,8 +8,12 @@ export function SideBar(): JSX.Element {
     <aside className="sidebar">
       <Branding>{title}</Branding>
       <Search></Search>
-      <Nav></Nav>
-      <Recent></Recent>
+      <React.Suspense fallback="">
+        <Nav></Nav>
+      </React.Suspense>
+      <React.Suspense fallback="">
+        <Recent></Recent>
+      </React.Suspense>
     </aside>
   );
 }

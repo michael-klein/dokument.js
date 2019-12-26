@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { docStore, DocStoreState } from './store/docStore';
-import { Store } from 'pullstate';
+import { dokumentStore, DocStoreState } from './store/docStore';
 import { ComponentList } from './theme/components/component_list';
 import { search, DocSearchResult } from './search/search_index';
 import { HtmdxOptions } from 'htmdx';
+import { Store } from 'forimmer';
 
 export interface DocContextValue {
-  docStore: Store<DocStoreState>;
+  dokumentStore: Store<DocStoreState>;
   rootPath: string;
   componentList: ComponentList;
   title: string;
@@ -14,7 +14,7 @@ export interface DocContextValue {
   htmdxOptions: HtmdxOptions;
 }
 export const docContextValue: DocContextValue = {
-  docStore,
+  dokumentStore,
   rootPath: './',
   componentList: undefined,
   search: search,

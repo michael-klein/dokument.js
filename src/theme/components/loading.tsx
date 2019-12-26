@@ -7,6 +7,7 @@ export function Loading(): JSX.Element {
         {`
                 .loading {
                     margin: 20px auto;
+                    margin-top: 50%;
                     width: 40px;
                     height: 40px;
                     position: relative;

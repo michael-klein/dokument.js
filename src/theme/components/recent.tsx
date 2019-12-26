@@ -1,14 +1,18 @@
 import * as React from 'react';
-import { useDocStore } from '../../store/hooks/use_doc_store';
 import { DocumentData } from '../../utils/document_provider';
 import { Link } from 'react-router-dom';
 import { useGetTo } from '../../hooks/use_to';
+import { useStoreState } from 'forimmer';
+import { useDocContext } from '../../hooks/use_doc_context';
 interface RecentDocument {
   document: DocumentData;
   timestamp: number;
 }
 export function Recent(): JSX.Element {
-  const currentDocument = useDocStore(state => state.currentDocument);
+  const { dokumentStore } = useDocContext();
+  const [currentDocument] = useStoreState(dokumentStore, state => [
+    state.currentDocument,
+  ]);
   const [recentDocuments, setRecentDocuments] = React.useState(
     (localStorage.getItem('recent-document')
       ? JSON.parse(localStorage.getItem('recent-document'))
@@ -38,7 +42,7 @@ export function Recent(): JSX.Element {
         {recentDocuments.map(({ document, timestamp }) => {
           const [to, heading] = getTo(document);
           return (
-            <li>
+            <li key={heading.text + timestamp}>
               <span className="recent-time">
                 {new Date(timestamp).toLocaleString()}
               </span>

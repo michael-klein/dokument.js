@@ -14,12 +14,6 @@ body {
   display: flex;
   flex-direction: column;
 
-  .loading {
-    position: fixed;
-    top: calc(50% - 30px);
-    left: calc(50% - 30px);
-  }
-
   .docs {
     flex: auto;
     display: flex;
