@@ -10,7 +10,7 @@ var ky = _interopDefault(require('ky'));
 var removeMarkdown = _interopDefault(require('remove-markdown'));
 var elasticlunr = _interopDefault(require('elasticlunr'));
 var reactRouterDom = require('react-router-dom');
-var MDX = _interopDefault(require('@mdx-js/runtime'));
+var htmdx = require('htmdx');
 var innerText = _interopDefault(require('react-innertext'));
 var reactRouter = require('react-router');
 var Highlighter = _interopDefault(require('react-highlight-words'));
@@ -525,13 +525,11 @@ function search(query) {
 
 var docContextValue = {
   docStore: docStore,
-  remarkPlugins: [],
-  rehypePlugins: [],
   rootPath: './',
   componentList: undefined,
   search: search,
   title: '',
-  mdxComponents: {}
+  htmdxOptions: {}
 };
 var docContext =
 /*#__PURE__*/
@@ -619,15 +617,19 @@ var components = {
 });
 function DocumentRenderer(props) {
   var _useDocContext = useDocContext(),
-      rehypePlugins = _useDocContext.rehypePlugins,
-      remarkPlugins = _useDocContext.remarkPlugins,
       componentList = _useDocContext.componentList,
-      mdxComponents = _useDocContext.mdxComponents;
+      _useDocContext$htmdxO = _useDocContext.htmdxOptions,
+      htmdxOptions = _useDocContext$htmdxO === void 0 ? {
+    components: {}
+  } : _useDocContext$htmdxO;
 
   var PreviousAndNext = componentList.PreviousAndNext;
   var Provider = mdxContext.Provider;
   var currentDocument = useSaveDocument(props.slug);
   React.useEffect(function () {
+    docStore.update(function (state) {
+      state.currentDocument = currentDocument;
+    });
     var heading = document.getElementById(props.headingSlug);
 
     if (heading) {
@@ -668,11 +670,9 @@ function DocumentRenderer(props) {
   }, React.createElement(PreviousAndNext, {
     previous: previous,
     next: next
-  }), React.createElement("div", null, React.createElement(MDX, {
-    components: _extends({}, components, {}, mdxComponents),
-    remarkPlugins: remarkPlugins,
-    rehypePlugins: rehypePlugins
-  }, currentDocument.content)), React.createElement(PreviousAndNext, {
+  }), React.createElement("div", null, htmdx.htmdx(currentDocument.content, React.createElement, _extends({}, htmdxOptions, {
+    components: _extends({}, components, {}, htmdxOptions.components)
+  }))), React.createElement(PreviousAndNext, {
     previous: previous,
     next: next
   }), currentDocument.lastModified > -1 && React.createElement(LastChanged, {
@@ -700,10 +700,11 @@ function SideBar() {
 
   var Nav = componentList.Nav,
       Search = componentList.Search,
-      Branding = componentList.Branding;
+      Branding = componentList.Branding,
+      Recent = componentList.Recent;
   return React.createElement("aside", {
     className: "sidebar"
-  }, React.createElement(Branding, null, title), React.createElement(Search, null), React.createElement(Nav, null));
+  }, React.createElement(Branding, null, title), React.createElement(Search, null), React.createElement(Nav, null), React.createElement(Recent, null));
 }
 
 function RenderArticle() {
@@ -730,7 +731,6 @@ function Main() {
 function useClearSearchOnLinkClicked(setSearchQuery) {
   React.useEffect(function () {
     var listener = function listener(event) {
-      console.log(event);
       var target = event.target;
 
       while (target !== document.body) {
@@ -965,6 +965,53 @@ function Branding(props) {
   return React.createElement("h1", null, props.children);
 }
 
+function Recent() {
+  var currentDocument = useDocStore(function (state) {
+    return state.currentDocument;
+  });
+
+  var _React$useState = React.useState(localStorage.getItem('recent-document') ? JSON.parse(localStorage.getItem('recent-document')) : []),
+      recentDocuments = _React$useState[0],
+      setRecentDocuments = _React$useState[1];
+
+  React.useEffect(function () {
+    if (currentDocument) {
+      var index = recentDocuments.findIndex(function (_ref) {
+        var document = _ref.document;
+        return currentDocument.slug === document.slug;
+      });
+
+      if (index > -1) {
+        recentDocuments.splice(index, 1);
+      }
+
+      recentDocuments.unshift({
+        document: currentDocument,
+        timestamp: Date.now()
+      });
+      setRecentDocuments(recentDocuments);
+      localStorage.setItem('recent-document', JSON.stringify(recentDocuments));
+    }
+  }, [currentDocument]);
+  var getTo = useGetTo();
+  return React.createElement("div", {
+    className: "recent"
+  }, React.createElement("div", null, "recently viewed:"), React.createElement("ul", null, recentDocuments.map(function (_ref2) {
+    var document = _ref2.document,
+        timestamp = _ref2.timestamp;
+
+    var _getTo = getTo(document),
+        to = _getTo[0],
+        heading = _getTo[1];
+
+    return React.createElement("li", null, React.createElement("span", {
+      className: "recent-time"
+    }, new Date(timestamp).toLocaleString()), React.createElement(reactRouterDom.Link, {
+      to: to
+    }, heading.text));
+  })));
+}
+
 var componentListValue = {
   DocumentRenderer: DocumentRenderer,
   NavItem: NavItem,
@@ -978,7 +1025,8 @@ var componentListValue = {
   SearchResultsItem: SearchResultsItem,
   Loading: Loading,
   Branding: Branding,
-  LastChanged: LastChanged
+  LastChanged: LastChanged,
+  Recent: Recent
 };
 
 var dokument = function dokument(container, optionsIn) {
@@ -989,10 +1037,8 @@ var dokument = function dokument(container, optionsIn) {
   try {
     var options = _extends({
       rootPath: './',
-      remarkPlugins: [],
-      rehypePlugins: [],
       title: 'Documentation',
-      mdxComponents: {},
+      htmdxOptions: _extends({}, optionsIn.htmdxOptions),
       navbarPath: ''
     }, optionsIn, {
       componentList: _extends({}, componentListValue, {}, optionsIn.componentList || {})
@@ -1017,7 +1063,6 @@ var load = function load(options) {
         Object.values(docStore.getRawState().documentMap).forEach(function (doc) {
           addDocumentToIndex(doc);
         });
-        console.log(docStore);
       });
     });
   } catch (e) {

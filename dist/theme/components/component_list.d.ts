@@ -21,4 +21,5 @@ export interface ComponentList {
     Loading: React.FunctionComponent;
     Branding: React.FunctionComponent<BrandingProps>;
     LastChanged: React.FunctionComponent<LastChangedProps>;
+    Recent: React.FunctionComponent;
 }

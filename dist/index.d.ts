@@ -1,15 +1,11 @@
-import * as React from 'react';
 import '@babel/polyfill';
 import { ComponentList } from './theme/components/component_list';
+import { HtmdxOptions } from 'htmdx';
 export interface DocsOptions {
     rootPath: string;
     navbarPath: string;
-    remarkPlugins: Function[];
-    rehypePlugins: Function[];
     componentList: ComponentList;
-    mdxComponents: {
-        [key: string]: React.Component<any, any, any> | React.FunctionComponent<any>;
-    };
+    htmdxOptions: HtmdxOptions;
     title?: string;
 }
 export declare const defaultComponentList: ComponentList;

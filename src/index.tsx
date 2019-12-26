@@ -8,18 +8,13 @@ import { addDocumentToIndex } from './search/search_index';
 import { join } from './utils/file_utils';
 import { ComponentList } from './theme/components/component_list';
 import { componentListValue } from './theme/components/component_list_value';
+import { HtmdxOptions } from 'htmdx';
 
 export interface DocsOptions {
   rootPath: string;
   navbarPath: string;
-  remarkPlugins: Function[];
-  rehypePlugins: Function[];
   componentList: ComponentList;
-  mdxComponents: {
-    [key: string]:
-      | React.Component<any, any, any>
-      | React.FunctionComponent<any>;
-  };
+  htmdxOptions: HtmdxOptions;
   title?: string;
 }
 
@@ -32,7 +27,6 @@ async function load(options: DocsOptions) {
   Object.values(docStore.getRawState().documentMap).forEach(doc => {
     addDocumentToIndex(doc);
   });
-  console.log(docStore);
 }
 
 export const defaultComponentList: ComponentList = { ...componentListValue };
@@ -47,10 +41,8 @@ export async function dokument(
 ): Promise<void> {
   const options: DocsOptions = {
     rootPath: './',
-    remarkPlugins: [],
-    rehypePlugins: [],
     title: 'Documentation',
-    mdxComponents: {},
+    htmdxOptions: { ...optionsIn.htmdxOptions },
     navbarPath: '',
     ...optionsIn,
     componentList: {

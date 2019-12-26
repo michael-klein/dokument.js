@@ -5,7 +5,6 @@ import { useDocContext } from '../../hooks/use_doc_context';
 function useClearSearchOnLinkClicked(setSearchQuery: (query: string) => void) {
   React.useEffect(() => {
     const listener: (event: MouseEvent) => void = event => {
-      console.log(event);
       let target: HTMLElement = event.target as HTMLElement;
       while (target !== document.body) {
         if (target instanceof HTMLAnchorElement) {

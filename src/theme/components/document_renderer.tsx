@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-// tslint:disable
-import MDX from '@mdx-js/runtime';
+import { htmdx } from 'htmdx';
 import { useDocContext } from '../../hooks/use_doc_context';
 import { DocumentData } from '../../utils/document_provider';
 import { Link } from 'react-router-dom';
@@ -9,6 +8,7 @@ import innerText from 'react-innertext';
 import { useDocStore } from '../../store/hooks/use_doc_store';
 import { useSaveDocument } from '../../hooks/use_save_document';
 import { LastChanged } from './last_changed';
+import { docStore } from '../../store/docStore';
 
 export interface MDXContext {
   currentDocument?: DocumentData;
@@ -53,17 +53,15 @@ export interface DocumentRendererProps {
 }
 
 export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
-  const {
-    rehypePlugins,
-    remarkPlugins,
-    componentList,
-    mdxComponents,
-  } = useDocContext();
+  const { componentList, htmdxOptions = { components: {} } } = useDocContext();
   const { PreviousAndNext } = componentList;
   const Provider = mdxContext.Provider;
 
   const currentDocument = useSaveDocument(props.slug);
   React.useEffect(() => {
+    docStore.update(state => {
+      state.currentDocument = currentDocument;
+    });
     const heading: HTMLElement = document.getElementById(props.headingSlug);
     if (heading) {
       if (heading.parentElement.firstElementChild === heading) {
@@ -94,13 +92,10 @@ export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
     <Provider value={{ currentDocument }}>
       <PreviousAndNext previous={previous} next={next}></PreviousAndNext>
       <div>
-        <MDX
-          components={{ ...components, ...mdxComponents }}
-          remarkPlugins={remarkPlugins}
-          rehypePlugins={rehypePlugins}
-        >
-          {currentDocument.content}
-        </MDX>
+        {htmdx(currentDocument.content, React.createElement, {
+          ...htmdxOptions,
+          components: { ...components, ...htmdxOptions.components },
+        })}
       </div>
       <PreviousAndNext previous={previous} next={next}></PreviousAndNext>
       {currentDocument.lastModified > -1 && (

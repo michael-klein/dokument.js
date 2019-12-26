@@ -4,12 +4,14 @@ import {
   fetchNavbar,
   DocumentMap,
   fetchDocuments,
+  DocumentData,
 } from '../utils/document_provider';
 
 export interface DocStoreState {
   navbar?: Navbar;
   documentMap: DocumentMap;
   documentsLoaded: boolean;
+  currentDocument?: DocumentData;
 }
 
 export const docStore = new Store<DocStoreState>({
