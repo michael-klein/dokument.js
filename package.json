@@ -48,7 +48,7 @@
     "elasticlunr": "^0.9.5",
     "forimmer": "^0.1.0",
     "hooks": "^0.3.2",
-    "htmdx": "^0.2.8",
+    "htmdx": "^0.3.0",
     "ky": "^0.15.0",
     "pullstate": "^1.7.1",
     "react-highlight-words": "^0.16.0",
