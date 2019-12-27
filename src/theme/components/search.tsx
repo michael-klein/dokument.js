@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDocContext } from '../../hooks/use_doc_context';
+import { useStoreState } from 'forimmer';
 
 function useClearSearchOnLinkClicked(setSearchQuery: (query: string) => void) {
   React.useEffect(() => {
@@ -29,13 +30,17 @@ function useClearSearchOnLinkClicked(setSearchQuery: (query: string) => void) {
 }
 
 export function Search(): JSX.Element {
-  const { SearchResults } = useDocContext().componentList;
+  const { componentList, dokumentStore } = useDocContext();
+  const { SearchResults } = componentList;
   const [searchQuery, setSearchQuery] = React.useState('');
   const location = useLocation();
   React.useEffect(() => {
     setSearchQuery('');
   }, [location]);
   useClearSearchOnLinkClicked(setSearchQuery);
+  const [allDocumentsLoaded] = useStoreState(dokumentStore, state => [
+    state.allDocumentsLoaded,
+  ]);
   return (
     <div className="search">
       {searchQuery.length > 0 && (
@@ -44,10 +49,13 @@ export function Search(): JSX.Element {
       <input
         type="text"
         value={searchQuery}
-        placeholder="search..."
+        placeholder={
+          allDocumentsLoaded ? 'Search documents' : 'Preparing search...'
+        }
         onChange={(e: React.SyntheticEvent<HTMLInputElement>) =>
           setSearchQuery(e.currentTarget.value)
         }
+        disabled={!allDocumentsLoaded}
         onKeyUp={e => {
           if (e.key === 'Escape') {
             setSearchQuery('');

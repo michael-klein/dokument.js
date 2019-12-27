@@ -2,13 +2,13 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import '@babel/polyfill';
 import { Docs } from './theme/components/docs';
-import { dokumentStore, loadNavBar, loadDocuments } from './store/docStore';
+import { setNavBar, setDocumentsLoaded } from './store/docStore';
 import { docContext, docContextValue } from './doc_context';
-import { addDocumentToIndex } from './search/search_index';
 import { join } from './utils/file_utils';
 import { ComponentList } from './theme/components/component_list';
 import { componentListValue } from './theme/components/component_list_value';
 import { HtmdxOptions } from 'htmdx';
+import { fetchDocuments, fetchNavbar } from './utils/document_provider';
 
 export interface DocsOptions {
   rootPath: string;
@@ -19,14 +19,10 @@ export interface DocsOptions {
 }
 
 async function load(options: DocsOptions) {
-  await loadNavBar(join(options.rootPath, options.navbarPath));
-  await loadDocuments({
-    navbar: dokumentStore.getCurrentState().navbar,
-    rootPath: options.rootPath,
-  });
-  Object.values(dokumentStore.getCurrentState().documentMap).forEach(doc => {
-    addDocumentToIndex(doc);
-  });
+  const navbar = await fetchNavbar(join(options.rootPath, options.navbarPath));
+  await setNavBar(navbar);
+  await fetchDocuments(options.rootPath, navbar);
+  setDocumentsLoaded();
 }
 
 export const defaultComponentList: ComponentList = { ...componentListValue };

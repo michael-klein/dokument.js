@@ -1,47 +1,14 @@
 import { getFile, getJSON, join, getHeaders } from './file_utils';
 import removeMarkdown from 'remove-markdown';
-
-export interface DocumentProvider {
-  getDocument(id: string): string;
-  getDocumentMap(): DocumentMap;
-}
-
-export interface NavbarJSON {
-  [key: string]: string | NavbarJSON;
-}
-
-export enum NavbarItemType {
-  CATEGORY,
-  DOCUMENT,
-}
-export interface NavbarItem {
-  type: NavbarItemType;
-  path?: string;
-  slug?: string;
-  children?: Navbar;
-}
-
-export interface Navbar {
-  [title: string]: NavbarItem;
-}
-
-export interface DocumentHeading {
-  size: number;
-  text: string;
-  raw: string;
-  slug: string;
-}
-export interface DocumentData {
-  title: string;
-  path: string;
-  slug: string;
-  content: string;
-  headings: DocumentHeading[];
-  lastModified: number;
-}
-export interface DocumentMap {
-  [slug: string]: DocumentData;
-}
+import { addDocument } from '../store/docStore';
+import { addDocumentToIndex } from '../search/search_index';
+import {
+  DocumentHeading,
+  Navbar,
+  NavbarJSON,
+  NavbarItemType,
+  DocumentData,
+} from './document_interfaces';
 
 export function findHeadings(document: string): DocumentHeading[] {
   const parts: string[] = document.split(/\n/g);
@@ -118,14 +85,11 @@ export function slugify(path: string): string {
 export async function fetchDocuments(
   rootPath: string,
   navbar: Navbar
-): Promise<DocumentMap> {
-  let documentMap: DocumentMap = {};
-
+): Promise<void> {
   for (const title of Object.keys(navbar)) {
     const { slug, children, type, path } = navbar[title];
     if (type === NavbarItemType.CATEGORY) {
-      const subResult: DocumentMap = await fetchDocuments(rootPath, children);
-      documentMap = { ...documentMap, ...subResult };
+      await fetchDocuments(rootPath, children);
     } else {
       const docPath: string = join(rootPath, path);
       const document: DocumentData = JSON.parse(localStorage.getItem(slug));
@@ -141,13 +105,14 @@ export async function fetchDocuments(
       }
       if (document) {
         if (document.lastModified === lastModifiedTimestamp) {
-          documentMap[slug] = document;
+          addDocumentToIndex(document);
+          await addDocument(document);
           continue;
         }
       }
       try {
         const content: string = await getFile(docPath);
-        documentMap[slug] = {
+        const document = {
           title,
           content,
           path: docPath,
@@ -155,14 +120,10 @@ export async function fetchDocuments(
           headings: findHeadings(content),
           lastModified: lastModifiedTimestamp,
         };
-        Promise.resolve().then(() =>
-          localStorage.setItem(slug, JSON.stringify(documentMap[slug]))
-        );
-      } catch (e) {
-        documentMap[slug] = document;
-      }
+        addDocumentToIndex(document);
+        localStorage.setItem(document.slug, JSON.stringify(document));
+        await addDocument(document);
+      } catch (e) {}
     }
   }
-
-  return documentMap;
 }

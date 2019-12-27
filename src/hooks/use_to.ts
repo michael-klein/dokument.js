@@ -1,4 +1,4 @@
-import { DocumentData, DocumentHeading } from '../utils/document_provider';
+import { DocumentData, DocumentHeading } from '../utils/document_interfaces';
 import { join } from '../utils/file_utils';
 import { useDocContext } from './use_doc_context';
 

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { DocumentHeading } from '../../utils/document_provider';
+import { DocumentHeading } from '../../utils/document_interfaces';
 import { useStoreState } from 'forimmer';
 import { useDocContext } from '../../hooks/use_doc_context';
 

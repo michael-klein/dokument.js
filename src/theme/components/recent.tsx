@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DocumentData } from '../../utils/document_provider';
+import { DocumentData } from '../../utils/document_interfaces';
 import { Link } from 'react-router-dom';
 import { useGetTo } from '../../hooks/use_to';
 import { useStoreState } from 'forimmer';

@@ -3,7 +3,7 @@ import removeMarkdown from 'remove-markdown';
 import Highlighter from 'react-highlight-words';
 import { Link } from 'react-router-dom';
 import { useGetTo } from '../../hooks/use_to';
-import { DocumentData } from '../../utils/document_provider';
+import { DocumentData } from '../../utils/document_interfaces';
 
 function getSentencesWithSearchResults(
   text: string,

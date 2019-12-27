@@ -1,4 +1,4 @@
-import { Navbar } from '../../utils/document_provider';
+import { Navbar } from '../../utils/document_interfaces';
 export interface NavLevelProps {
     navbar: Navbar;
 }

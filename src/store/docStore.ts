@@ -1,20 +1,17 @@
+import { createStore, Store } from 'forimmer';
 import {
   Navbar,
-  fetchNavbar,
-  DocumentMap,
-  fetchDocuments,
   DocumentData,
-} from '../utils/document_provider';
+  DocumentMap,
+} from '../utils/document_interfaces';
 
-import { createStore, Store } from 'forimmer';
+export const dokumentStore: Store<DocStoreState> = createStore<DocStoreState>({
+  documentMap: {},
+  allDocumentsLoaded: false,
+});
 
-export const dokumentStore: Store<DocStoreState> = createStore<DocStoreState>(
-  {}
-);
-
-export const loadNavBar = dokumentStore.createStoreAction(
-  async (path: string) => {
-    const navbar = await fetchNavbar(path);
+export const setNavBar = dokumentStore.createStoreAction(
+  async (navbar: Navbar) => {
     return draft => {
       draft.navbar = navbar;
     };
@@ -29,17 +26,23 @@ export const setCurrentDocument = dokumentStore.createStoreAction(
   }
 );
 
-export const loadDocuments = dokumentStore.createStoreAction(
-  async ({ rootPath, navbar }: { rootPath: string; navbar: Navbar }) => {
-    const documentMap = await fetchDocuments(rootPath, navbar);
+export const addDocument = dokumentStore.createStoreAction(
+  async (document: DocumentData) => {
     return draft => {
-      draft.documentMap = documentMap;
+      draft.documentMap[document.slug] = document;
     };
   }
 );
+
+export const setDocumentsLoaded = dokumentStore.createStoreAction(async () => {
+  return draft => {
+    draft.allDocumentsLoaded = true;
+  };
+});
 
 export interface DocStoreState {
   navbar?: Navbar;
   documentMap?: DocumentMap;
   currentDocument?: DocumentData;
+  allDocumentsLoaded?: boolean;
 }

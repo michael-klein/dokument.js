@@ -3,7 +3,7 @@ import {
   Navbar,
   NavbarItemType,
   DocumentData,
-} from '../../utils/document_provider';
+} from '../../utils/document_interfaces';
 import { useDocContext } from '../../hooks/use_doc_context';
 import { Link } from 'react-router-dom';
 import { useGetTo } from '../../hooks/use_to';

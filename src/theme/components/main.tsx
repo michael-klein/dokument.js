@@ -11,13 +11,14 @@ function RenderArticle() {
     state.currentDocument || null,
   ]);
   let { slug, headingSlug } = useParams();
+  const documentForSlug = !slug
+    ? Object.values(documentMap)[0]
+    : documentMap[slug];
   React.useEffect(() => {
-    if (documentMap[slug]) {
-      setCurrentDocument(documentMap[slug]);
-    } else {
-      setCurrentDocument(Object.values(documentMap)[0]);
+    if (documentForSlug) {
+      setCurrentDocument(documentForSlug);
     }
-  }, [slug]);
+  }, [slug, documentForSlug]);
   return (
     <DocumentRenderer slug={slug} headingSlug={headingSlug}></DocumentRenderer>
   );

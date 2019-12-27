@@ -1,4 +1,4 @@
-import { DocumentData } from '../../utils/document_provider';
+import { DocumentData } from '../../utils/document_interfaces';
 export interface PreviousAndNextProps {
     previous?: DocumentData;
     next?: DocumentData;

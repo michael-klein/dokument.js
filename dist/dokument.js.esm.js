@@ -1,14 +1,14 @@
 import { createContext, useContext, createElement, useEffect, isValidElement, Fragment, Suspense, useState } from 'react';
 import { render } from 'react-dom';
 import '@babel/polyfill';
-import ky from 'ky';
-import removeMarkdown from 'remove-markdown';
 import { createStore, useStoreState } from 'forimmer';
 import elasticlunr from 'elasticlunr';
 import { HashRouter, Link, useLocation } from 'react-router-dom';
+import ky from 'ky';
 import { htmdx } from 'htmdx';
 import innerText from 'react-innertext';
 import { Switch, Route, useParams } from 'react-router';
+import removeMarkdown from 'remove-markdown';
 import Highlighter from 'react-highlight-words';
 
 function _extends() {
@@ -29,420 +29,18 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
-// A type of promise-like that resolves synchronously and supports only one observer
-const _Pact = /*#__PURE__*/(function() {
-	function _Pact() {}
-	_Pact.prototype.then = function(onFulfilled, onRejected) {
-		const result = new _Pact();
-		const state = this.s;
-		if (state) {
-			const callback = state & 1 ? onFulfilled : onRejected;
-			if (callback) {
-				try {
-					_settle(result, 1, callback(this.v));
-				} catch (e) {
-					_settle(result, 2, e);
-				}
-				return result;
-			} else {
-				return this;
-			}
-		}
-		this.o = function(_this) {
-			try {
-				const value = _this.v;
-				if (_this.s & 1) {
-					_settle(result, 1, onFulfilled ? onFulfilled(value) : value);
-				} else if (onRejected) {
-					_settle(result, 1, onRejected(value));
-				} else {
-					_settle(result, 2, value);
-				}
-			} catch (e) {
-				_settle(result, 2, e);
-			}
-		};
-		return result;
-	};
-	return _Pact;
-})();
-
-// Settles a pact synchronously
-function _settle(pact, state, value) {
-	if (!pact.s) {
-		if (value instanceof _Pact) {
-			if (value.s) {
-				if (state & 1) {
-					state = value.s;
-				}
-				value = value.v;
-			} else {
-				value.o = _settle.bind(null, pact, state);
-				return;
-			}
-		}
-		if (value && value.then) {
-			value.then(_settle.bind(null, pact, state), _settle.bind(null, pact, 2));
-			return;
-		}
-		pact.s = state;
-		pact.v = value;
-		const observer = pact.o;
-		if (observer) {
-			observer(pact);
-		}
-	}
-}
-
-function _isSettledPact(thenable) {
-	return thenable instanceof _Pact && thenable.s & 1;
-}
-
-// Asynchronously iterate through an object that has a length property, passing the index as the first argument to the callback (even as the length property changes)
-function _forTo(array, body, check) {
-	var i = -1, pact, reject;
-	function _cycle(result) {
-		try {
-			while (++i < array.length && (!check || !check())) {
-				result = body(i);
-				if (result && result.then) {
-					if (_isSettledPact(result)) {
-						result = result.v;
-					} else {
-						result.then(_cycle, reject || (reject = _settle.bind(null, pact = new _Pact(), 2)));
-						return;
-					}
-				}
-			}
-			if (pact) {
-				_settle(pact, 1, result);
-			} else {
-				pact = result;
-			}
-		} catch (e) {
-			_settle(pact || (pact = new _Pact()), 2, e);
-		}
-	}
-	_cycle();
-	return pact;
-}
-
-const _iteratorSymbol = /*#__PURE__*/ typeof Symbol !== "undefined" ? (Symbol.iterator || (Symbol.iterator = Symbol("Symbol.iterator"))) : "@@iterator";
-
-// Asynchronously iterate through an object's values
-// Uses for...of if the runtime supports it, otherwise iterates until length on a copy
-function _forOf(target, body, check) {
-	if (typeof target[_iteratorSymbol] === "function") {
-		var iterator = target[_iteratorSymbol](), step, pact, reject;
-		function _cycle(result) {
-			try {
-				while (!(step = iterator.next()).done && (!check || !check())) {
-					result = body(step.value);
-					if (result && result.then) {
-						if (_isSettledPact(result)) {
-							result = result.v;
-						} else {
-							result.then(_cycle, reject || (reject = _settle.bind(null, pact = new _Pact(), 2)));
-							return;
-						}
-					}
-				}
-				if (pact) {
-					_settle(pact, 1, result);
-				} else {
-					pact = result;
-				}
-			} catch (e) {
-				_settle(pact || (pact = new _Pact()), 2, e);
-			}
-		}
-		_cycle();
-		if (iterator.return) {
-			var _fixup = function(value) {
-				try {
-					if (!step.done) {
-						iterator.return();
-					}
-				} catch(e) {
-				}
-				return value;
-			};
-			if (pact && pact.then) {
-				return pact.then(_fixup, function(e) {
-					throw _fixup(e);
-				});
-			}
-			_fixup();
-		}
-		return pact;
-	}
-	// No support for Symbol.iterator
-	if (!("length" in target)) {
-		throw new TypeError("Object is not iterable");
-	}
-	// Handle live collections properly
-	var values = [];
-	for (var i = 0; i < target.length; i++) {
-		values.push(target[i]);
-	}
-	return _forTo(values, function(i) { return body(values[i]); }, check);
-}
-
-const _asyncIteratorSymbol = /*#__PURE__*/ typeof Symbol !== "undefined" ? (Symbol.asyncIterator || (Symbol.asyncIterator = Symbol("Symbol.asyncIterator"))) : "@@asyncIterator";
-
-// Asynchronously call a function and send errors to recovery continuation
-function _catch(body, recover) {
-	try {
-		var result = body();
-	} catch(e) {
-		return recover(e);
-	}
-	if (result && result.then) {
-		return result.then(void 0, recover);
-	}
-	return result;
-}
-
-var getJSON = function getJSON(filePath) {
-  try {
-    return Promise.resolve(ky.get(filePath).json());
-  } catch (e) {
-    return Promise.reject(e);
-  }
-};
-var getFile = function getFile(filePath) {
-  try {
-    return Promise.resolve(ky.get(filePath).text());
-  } catch (e) {
-    return Promise.reject(e);
-  }
-};
-var getHeaders = function getHeaders(filePath) {
-  try {
-    return Promise.resolve(ky.head(filePath).then(function (r) {
-      return r.headers;
-    }));
-  } catch (e) {
-    return Promise.reject(e);
-  }
-};
-function join() {
-  var parts = [];
-
-  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-    args[_key] = arguments[_key];
-  }
-
-  for (var i = 0, l = args.length; i < l; i++) {
-    parts = parts.concat(args[i].split('/'));
-  }
-
-  var newParts = [];
-
-  for (var _i = 0, _l = parts.length; _i < _l; _i++) {
-    var part = parts[_i];
-    if (!part || part === '.') continue;
-    if (part === '..') newParts.pop();else newParts.push(part);
-  }
-
-  if (parts[0] === '') newParts.unshift('');
-  return newParts.join('/') || (newParts.length ? '/' : '.');
-}
-
-var fetchDocuments =
-/*#__PURE__*/
-function (_fetchDocuments) {
-  function fetchDocuments(_x, _x2) {
-    return _fetchDocuments.apply(this, arguments);
-  }
-
-  fetchDocuments.toString = function () {
-    return _fetchDocuments.toString();
-  };
-
-  return fetchDocuments;
-}(function (rootPath, navbar) {
-  try {
-    var documentMap = {};
-
-    var _temp6 = _forOf(Object.keys(navbar), function (title) {
-      var _navbar$title = navbar[title],
-          slug = _navbar$title.slug,
-          children = _navbar$title.children,
-          type = _navbar$title.type,
-          path = _navbar$title.path;
-
-      var _temp4 = function () {
-        if (type === NavbarItemType.CATEGORY) {
-          return Promise.resolve(fetchDocuments(rootPath, children)).then(function (subResult) {
-            documentMap = _extends({}, documentMap, {}, subResult);
-          });
-        } else {
-          var _temp7 = function _temp7() {
-            var lastModified = _headers && _headers.get('last-modified');
-
-            var lastModifiedTimestamp = -1;
-
-            if (lastModified) {
-              lastModifiedTimestamp = new Date(lastModified).getTime();
-            }
-
-            if (_document) {
-              if (_document.lastModified === lastModifiedTimestamp) {
-                documentMap[slug] = _document;
-                return;
-              }
-            }
-
-            var _temp = _catch(function () {
-              return Promise.resolve(getFile(_docPath)).then(function (content) {
-                documentMap[slug] = {
-                  title: title,
-                  content: content,
-                  path: _docPath,
-                  slug: slug,
-                  headings: findHeadings(content),
-                  lastModified: lastModifiedTimestamp
-                };
-                Promise.resolve().then(function () {
-                  return localStorage.setItem(slug, JSON.stringify(documentMap[slug]));
-                });
-              });
-            }, function () {
-              documentMap[slug] = _document;
-            });
-
-            if (_temp && _temp.then) return _temp.then(function () {});
-          };
-
-          var _docPath = join(rootPath, path);
-
-          var _document = JSON.parse(localStorage.getItem(slug));
-
-          var _headers;
-
-          var _temp8 = _catch(function () {
-            return Promise.resolve(getHeaders(_docPath)).then(function (_getHeaders) {
-              _headers = _getHeaders;
-            });
-          }, function () {});
-
-          return _temp8 && _temp8.then ? _temp8.then(_temp7) : _temp7(_temp8);
-        }
-      }();
-
-      if (_temp4 && _temp4.then) return _temp4.then(function () {});
-    });
-
-    return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(function () {
-      return documentMap;
-    }) : documentMap);
-  } catch (e) {
-    return Promise.reject(e);
-  }
-});
-var fetchNavbar = function fetchNavbar(path) {
-  try {
-    return Promise.resolve(getJSON(join(path, 'navbar.docs.json'))).then(buildNavbar);
-  } catch (e) {
-    return Promise.reject(e);
-  }
-};
-var NavbarItemType;
-
-(function (NavbarItemType) {
-  NavbarItemType[NavbarItemType["CATEGORY"] = 0] = "CATEGORY";
-  NavbarItemType[NavbarItemType["DOCUMENT"] = 1] = "DOCUMENT";
-})(NavbarItemType || (NavbarItemType = {}));
-
-function findHeadings(document) {
-  var parts = document.split(/\n/g);
-  var headings = [];
-  var i = 0;
-
-  for (var _iterator = parts, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-    var _ref;
-
-    if (_isArray) {
-      if (_i >= _iterator.length) break;
-      _ref = _iterator[_i++];
-    } else {
-      _i = _iterator.next();
-      if (_i.done) break;
-      _ref = _i.value;
-    }
-
-    var part = _ref;
-
-    if (part.trim()[0] === '#') {
-      var size = 1;
-
-      while (part[size] && part[size] === '#') {
-        size++;
-      }
-
-      var text = removeMarkdown(part);
-      text = text.trim();
-      headings.push({
-        size: size,
-        text: text,
-        raw: part,
-        slug: i + "-" + slugify(text)
-      });
-      i++;
-    }
-  }
-
-  return headings;
-}
-function buildNavbar(navbarJSON) {
-  var navbar = {};
-
-  for (var _i2 = 0, _Object$keys = Object.keys(navbarJSON); _i2 < _Object$keys.length; _i2++) {
-    var title = _Object$keys[_i2];
-    var entry = navbarJSON[title];
-
-    if (typeof entry === 'object') {
-      navbar[title] = {
-        type: NavbarItemType.CATEGORY,
-        children: buildNavbar(entry)
-      };
-    } else {
-      var slug = slugify(entry);
-      navbar[title] = {
-        type: NavbarItemType.DOCUMENT,
-        slug: slug,
-        path: entry
-      };
-    }
-  }
-
-  return navbar;
-}
-function slugify(path) {
-  var a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;';
-  var b = 'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnooooooooprrsssssttuuuuuuuuuwxyyzzz------';
-  var p = new RegExp(a.split('').join('|'), 'g');
-  return path.toString().toLowerCase().replace(/.mdx/g, '').replace(/\s+/g, '-').replace(p, function (c) {
-    return b.charAt(a.indexOf(c));
-  }).replace(/&/g, '-and-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
-}
-
 var dokumentStore =
 /*#__PURE__*/
-createStore({});
-var loadNavBar =
+createStore({
+  documentMap: {},
+  allDocumentsLoaded: false
+});
+var setNavBar =
 /*#__PURE__*/
-dokumentStore.createStoreAction(function (path) {
-  try {
-    return Promise.resolve(fetchNavbar(path)).then(function (navbar) {
-      return function (draft) {
-        draft.navbar = navbar;
-      };
-    });
-  } catch (e) {
-    return Promise.reject(e);
-  }
+dokumentStore.createStoreAction(function (navbar) {
+  return Promise.resolve(function (draft) {
+    draft.navbar = navbar;
+  });
 });
 var setCurrentDocument =
 /*#__PURE__*/
@@ -451,21 +49,19 @@ dokumentStore.createStoreAction(function (currentDocument) {
     draft.currentDocument = currentDocument;
   });
 });
-var loadDocuments =
+var addDocument =
 /*#__PURE__*/
-dokumentStore.createStoreAction(function (_ref) {
-  var rootPath = _ref.rootPath,
-      navbar = _ref.navbar;
-
-  try {
-    return Promise.resolve(fetchDocuments(rootPath, navbar)).then(function (documentMap) {
-      return function (draft) {
-        draft.documentMap = documentMap;
-      };
-    });
-  } catch (e) {
-    return Promise.reject(e);
-  }
+dokumentStore.createStoreAction(function (document) {
+  return Promise.resolve(function (draft) {
+    draft.documentMap[document.slug] = document;
+  });
+});
+var setDocumentsLoaded =
+/*#__PURE__*/
+dokumentStore.createStoreAction(function () {
+  return Promise.resolve(function (draft) {
+    draft.allDocumentsLoaded = true;
+  });
 });
 
 var index =
@@ -522,6 +118,52 @@ function Docs() {
   return createElement("div", {
     className: "docs"
   }, createElement(HashRouter, null, createElement(SideBar, null), createElement(Main, null)));
+}
+
+var getJSON = function getJSON(filePath) {
+  try {
+    return Promise.resolve(ky.get(filePath).json());
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+var getFile = function getFile(filePath) {
+  try {
+    return Promise.resolve(ky.get(filePath).text());
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+var getHeaders = function getHeaders(filePath) {
+  try {
+    return Promise.resolve(ky.head(filePath).then(function (r) {
+      return r.headers;
+    }));
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+function join() {
+  var parts = [];
+
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  for (var i = 0, l = args.length; i < l; i++) {
+    parts = parts.concat(args[i].split('/'));
+  }
+
+  var newParts = [];
+
+  for (var _i = 0, _l = parts.length; _i < _l; _i++) {
+    var part = parts[_i];
+    if (!part || part === '.') continue;
+    if (part === '..') newParts.pop();else newParts.push(part);
+  }
+
+  if (parts[0] === '') newParts.unshift('');
+  return newParts.join('/') || (newParts.length ? '/' : '.');
 }
 
 function LastChanged(props) {
@@ -680,13 +322,12 @@ function RenderArticle() {
       slug = _useParams.slug,
       headingSlug = _useParams.headingSlug;
 
+  var documentForSlug = !slug ? Object.values(documentMap)[0] : documentMap[slug];
   useEffect(function () {
-    if (documentMap[slug]) {
-      setCurrentDocument(documentMap[slug]);
-    } else {
-      setCurrentDocument(Object.values(documentMap)[0]);
+    if (documentForSlug) {
+      setCurrentDocument(documentForSlug);
     }
-  }, [slug]);
+  }, [slug, documentForSlug]);
   return createElement(DocumentRenderer, {
     slug: slug,
     headingSlug: headingSlug
@@ -731,7 +372,11 @@ function useClearSearchOnLinkClicked(setSearchQuery) {
 }
 
 function Search() {
-  var SearchResults = useDocContext().componentList.SearchResults;
+  var _useDocContext = useDocContext(),
+      componentList = _useDocContext.componentList,
+      dokumentStore = _useDocContext.dokumentStore;
+
+  var SearchResults = componentList.SearchResults;
 
   var _React$useState = useState(''),
       searchQuery = _React$useState[0],
@@ -742,6 +387,12 @@ function Search() {
     setSearchQuery('');
   }, [location]);
   useClearSearchOnLinkClicked(setSearchQuery);
+
+  var _useStoreState = useStoreState(dokumentStore, function (state) {
+    return [state.allDocumentsLoaded];
+  }),
+      allDocumentsLoaded = _useStoreState[0];
+
   return createElement("div", {
     className: "search"
   }, searchQuery.length > 0 && createElement(SearchResults, {
@@ -749,10 +400,11 @@ function Search() {
   }), createElement("input", {
     type: "text",
     value: searchQuery,
-    placeholder: "search...",
+    placeholder: allDocumentsLoaded ? 'Search documents' : 'Preparing search...',
     onChange: function onChange(e) {
       return setSearchQuery(e.currentTarget.value);
     },
+    disabled: !allDocumentsLoaded,
     onKeyUp: function onKeyUp(e) {
       if (e.key === 'Escape') {
         setSearchQuery('');
@@ -814,6 +466,13 @@ function NavItem(props) {
     }, heading.text);
   })));
 }
+
+var NavbarItemType;
+
+(function (NavbarItemType) {
+  NavbarItemType[NavbarItemType["CATEGORY"] = 0] = "CATEGORY";
+  NavbarItemType[NavbarItemType["DOCUMENT"] = 1] = "DOCUMENT";
+})(NavbarItemType || (NavbarItemType = {}));
 
 function NavLevel(props) {
   var navbar = props.navbar;
@@ -1029,6 +688,352 @@ var componentListValue = {
   Recent: Recent
 };
 
+// A type of promise-like that resolves synchronously and supports only one observer
+const _Pact = /*#__PURE__*/(function() {
+	function _Pact() {}
+	_Pact.prototype.then = function(onFulfilled, onRejected) {
+		const result = new _Pact();
+		const state = this.s;
+		if (state) {
+			const callback = state & 1 ? onFulfilled : onRejected;
+			if (callback) {
+				try {
+					_settle(result, 1, callback(this.v));
+				} catch (e) {
+					_settle(result, 2, e);
+				}
+				return result;
+			} else {
+				return this;
+			}
+		}
+		this.o = function(_this) {
+			try {
+				const value = _this.v;
+				if (_this.s & 1) {
+					_settle(result, 1, onFulfilled ? onFulfilled(value) : value);
+				} else if (onRejected) {
+					_settle(result, 1, onRejected(value));
+				} else {
+					_settle(result, 2, value);
+				}
+			} catch (e) {
+				_settle(result, 2, e);
+			}
+		};
+		return result;
+	};
+	return _Pact;
+})();
+
+// Settles a pact synchronously
+function _settle(pact, state, value) {
+	if (!pact.s) {
+		if (value instanceof _Pact) {
+			if (value.s) {
+				if (state & 1) {
+					state = value.s;
+				}
+				value = value.v;
+			} else {
+				value.o = _settle.bind(null, pact, state);
+				return;
+			}
+		}
+		if (value && value.then) {
+			value.then(_settle.bind(null, pact, state), _settle.bind(null, pact, 2));
+			return;
+		}
+		pact.s = state;
+		pact.v = value;
+		const observer = pact.o;
+		if (observer) {
+			observer(pact);
+		}
+	}
+}
+
+function _isSettledPact(thenable) {
+	return thenable instanceof _Pact && thenable.s & 1;
+}
+
+// Asynchronously iterate through an object that has a length property, passing the index as the first argument to the callback (even as the length property changes)
+function _forTo(array, body, check) {
+	var i = -1, pact, reject;
+	function _cycle(result) {
+		try {
+			while (++i < array.length && (!check || !check())) {
+				result = body(i);
+				if (result && result.then) {
+					if (_isSettledPact(result)) {
+						result = result.v;
+					} else {
+						result.then(_cycle, reject || (reject = _settle.bind(null, pact = new _Pact(), 2)));
+						return;
+					}
+				}
+			}
+			if (pact) {
+				_settle(pact, 1, result);
+			} else {
+				pact = result;
+			}
+		} catch (e) {
+			_settle(pact || (pact = new _Pact()), 2, e);
+		}
+	}
+	_cycle();
+	return pact;
+}
+
+const _iteratorSymbol = /*#__PURE__*/ typeof Symbol !== "undefined" ? (Symbol.iterator || (Symbol.iterator = Symbol("Symbol.iterator"))) : "@@iterator";
+
+// Asynchronously iterate through an object's values
+// Uses for...of if the runtime supports it, otherwise iterates until length on a copy
+function _forOf(target, body, check) {
+	if (typeof target[_iteratorSymbol] === "function") {
+		var iterator = target[_iteratorSymbol](), step, pact, reject;
+		function _cycle(result) {
+			try {
+				while (!(step = iterator.next()).done && (!check || !check())) {
+					result = body(step.value);
+					if (result && result.then) {
+						if (_isSettledPact(result)) {
+							result = result.v;
+						} else {
+							result.then(_cycle, reject || (reject = _settle.bind(null, pact = new _Pact(), 2)));
+							return;
+						}
+					}
+				}
+				if (pact) {
+					_settle(pact, 1, result);
+				} else {
+					pact = result;
+				}
+			} catch (e) {
+				_settle(pact || (pact = new _Pact()), 2, e);
+			}
+		}
+		_cycle();
+		if (iterator.return) {
+			var _fixup = function(value) {
+				try {
+					if (!step.done) {
+						iterator.return();
+					}
+				} catch(e) {
+				}
+				return value;
+			};
+			if (pact && pact.then) {
+				return pact.then(_fixup, function(e) {
+					throw _fixup(e);
+				});
+			}
+			_fixup();
+		}
+		return pact;
+	}
+	// No support for Symbol.iterator
+	if (!("length" in target)) {
+		throw new TypeError("Object is not iterable");
+	}
+	// Handle live collections properly
+	var values = [];
+	for (var i = 0; i < target.length; i++) {
+		values.push(target[i]);
+	}
+	return _forTo(values, function(i) { return body(values[i]); }, check);
+}
+
+const _asyncIteratorSymbol = /*#__PURE__*/ typeof Symbol !== "undefined" ? (Symbol.asyncIterator || (Symbol.asyncIterator = Symbol("Symbol.asyncIterator"))) : "@@asyncIterator";
+
+// Asynchronously call a function and send errors to recovery continuation
+function _catch(body, recover) {
+	try {
+		var result = body();
+	} catch(e) {
+		return recover(e);
+	}
+	if (result && result.then) {
+		return result.then(void 0, recover);
+	}
+	return result;
+}
+
+var fetchDocuments =
+/*#__PURE__*/
+function (_fetchDocuments) {
+  function fetchDocuments(_x, _x2) {
+    return _fetchDocuments.apply(this, arguments);
+  }
+
+  fetchDocuments.toString = function () {
+    return _fetchDocuments.toString();
+  };
+
+  return fetchDocuments;
+}(function (rootPath, navbar) {
+  try {
+    return Promise.resolve(_forOf(Object.keys(navbar), function (title) {
+      var _navbar$title = navbar[title],
+          slug = _navbar$title.slug,
+          children = _navbar$title.children,
+          type = _navbar$title.type,
+          path = _navbar$title.path;
+
+      var _temp7 = function () {
+        if (type === NavbarItemType.CATEGORY) {
+          return Promise.resolve(fetchDocuments(rootPath, children)).then(function () {});
+        } else {
+          var _temp8 = function _temp8() {
+            function _temp4() {
+              var _temp2 = _catch(function () {
+                return Promise.resolve(getFile(_docPath)).then(function (content) {
+                  var document = {
+                    title: title,
+                    content: content,
+                    path: _docPath,
+                    slug: slug,
+                    headings: findHeadings(content),
+                    lastModified: lastModifiedTimestamp
+                  };
+                  addDocumentToIndex(document);
+                  localStorage.setItem(document.slug, JSON.stringify(document));
+                  return Promise.resolve(addDocument(document)).then(function () {});
+                });
+              }, function () {});
+
+              if (_temp2 && _temp2.then) return _temp2.then(function () {});
+            }
+
+            var lastModified = _headers && _headers.get('last-modified');
+
+            var lastModifiedTimestamp = -1;
+
+            if (lastModified) {
+              lastModifiedTimestamp = new Date(lastModified).getTime();
+            }
+
+            var _temp3 = function () {
+              if (_document) {
+                var _temp10 = function () {
+                  if (_document.lastModified === lastModifiedTimestamp) {
+                    addDocumentToIndex(_document);
+                    return Promise.resolve(addDocument(_document)).then(function () {});
+                  }
+                }();
+
+                if (_temp10 && _temp10.then) return _temp10.then(function () {});
+              }
+            }();
+
+            return _temp3 && _temp3.then ? _temp3.then(_temp4) : _temp4(_temp3);
+          };
+
+          var _docPath = join(rootPath, path);
+
+          var _document = JSON.parse(localStorage.getItem(slug));
+
+          var _headers;
+
+          var _temp9 = _catch(function () {
+            return Promise.resolve(getHeaders(_docPath)).then(function (_getHeaders) {
+              _headers = _getHeaders;
+            });
+          }, function () {});
+
+          return _temp9 && _temp9.then ? _temp9.then(_temp8) : _temp8(_temp9);
+        }
+      }();
+
+      if (_temp7 && _temp7.then) return _temp7.then(function () {});
+    }));
+  } catch (e) {
+    return Promise.reject(e);
+  }
+});
+var fetchNavbar = function fetchNavbar(path) {
+  try {
+    return Promise.resolve(getJSON(join(path, 'navbar.docs.json'))).then(buildNavbar);
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+function findHeadings(document) {
+  var parts = document.split(/\n/g);
+  var headings = [];
+  var i = 0;
+
+  for (var _iterator = parts, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+    var _ref;
+
+    if (_isArray) {
+      if (_i >= _iterator.length) break;
+      _ref = _iterator[_i++];
+    } else {
+      _i = _iterator.next();
+      if (_i.done) break;
+      _ref = _i.value;
+    }
+
+    var part = _ref;
+
+    if (part.trim()[0] === '#') {
+      var size = 1;
+
+      while (part[size] && part[size] === '#') {
+        size++;
+      }
+
+      var text = removeMarkdown(part);
+      text = text.trim();
+      headings.push({
+        size: size,
+        text: text,
+        raw: part,
+        slug: i + "-" + slugify(text)
+      });
+      i++;
+    }
+  }
+
+  return headings;
+}
+function buildNavbar(navbarJSON) {
+  var navbar = {};
+
+  for (var _i2 = 0, _Object$keys = Object.keys(navbarJSON); _i2 < _Object$keys.length; _i2++) {
+    var title = _Object$keys[_i2];
+    var entry = navbarJSON[title];
+
+    if (typeof entry === 'object') {
+      navbar[title] = {
+        type: NavbarItemType.CATEGORY,
+        children: buildNavbar(entry)
+      };
+    } else {
+      var slug = slugify(entry);
+      navbar[title] = {
+        type: NavbarItemType.DOCUMENT,
+        slug: slug,
+        path: entry
+      };
+    }
+  }
+
+  return navbar;
+}
+function slugify(path) {
+  var a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;';
+  var b = 'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnooooooooprrsssssttuuuuuuuuuwxyyzzz------';
+  var p = new RegExp(a.split('').join('|'), 'g');
+  return path.toString().toLowerCase().replace(/.mdx/g, '').replace(/\s+/g, '-').replace(p, function (c) {
+    return b.charAt(a.indexOf(c));
+  }).replace(/&/g, '-and-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+}
+
 var dokument = function dokument(container, optionsIn) {
   if (optionsIn === void 0) {
     optionsIn = {};
@@ -1058,13 +1063,10 @@ var dokument = function dokument(container, optionsIn) {
 
 var load = function load(options) {
   try {
-    return Promise.resolve(loadNavBar(join(options.rootPath, options.navbarPath))).then(function () {
-      return Promise.resolve(loadDocuments({
-        navbar: dokumentStore.getCurrentState().navbar,
-        rootPath: options.rootPath
-      })).then(function () {
-        Object.values(dokumentStore.getCurrentState().documentMap).forEach(function (doc) {
-          addDocumentToIndex(doc);
+    return Promise.resolve(fetchNavbar(join(options.rootPath, options.navbarPath))).then(function (navbar) {
+      return Promise.resolve(setNavBar(navbar)).then(function () {
+        return Promise.resolve(fetchDocuments(options.rootPath, navbar)).then(function () {
+          setDocumentsLoaded();
         });
       });
     });

@@ -2,11 +2,11 @@ import * as React from 'react';
 
 import { htmdx } from 'htmdx';
 import { useDocContext } from '../../hooks/use_doc_context';
-import { DocumentData } from '../../utils/document_provider';
 import { Link } from 'react-router-dom';
 import innerText from 'react-innertext';
 import { LastChanged } from './last_changed';
 import { useStoreState } from 'forimmer';
+import { DocumentData } from '../../utils/document_interfaces';
 
 export interface MDXContext {
   currentDocument?: DocumentData;
