@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=PT+Serif&display=swap');
-@import url('https://fonts.googleapis.com/css?family=Cabin:400,600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&display=swap');
 
 //Basic stylings
 $br: 4px !default;
@@ -34,12 +34,12 @@ $link-color: $primary !default;
 $link-hover-color: darken($link-color, 15%) !default;
 
 //Font
-$sans-serif: 'Cabin', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+$sans-serif: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
   'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
   'Segoe UI Symbol' !default;
 $serif: 'PT Serif', Georgia, Times, 'Times New Roman', serif !default;
 $monospace: Menlo, Monaco, Consolas, 'Courier New', monospace !default;
-$font-family: $serif !default;
+$font-family: $sans-serif !default;
 
 //Typography
 $font-size-base: 16px !default;

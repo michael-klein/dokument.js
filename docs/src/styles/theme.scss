@@ -1,23 +1,18 @@
 @import '../../../src/theme/styles/theme';
 
-#docs-app {
-  .license {
-    z-index: 1;
-    position: sticky;
-    padding-left: 24px;
-    top: 55px;
-    background: #efefef;
-    box-shadow: 0px 11px 20px #efefef;
-    img {
-      height: 17px;
-      margin-right: 5px;
-    }
-  }
+body {
+  .header {
+    .branding {
+      display: flex;
 
-  .branding h1 {
-    letter-spacing: 0.1em;
-    font-family: $sans-serif;
-    display: flex;
+      .license {
+        margin-left: 5px;
+        img {
+          height: 17px;
+          margin-right: 5px;
+        }
+      }
+    }
   }
 
   main {

@@ -7,6 +7,7 @@ import innerText from 'react-innertext';
 import { LastChanged } from './last_changed';
 import { useStoreState } from 'forimmer';
 import { DocumentData } from '../../utils/document_interfaces';
+import scrollIntoView from 'scroll-into-view';
 
 export interface MDXContext {
   currentDocument?: DocumentData;
@@ -59,6 +60,7 @@ export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
   } = useDocContext();
   const { PreviousAndNext } = componentList;
   const Provider = mdxContext.Provider;
+  const { scrollContainerSelector } = useDocContext();
 
   const [documentMap, currentDocument] = useStoreState(dokumentStore, state => [
     state.documentMap,
@@ -68,13 +70,18 @@ export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
   React.useEffect(() => {
     const heading: HTMLElement = document.getElementById(props.headingSlug);
     if (heading) {
-      if (heading.parentElement.firstElementChild === heading) {
-        document
-          .querySelector('article')
-          .scrollIntoView({ behavior: 'smooth' });
-      } else {
-        heading.scrollIntoView({ behavior: 'smooth' });
-      }
+      const scrollTarget =
+        heading.parentElement.firstElementChild === heading
+          ? document.querySelector('article')
+          : heading;
+      scrollIntoView(scrollTarget, {
+        validTarget: function(target: HTMLElement) {
+          return target.matches && target.matches(scrollContainerSelector);
+        },
+        align: {
+          top: 0,
+        },
+      });
     }
   }, [props.headingSlug, currentDocument]);
 

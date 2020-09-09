@@ -12,6 +12,7 @@ export interface DocContextValue {
   title: string;
   search: (query: string) => DocSearchResult[];
   htmdxOptions: HtmdxOptions;
+  scrollContainerSelector: string;
 }
 export const docContextValue: DocContextValue = {
   dokumentStore,
@@ -20,6 +21,7 @@ export const docContextValue: DocContextValue = {
   search: search,
   title: '',
   htmdxOptions: {},
+  scrollContainerSelector: 'main',
 };
 
 export const docContext = React.createContext(docContextValue);

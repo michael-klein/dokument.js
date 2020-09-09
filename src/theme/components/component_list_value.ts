@@ -14,6 +14,8 @@ import { Branding } from './branding';
 import { LastChanged } from './last_changed';
 import { Recent } from './recent';
 
+import { Header } from './header';
+
 export const componentListValue: ComponentList = {
   DocumentRenderer,
   NavItem,
@@ -29,4 +31,5 @@ export const componentListValue: ComponentList = {
   Branding,
   LastChanged,
   Recent,
+  Header,
 };

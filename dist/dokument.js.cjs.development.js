@@ -11,6 +11,7 @@ var reactRouterDom = require('react-router-dom');
 var ky = _interopDefault(require('ky'));
 var htmdx = require('htmdx');
 var innerText = _interopDefault(require('react-innertext'));
+var scrollIntoView = _interopDefault(require('scroll-into-view'));
 var reactRouter = require('react-router');
 var removeMarkdown = _interopDefault(require('remove-markdown'));
 var Highlighter = _interopDefault(require('react-highlight-words'));
@@ -116,7 +117,8 @@ var docContextValue = {
   componentList: undefined,
   search: search,
   title: '',
-  htmdxOptions: {}
+  htmdxOptions: {},
+  scrollContainerSelector: 'main'
 };
 var docContext =
 /*#__PURE__*/
@@ -129,10 +131,11 @@ function useDocContext() {
 function Docs() {
   var _useDocContext$compon = useDocContext().componentList,
       SideBar = _useDocContext$compon.SideBar,
-      Main = _useDocContext$compon.Main;
-  return React.createElement("div", {
-    className: "docs"
-  }, React.createElement(reactRouterDom.HashRouter, null, React.createElement(SideBar, null), React.createElement(Main, null)));
+      Main = _useDocContext$compon.Main,
+      Header = _useDocContext$compon.Header;
+  return React.createElement(React.Fragment, null, React.createElement(reactRouterDom.HashRouter, null, React.createElement(Header, null), React.createElement("div", {
+    className: "main-wrapper"
+  }, React.createElement(SideBar, null), React.createElement(Main, null))));
 }
 
 var getJSON = function getJSON(filePath) {
@@ -236,6 +239,9 @@ function DocumentRenderer(props) {
   var PreviousAndNext = componentList.PreviousAndNext;
   var Provider = mdxContext.Provider;
 
+  var _useDocContext2 = useDocContext(),
+      scrollContainerSelector = _useDocContext2.scrollContainerSelector;
+
   var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
     return [state.documentMap, state.currentDocument];
   }),
@@ -246,15 +252,15 @@ function DocumentRenderer(props) {
     var heading = document.getElementById(props.headingSlug);
 
     if (heading) {
-      if (heading.parentElement.firstElementChild === heading) {
-        document.querySelector('article').scrollIntoView({
-          behavior: 'smooth'
-        });
-      } else {
-        heading.scrollIntoView({
-          behavior: 'smooth'
-        });
-      }
+      var scrollTarget = heading.parentElement.firstElementChild === heading ? document.querySelector('article') : heading;
+      scrollIntoView(scrollTarget, {
+        validTarget: function validTarget(target) {
+          return target.matches && target.matches(scrollContainerSelector);
+        },
+        align: {
+          top: 0
+        }
+      });
     }
   }, [props.headingSlug, currentDocument]);
   var previous;
@@ -307,16 +313,13 @@ function Nav() {
 
 function SideBar() {
   var _useDocContext = useDocContext(),
-      componentList = _useDocContext.componentList,
-      title = _useDocContext.title;
+      componentList = _useDocContext.componentList;
 
   var Nav = componentList.Nav,
-      Search = componentList.Search,
-      Branding = componentList.Branding,
       Recent = componentList.Recent;
   return React.createElement("aside", {
     className: "sidebar"
-  }, React.createElement(Branding, null, title), React.createElement(Search, null), React.createElement(React.Suspense, {
+  }, React.createElement(React.Suspense, {
     fallback: ""
   }, React.createElement(Nav, null)), React.createElement(React.Suspense, {
     fallback: ""
@@ -364,10 +367,15 @@ function Main() {
   }, React.createElement(RenderArticle, null))))));
 }
 
-function useClearSearchOnLinkClicked(setSearchQuery) {
+function useHandleSearchFocus(setSearchQuery) {
   React.useEffect(function () {
     var listener = function listener(event) {
       var target = event.target;
+
+      if (target === document.body) {
+        setSearchQuery('');
+        return;
+      }
 
       while (target !== document.body) {
         if (target instanceof HTMLAnchorElement) {
@@ -403,7 +411,7 @@ function Search() {
   React.useEffect(function () {
     setSearchQuery('');
   }, [location]);
-  useClearSearchOnLinkClicked(setSearchQuery);
+  useHandleSearchFocus(setSearchQuery);
 
   var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
     return [state.allDocumentsLoaded];
@@ -652,7 +660,9 @@ function Loading() {
 }
 
 function Branding(props) {
-  return React.createElement("h1", null, props.children);
+  return React.createElement("div", {
+    className: "branding"
+  }, props.children);
 }
 
 function Recent() {
@@ -708,6 +718,18 @@ function Recent() {
   })));
 }
 
+function Header() {
+  var _useDocContext = useDocContext(),
+      componentList = _useDocContext.componentList,
+      title = _useDocContext.title;
+
+  var Search = componentList.Search,
+      Branding = componentList.Branding;
+  return React.createElement("header", {
+    className: "header"
+  }, React.createElement(Branding, null, title), React.createElement(Search, null));
+}
+
 var componentListValue = {
   DocumentRenderer: DocumentRenderer,
   NavItem: NavItem,
@@ -722,7 +744,8 @@ var componentListValue = {
   Loading: Loading,
   Branding: Branding,
   LastChanged: LastChanged,
-  Recent: Recent
+  Recent: Recent,
+  Header: Header
 };
 
 // A type of promise-like that resolves synchronously and supports only one observer

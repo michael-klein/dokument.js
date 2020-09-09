@@ -1,4 +1,4 @@
-import { createContext, useContext, createElement, useEffect, isValidElement, Fragment, Suspense, useState, useRef } from 'react';
+import { createContext, useContext, createElement, Fragment, useEffect, isValidElement, Suspense, useState, useRef } from 'react';
 import { render } from 'react-dom';
 import '@babel/polyfill';
 import { createStore, useStoreState } from 'forimmer';
@@ -7,6 +7,7 @@ import { HashRouter, Link, useLocation } from 'react-router-dom';
 import ky from 'ky';
 import { htmdx } from 'htmdx';
 import innerText from 'react-innertext';
+import scrollIntoView from 'scroll-into-view';
 import { Switch, Route, useParams } from 'react-router';
 import removeMarkdown from 'remove-markdown';
 import Highlighter from 'react-highlight-words';
@@ -112,7 +113,8 @@ var docContextValue = {
   componentList: undefined,
   search: search,
   title: '',
-  htmdxOptions: {}
+  htmdxOptions: {},
+  scrollContainerSelector: 'main'
 };
 var docContext =
 /*#__PURE__*/
@@ -125,10 +127,11 @@ function useDocContext() {
 function Docs() {
   var _useDocContext$compon = useDocContext().componentList,
       SideBar = _useDocContext$compon.SideBar,
-      Main = _useDocContext$compon.Main;
-  return createElement("div", {
-    className: "docs"
-  }, createElement(HashRouter, null, createElement(SideBar, null), createElement(Main, null)));
+      Main = _useDocContext$compon.Main,
+      Header = _useDocContext$compon.Header;
+  return createElement(Fragment, null, createElement(HashRouter, null, createElement(Header, null), createElement("div", {
+    className: "main-wrapper"
+  }, createElement(SideBar, null), createElement(Main, null))));
 }
 
 var getJSON = function getJSON(filePath) {
@@ -232,6 +235,9 @@ function DocumentRenderer(props) {
   var PreviousAndNext = componentList.PreviousAndNext;
   var Provider = mdxContext.Provider;
 
+  var _useDocContext2 = useDocContext(),
+      scrollContainerSelector = _useDocContext2.scrollContainerSelector;
+
   var _useStoreState = useStoreState(dokumentStore, function (state) {
     return [state.documentMap, state.currentDocument];
   }),
@@ -242,15 +248,15 @@ function DocumentRenderer(props) {
     var heading = document.getElementById(props.headingSlug);
 
     if (heading) {
-      if (heading.parentElement.firstElementChild === heading) {
-        document.querySelector('article').scrollIntoView({
-          behavior: 'smooth'
-        });
-      } else {
-        heading.scrollIntoView({
-          behavior: 'smooth'
-        });
-      }
+      var scrollTarget = heading.parentElement.firstElementChild === heading ? document.querySelector('article') : heading;
+      scrollIntoView(scrollTarget, {
+        validTarget: function validTarget(target) {
+          return target.matches && target.matches(scrollContainerSelector);
+        },
+        align: {
+          top: 0
+        }
+      });
     }
   }, [props.headingSlug, currentDocument]);
   var previous;
@@ -303,16 +309,13 @@ function Nav() {
 
 function SideBar() {
   var _useDocContext = useDocContext(),
-      componentList = _useDocContext.componentList,
-      title = _useDocContext.title;
+      componentList = _useDocContext.componentList;
 
   var Nav = componentList.Nav,
-      Search = componentList.Search,
-      Branding = componentList.Branding,
       Recent = componentList.Recent;
   return createElement("aside", {
     className: "sidebar"
-  }, createElement(Branding, null, title), createElement(Search, null), createElement(Suspense, {
+  }, createElement(Suspense, {
     fallback: ""
   }, createElement(Nav, null)), createElement(Suspense, {
     fallback: ""
@@ -360,10 +363,15 @@ function Main() {
   }, createElement(RenderArticle, null))))));
 }
 
-function useClearSearchOnLinkClicked(setSearchQuery) {
+function useHandleSearchFocus(setSearchQuery) {
   useEffect(function () {
     var listener = function listener(event) {
       var target = event.target;
+
+      if (target === document.body) {
+        setSearchQuery('');
+        return;
+      }
 
       while (target !== document.body) {
         if (target instanceof HTMLAnchorElement) {
@@ -399,7 +407,7 @@ function Search() {
   useEffect(function () {
     setSearchQuery('');
   }, [location]);
-  useClearSearchOnLinkClicked(setSearchQuery);
+  useHandleSearchFocus(setSearchQuery);
 
   var _useStoreState = useStoreState(dokumentStore, function (state) {
     return [state.allDocumentsLoaded];
@@ -648,7 +656,9 @@ function Loading() {
 }
 
 function Branding(props) {
-  return createElement("h1", null, props.children);
+  return createElement("div", {
+    className: "branding"
+  }, props.children);
 }
 
 function Recent() {
@@ -704,6 +714,18 @@ function Recent() {
   })));
 }
 
+function Header() {
+  var _useDocContext = useDocContext(),
+      componentList = _useDocContext.componentList,
+      title = _useDocContext.title;
+
+  var Search = componentList.Search,
+      Branding = componentList.Branding;
+  return createElement("header", {
+    className: "header"
+  }, createElement(Branding, null, title), createElement(Search, null));
+}
+
 var componentListValue = {
   DocumentRenderer: DocumentRenderer,
   NavItem: NavItem,
@@ -718,7 +740,8 @@ var componentListValue = {
   Loading: Loading,
   Branding: Branding,
   LastChanged: LastChanged,
-  Recent: Recent
+  Recent: Recent,
+  Header: Header
 };
 
 // A type of promise-like that resolves synchronously and supports only one observer

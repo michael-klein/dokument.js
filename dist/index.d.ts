@@ -7,6 +7,7 @@ export interface DocsOptions {
     componentList: ComponentList;
     htmdxOptions: HtmdxOptions;
     title?: string;
+    scrollContainerSelector?: string;
 }
 export declare const defaultComponentList: ComponentList;
 export declare function dokument(container: HTMLElement, optionsIn?: Partial<Omit<DocsOptions, 'componentList'> & {

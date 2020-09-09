@@ -11,6 +11,7 @@ export interface DocContextValue {
     title: string;
     search: (query: string) => DocSearchResult[];
     htmdxOptions: HtmdxOptions;
+    scrollContainerSelector: string;
 }
 export declare const docContextValue: DocContextValue;
 export declare const docContext: React.Context<DocContextValue>;

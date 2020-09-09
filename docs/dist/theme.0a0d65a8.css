@@ -4,7 +4,7 @@
  * Add border box sizing in all browsers (opinionated).
  */
 @import url("https://fonts.googleapis.com/css?family=PT+Serif&display=swap");
-@import url("https://fonts.googleapis.com/css?family=Cabin:400,600,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&display=swap");
 *,
 ::before,
 ::after {
@@ -606,7 +606,7 @@ video {
 
 body {
   color: rgba(0, 0, 0, 0.8);
-  font-family: "PT Serif", Georgia, Times, "Times New Roman", serif;
+  font-family: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   font-size: 16px;
   line-height: 1.5;
 }
@@ -623,7 +623,7 @@ h4,
 h5,
 h6 {
   color: inherit;
-  font-family: "PT Serif", Georgia, Times, "Times New Roman", serif;
+  font-family: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   line-height: 1.2;
   font-weight: 500;
 }
@@ -771,7 +771,7 @@ textarea {
   padding: 8px 16px;
   line-height: 1.5;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 input[type=color] {
@@ -1028,100 +1028,141 @@ tfoot td {
   padding: 16px 4px;
 }
 
-body,
-html {
-  height: 100%;
-}
-
 body {
   margin: 0;
   padding: 0;
-  max-width: 100%;
+  overflow-y: hidden;
 }
 
-#docs-app {
-  height: 100%;
+.header {
   display: flex;
-  flex-direction: column;
+  flex-flow: row nowrap;
+  padding: 2em;
+  padding-top: 1em;
+  padding-bottom: 0em;
 }
-#docs-app .docs {
-  flex: auto;
+.header .branding {
+  font-size: 1.8em;
+  flex: 1;
+  white-space: nowrap;
+}
+.header .search {
+  flex: 2;
   display: flex;
-  width: 100%;
-  height: 100%;
+  justify-content: center;
+  position: relative;
+  z-index: 1000;
 }
-#docs-app .sidebar {
+.header .search input {
+  width: auto;
+  min-width: 50%;
+  text-align: center;
+  position: relative;
+  top: 0px;
+  transition: all 300ms ease;
+}
+.header .search:before {
+  z-index: -1;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: #80808061;
+  content: "";
+  opacity: 0;
+  display: none;
+  transition: all 300ms ease;
+}
+.header .search:focus-within > input {
+  top: 100px;
+  min-width: 80%;
+}
+.header .search:focus-within:before {
+  opacity: 1;
+  display: block;
+}
+.header .search .search-results {
+  position: fixed;
+  top: 250px;
+  width: 80%;
+  background: #f7f7f9;
+  padding: 1em;
+  max-height: calc(80% - 250px);
+  overflow-y: scroll;
+  border-radius: 5px;
+  border: 1px solid gray;
+}
+.header .search .search-results h1 {
+  padding-top: 0;
+  font-size: 1.3em;
+  padding-bottom: 0;
+}
+.header .search .search-results ul {
+  list-style: none;
+  padding: 0;
+}
+.header .search .search-results ul li {
   background: #efefef;
-  max-width: 300px;
-  width: 100%;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.header .search .search-results ul li pre {
+  margin: 5px 0;
+  padding: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.header .search .search-results ul label {
+  font-weight: bold;
+  font-family: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+.header:after {
+  display: block;
+  content: "";
+  flex: 1;
+}
+
+.main-wrapper {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  height: 100vh;
+}
+.main-wrapper .sidebar {
   overflow-y: auto;
-  height: 100%;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
   margin: 0;
   padding-bottom: 100px;
+  display: flex;
+  flex: 0 0 300px;
+  flex-flow: column nowrap;
 }
-#docs-app .sidebar .recent {
-  font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+.main-wrapper .sidebar .recent {
+  font-family: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   padding-bottom: 20px;
   position: absolute;
   bottom: 0px;
   left: 0px;
-  background: #efefef;
-  box-shadow: 0px 11px 20px #efefef;
 }
-#docs-app .sidebar .recent > div {
+.main-wrapper .sidebar .recent > div {
   padding: 20px;
   padding-left: 40px;
   padding-bottom: 0px;
 }
-#docs-app .sidebar .recent li .recent-time {
+.main-wrapper .sidebar .recent li .recent-time {
   display: block;
   font-size: 10px;
   color: gray;
   position: absolute;
   margin-top: 1px;
 }
-#docs-app .sidebar .recent li a {
+.main-wrapper .sidebar .recent li a {
   margin-top: 10px;
   display: inline-block;
 }
-#docs-app .sidebar .search-results {
-  position: fixed;
-  left: 300px;
-  bottom: 0px;
-  top: 6px;
-  background: white;
-  right: 0px;
-  overflow: auto;
-  padding: 20px;
-  padding-top: 49px;
-}
-#docs-app .sidebar .search-results h1 {
-  padding-top: 0;
-  font-size: 1.3em;
-  padding-bottom: 0;
-}
-#docs-app .sidebar .search-results ul {
-  list-style: none;
-  padding: 0;
-}
-#docs-app .sidebar .search-results ul li {
-  background: #efefef;
-  border-radius: 4px;
-  padding: 20px;
-  margin-bottom: 20px;
-}
-#docs-app .sidebar .search-results ul li pre {
-  margin: 5px 0;
-  padding: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
-#docs-app .sidebar .search-results ul label {
-  font-weight: bold;
-  font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-}
-#docs-app .sidebar h1 {
+.main-wrapper .sidebar h1 {
   color: white;
   padding: 20px;
   margin-top: 0;
@@ -1134,22 +1175,22 @@ body {
   padding-bottom: 10px;
   font-size: 1.4em;
 }
-#docs-app .sidebar nav {
+.main-wrapper .sidebar nav {
   line-height: 1.7em;
   padding: 20px;
   padding-top: 0px;
   font-size: 0.97em;
-  font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
-#docs-app .sidebar nav ul {
+.main-wrapper .sidebar nav ul {
   padding-inline-start: 15px;
   list-style: none;
   position: relative;
 }
-#docs-app .sidebar nav ul li {
+.main-wrapper .sidebar nav ul li {
   position: relative;
 }
-#docs-app .sidebar nav ul li .arrow {
+.main-wrapper .sidebar nav ul li .arrow {
   position: absolute;
   right: 0px;
   transform: rotate(-90deg);
@@ -1157,18 +1198,18 @@ body {
   font-weight: bold;
   color: #2580b3;
 }
-#docs-app .sidebar nav > ul {
+.main-wrapper .sidebar nav > ul {
   padding-inline-start: 0px;
   padding-left: 15px;
   padding-right: 15px;
 }
-#docs-app .sidebar nav > ul > li {
+.main-wrapper .sidebar nav > ul > li {
   margin-bottom: 20px;
 }
-#docs-app .sidebar nav > ul > li > a, #docs-app .sidebar nav > ul > li > .nav-category {
+.main-wrapper .sidebar nav > ul > li > a, .main-wrapper .sidebar nav > ul > li > .nav-category {
   font-size: 1.15em;
 }
-#docs-app .sidebar .search {
+.main-wrapper .sidebar .search {
   position: sticky;
   top: 0px;
   background: #efefef;
@@ -1176,7 +1217,7 @@ body {
   padding-top: 10px;
   padding-bottom: 10px;
 }
-#docs-app .sidebar .search input {
+.main-wrapper .sidebar .search input {
   background: white;
   border-radius: 25px;
   margin: 0px;
@@ -1186,93 +1227,86 @@ body {
   width: 100%;
   box-shadow: 0px 11px 20px #efefef;
 }
-#docs-app main {
+.main-wrapper main {
   padding: 20px;
   padding-top: 0px;
   display: flex;
   justify-content: center;
   flex: auto;
   background: white;
+  min-height: 100%;
   overflow-y: auto;
-  height: 100%;
   max-width: initial;
   margin: 0;
   padding-bottom: 100px;
 }
-#docs-app main .last-changed {
-  font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+.main-wrapper main .last-changed {
+  font-family: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   color: #2580b3;
   font-size: 0.8em;
   font-weight: bold;
   text-align: right;
 }
-#docs-app main article {
+.main-wrapper main article {
   max-width: 700px;
   width: 100%;
 }
-#docs-app main article > *:first-child {
+.main-wrapper main article > *:first-child {
   padding-top: 34px;
 }
-#docs-app main article > *:last-child {
+.main-wrapper main article > *:last-child {
   margin-bottom: 100px;
 }
-#docs-app main .previous-next {
+.main-wrapper main .previous-next {
   display: flex;
 }
-#docs-app main .previous-next:not(:first-child) {
+.main-wrapper main .previous-next:not(:first-child) {
   margin-top: 40px;
 }
-#docs-app main .previous-next .previous,
-#docs-app main .previous-next .next {
+.main-wrapper main .previous-next .previous,
+.main-wrapper main .previous-next .next {
   flex: auto;
-  font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Work Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   font-size: 16px;
   font-weight: 600;
 }
-#docs-app main .previous-next .previous span,
-#docs-app main .previous-next .next span {
+.main-wrapper main .previous-next .previous span,
+.main-wrapper main .previous-next .next span {
   background: #efefef;
   padding: 10px;
   padding-top: 5px;
   padding-bottom: 5px;
   border-radius: 4px;
 }
-#docs-app main .previous-next .previous span {
+.main-wrapper main .previous-next .previous span {
   margin-left: -10px;
 }
-#docs-app main .previous-next .previous span:before {
+.main-wrapper main .previous-next .previous span:before {
   content: "<< ";
   color: #2580b3;
 }
-#docs-app main .previous-next .next {
+.main-wrapper main .previous-next .next {
   text-align: right;
 }
-#docs-app main .previous-next .next span {
+.main-wrapper main .previous-next .next span {
   margin-right: -10px;
 }
-#docs-app main .previous-next .next span:after {
+.main-wrapper main .previous-next .next span:after {
   content: " >>";
   color: #2580b3;
 }
 
-#docs-app .license {
-  z-index: 1;
-  position: sticky;
-  padding-left: 24px;
-  top: 55px;
-  background: #efefef;
-  box-shadow: 0px 11px 20px #efefef;
+body .header .branding {
+  display: flex;
 }
-#docs-app .license img {
+body .header .branding .license {
+  margin-left: 5px;
+}
+body .header .branding .license img {
   height: 17px;
   margin-right: 5px;
 }
-#docs-app .branding h1 {
-  letter-spacing: 0.1em;
-  font-family: "Cabin", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  display: flex;
-}
-#docs-app main .prism-code {
+body main .prism-code {
   background: #193a4e !important;
   padding-bottom: 0 !important;
 }

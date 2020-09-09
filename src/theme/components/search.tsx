@@ -3,10 +3,14 @@ import { useLocation } from 'react-router-dom';
 import { useDocContext } from '../../hooks/use_doc_context';
 import { useStoreState } from 'forimmer';
 
-function useClearSearchOnLinkClicked(setSearchQuery: (query: string) => void) {
+function useHandleSearchFocus(setSearchQuery: (query: string) => void) {
   React.useEffect(() => {
     const listener: (event: MouseEvent) => void = event => {
       let target: HTMLElement = event.target as HTMLElement;
+      if (target === document.body) {
+        setSearchQuery('');
+        return;
+      }
       while (target !== document.body) {
         if (target instanceof HTMLAnchorElement) {
           if (
@@ -37,7 +41,7 @@ export function Search(): JSX.Element {
   React.useEffect(() => {
     setSearchQuery('');
   }, [location]);
-  useClearSearchOnLinkClicked(setSearchQuery);
+  useHandleSearchFocus(setSearchQuery);
   const [allDocumentsLoaded] = useStoreState(dokumentStore, state => [
     state.allDocumentsLoaded,
   ]);

@@ -16,6 +16,7 @@ export interface DocsOptions {
   componentList: ComponentList;
   htmdxOptions: HtmdxOptions;
   title?: string;
+  scrollContainerSelector?: string;
 }
 
 async function load(options: DocsOptions) {

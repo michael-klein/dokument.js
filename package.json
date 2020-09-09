@@ -52,6 +52,7 @@
     "react-innertext": "^1.1.5",
     "react-router-dom": "^5.2.0",
     "remove-markdown": "^0.3.0",
+    "scroll-into-view": "^1.15.0",
     "store": "^2.0.12"
   }
 }
