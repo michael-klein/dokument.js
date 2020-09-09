@@ -1,32 +1,52 @@
-import elasticlunr from 'elasticlunr';
-import { DocumentData } from '../utils/document_interfaces';
+import Fuse from 'fuse.js';
+import { DocumentMap } from '../utils/document_interfaces';
+import { dokumentStore } from '../store/docStore';
 
-const index: any = elasticlunr(function(this: any): void {
-  this.addField('title');
-  this.addField('content');
-  this.setRef('id');
-  this.saveDocument(true);
+interface Result {
+  slug: string;
+  content: string;
+}
+const fuse = new Fuse<Result>([], {
+  includeScore: true,
+  keys: ['content'],
+  minMatchCharLength: 3,
+  ignoreLocation: true,
 });
 
-export function addDocumentToIndex(doc: DocumentData): void {
-  index.addDoc({
-    id: doc.slug,
-    title: doc.title,
-    content: doc.content,
-  });
-}
-
+let docMap: DocumentMap;
+dokumentStore.subscribe(model => {
+  if (model.documentMap !== docMap) {
+    docMap = model.documentMap;
+    fuse.setCollection(
+      Object.keys(docMap).flatMap(key => {
+        const doc = docMap[key];
+        console.log(doc);
+        return doc.content.split(`\n`).map(content => {
+          return {
+            content,
+            slug: doc.slug,
+          };
+        });
+      })
+    );
+  }
+});
 export interface DocSearchResult {
   slug: string;
   score: number;
 }
+
 export function search(query: string): DocSearchResult[] {
-  return index
-    .search(query, { title: { boost: 2 }, content: { boost: 1 } })
-    .map((result: any) => {
-      return {
-        slug: result.ref,
-        score: result.score,
-      };
-    });
+  let results: { [key: string]: DocSearchResult } = {};
+  return fuse.search(query).reduce((memo, result) => {
+    let r =
+      results[result.item.slug] ||
+      ({ score: 0, slug: result.item.slug } as DocSearchResult);
+    results[result.item.slug] = r;
+    r.score += result.score;
+    if (!memo.includes(r) && result.score < 0.6) {
+      memo.push(r);
+    }
+    return memo;
+  }, []);
 }

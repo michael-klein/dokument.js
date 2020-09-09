@@ -29,27 +29,27 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.18",
-    "@types/react": "^16.9.5",
-    "@types/react-dom": "^16.9.1",
-    "acorn": "^6.3.0",
-    "husky": "^3.0.9",
-    "react": "^16.10.2",
-    "react-dom": "^16.10.2",
+    "@types/jest": "^24.9.1",
+    "@types/react": "^16.9.49",
+    "@types/react-dom": "^16.9.8",
+    "acorn": "^6.4.1",
+    "husky": "^3.1.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "tsdx": "^0.9.3",
-    "tslib": "^1.10.0",
-    "typescript": "^3.7.4"
+    "tslib": "^1.13.0",
+    "typescript": "^3.9.7"
   },
   "dependencies": {
-    "@types/react-router": "^5.1.2",
-    "@types/react-router-dom": "^5.1.0",
-    "elasticlunr": "^0.9.5",
+    "@types/react-router": "^5.1.8",
+    "@types/react-router-dom": "^5.1.5",
     "forimmer": "^0.1.0",
+    "fuse.js": "^6.4.1",
     "htmdx": "^0.3.0",
     "ky": "^0.15.0",
     "react-highlight-words": "^0.16.0",
     "react-innertext": "^1.1.5",
-    "react-router-dom": "^5.1.2",
+    "react-router-dom": "^5.2.0",
     "remove-markdown": "^0.3.0",
     "store": "^2.0.12"
   }

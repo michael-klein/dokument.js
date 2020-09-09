@@ -1,8 +1,8 @@
-import { createContext, useContext, createElement, useEffect, isValidElement, Fragment, Suspense, useState } from 'react';
+import { createContext, useContext, createElement, useEffect, isValidElement, Fragment, Suspense, useState, useRef } from 'react';
 import { render } from 'react-dom';
 import '@babel/polyfill';
 import { createStore, useStoreState } from 'forimmer';
-import elasticlunr from 'elasticlunr';
+import Fuse from 'fuse.js';
 import { HashRouter, Link, useLocation } from 'react-router-dom';
 import ky from 'ky';
 import { htmdx } from 'htmdx';
@@ -64,35 +64,46 @@ dokumentStore.createStoreAction(function () {
   });
 });
 
-var index =
+var fuse =
 /*#__PURE__*/
-elasticlunr(function () {
-  this.addField('title');
-  this.addField('content');
-  this.setRef('id');
-  this.saveDocument(true);
+new Fuse([], {
+  includeScore: true,
+  keys: ['content'],
+  minMatchCharLength: 3,
+  ignoreLocation: true
 });
-function addDocumentToIndex(doc) {
-  index.addDoc({
-    id: doc.slug,
-    title: doc.title,
-    content: doc.content
-  });
-}
+var docMap;
+dokumentStore.subscribe(function (model) {
+  if (model.documentMap !== docMap) {
+    docMap = model.documentMap;
+    fuse.setCollection(Object.keys(docMap).flatMap(function (key) {
+      var doc = docMap[key];
+      console.log(doc);
+      return doc.content.split("\n").map(function (content) {
+        return {
+          content: content,
+          slug: doc.slug
+        };
+      });
+    }));
+  }
+});
 function search(query) {
-  return index.search(query, {
-    title: {
-      boost: 2
-    },
-    content: {
-      boost: 1
-    }
-  }).map(function (result) {
-    return {
-      slug: result.ref,
-      score: result.score
+  var results = {};
+  return fuse.search(query).reduce(function (memo, result) {
+    var r = results[result.item.slug] || {
+      score: 0,
+      slug: result.item.slug
     };
-  });
+    results[result.item.slug] = r;
+    r.score += result.score;
+
+    if (!memo.includes(r) && result.score < 0.6) {
+      memo.push(r);
+    }
+
+    return memo;
+  }, []);
 }
 
 var docContextValue = {
@@ -538,24 +549,44 @@ function NavLevel(props) {
   }));
 }
 
+var useSearch = function useSearch(query) {
+  var _React$useState = useState([]),
+      result = _React$useState[0],
+      setResult = _React$useState[1];
+
+  var timeOutId = useRef(0);
+
+  var _useDocContext = useDocContext(),
+      search = _useDocContext.search;
+
+  useEffect(function () {
+    clearTimeout(timeOutId.current);
+    timeOutId.current = setTimeout(function () {
+      var result = search(query);
+      setResult(result);
+    }, 500);
+  }, [query]);
+  return result;
+};
+
 function SearchResults(props) {
   var searchQuery = props.searchQuery;
 
-  var _useDocContext = useDocContext(),
-      search = _useDocContext.search,
-      componentList = _useDocContext.componentList;
+  var _useDocContext2 = useDocContext(),
+      componentList = _useDocContext2.componentList;
 
   var SearchResultsItem = componentList.SearchResultsItem;
 
-  var _useDocContext2 = useDocContext(),
-      dokumentStore = _useDocContext2.dokumentStore;
+  var _useDocContext3 = useDocContext(),
+      dokumentStore = _useDocContext3.dokumentStore;
 
   var _useStoreState = useStoreState(dokumentStore, function (state) {
     return [state.documentMap];
   }),
       documentMap = _useStoreState[0];
 
-  var result = search(searchQuery);
+  var result = useSearch(searchQuery);
+  console.log(result);
   return createElement("div", {
     className: 'search-results'
   }, createElement("h1", null, "Listing ", result.length, " document", result.length !== 1 ? 's' : '', " with search results for ", searchQuery, ":"), createElement("ul", null, result.map(function (r) {
@@ -899,7 +930,6 @@ function (_fetchDocuments) {
                     headings: findHeadings(content),
                     lastModified: lastModifiedTimestamp
                   };
-                  addDocumentToIndex(document);
                   localStorage.setItem(document.slug, JSON.stringify(document));
                   return Promise.resolve(addDocument(document)).then(function () {});
                 });
@@ -920,7 +950,6 @@ function (_fetchDocuments) {
               if (_document) {
                 var _temp10 = function () {
                   if (_document.lastModified === lastModifiedTimestamp) {
-                    addDocumentToIndex(_document);
                     return Promise.resolve(addDocument(_document)).then(function () {});
                   }
                 }();

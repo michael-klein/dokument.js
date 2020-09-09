@@ -1,7 +1,6 @@
 import { getFile, getJSON, join, getHeaders } from './file_utils';
 import removeMarkdown from 'remove-markdown';
 import { addDocument } from '../store/docStore';
-import { addDocumentToIndex } from '../search/search_index';
 import {
   DocumentHeading,
   Navbar,
@@ -105,7 +104,6 @@ export async function fetchDocuments(
       }
       if (document) {
         if (document.lastModified === lastModifiedTimestamp) {
-          addDocumentToIndex(document);
           await addDocument(document);
           continue;
         }
@@ -120,7 +118,6 @@ export async function fetchDocuments(
           headings: findHeadings(content),
           lastModified: lastModifiedTimestamp,
         };
-        addDocumentToIndex(document);
         localStorage.setItem(document.slug, JSON.stringify(document));
         await addDocument(document);
       } catch (e) {}
