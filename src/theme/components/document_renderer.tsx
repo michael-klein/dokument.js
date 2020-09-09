@@ -17,7 +17,7 @@ const components: { [key: string]: React.FunctionComponent } = {
   Demo: () => <h1>This is a demo component</h1>,
 };
 ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].forEach(h => {
-  components[h] = (props: any) => {
+  const Component = (props: any): JSX.Element => {
     const { currentDocument } = React.useContext(mdxContext);
     let check = props.children;
     if (check instanceof Array) {
@@ -43,6 +43,7 @@ const components: { [key: string]: React.FunctionComponent } = {
       ],
     });
   };
+  components[h] = Component;
 });
 
 export interface DocumentRendererProps {

@@ -193,7 +193,7 @@ var components = {
   }
 };
 ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].forEach(function (h) {
-  components[h] = function (props) {
+  var Component = function Component(props) {
     var _React$useContext = useContext(mdxContext),
         currentDocument = _React$useContext.currentDocument;
 
@@ -217,6 +217,8 @@ var components = {
       }, heading.text) : props.children)]
     });
   };
+
+  components[h] = Component;
 });
 function DocumentRenderer(props) {
   var _useDocContext = useDocContext(),
