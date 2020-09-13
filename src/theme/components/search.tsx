@@ -3,12 +3,25 @@ import { useLocation } from 'react-router-dom';
 import { useDocContext } from '../../hooks/use_doc_context';
 import { useStoreState } from 'forimmer';
 
-function useHandleSearchFocus(setSearchQuery: (query: string) => void) {
+function useHandleSearchFocus(
+  searchQuery: string,
+  setSearchQuery: (query: string) => void,
+  inputRef: React.MutableRefObject<HTMLInputElement>
+) {
+  const location = useLocation();
+  React.useEffect(() => {
+    setSearchQuery(null);
+  }, [location]);
+  React.useLayoutEffect(() => {
+    if (searchQuery === null) {
+      inputRef.current.blur();
+    }
+  }, [searchQuery]);
   React.useEffect(() => {
     const listener: (event: MouseEvent) => void = event => {
       let target: HTMLElement = event.target as HTMLElement;
       if (target === document.body) {
-        setSearchQuery('');
+        setSearchQuery(null);
         return;
       }
       while (target !== document.body) {
@@ -19,7 +32,7 @@ function useHandleSearchFocus(setSearchQuery: (query: string) => void) {
               ''
             )[0] === '#'
           ) {
-            setSearchQuery('');
+            setSearchQuery(null);
             return;
           }
         }
@@ -31,26 +44,49 @@ function useHandleSearchFocus(setSearchQuery: (query: string) => void) {
       document.body.removeEventListener('click', listener);
     };
   }, []);
+
+  React.useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSearchQuery(null);
+      }
+    };
+    inputRef.current.addEventListener('keyup', listener);
+    return () => {
+      inputRef.current.removeEventListener('keyup', listener);
+    };
+  }, [inputRef.current]);
+
+  React.useEffect(() => {
+    const listener = () => {
+      setSearchQuery('');
+    };
+    inputRef.current.addEventListener('focus', listener);
+    return () => {
+      inputRef.current.removeEventListener('focus', listener);
+    };
+  }, [inputRef.current]);
 }
 
 export function Search(): JSX.Element {
   const { componentList, dokumentStore } = useDocContext();
   const { SearchResults } = componentList;
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const location = useLocation();
-  React.useEffect(() => {
-    setSearchQuery('');
-  }, [location]);
-  useHandleSearchFocus(setSearchQuery);
+  const [searchQuery, setSearchQuery] = React.useState<string>(null);
+  const inputRef = React.useRef<HTMLInputElement>();
+
+  useHandleSearchFocus(searchQuery, setSearchQuery, inputRef);
+
   const [allDocumentsLoaded] = useStoreState(dokumentStore, state => [
     state.allDocumentsLoaded,
   ]);
+
   return (
     <div className="search">
-      {searchQuery.length > 0 && (
+      {searchQuery && searchQuery.length > 0 && (
         <SearchResults searchQuery={searchQuery}></SearchResults>
       )}
       <input
+        ref={inputRef}
         type="text"
         value={searchQuery}
         placeholder={
@@ -60,11 +96,6 @@ export function Search(): JSX.Element {
           setSearchQuery(e.currentTarget.value)
         }
         disabled={!allDocumentsLoaded}
-        onKeyUp={e => {
-          if (e.key === 'Escape') {
-            setSearchQuery('');
-          }
-        }}
       ></input>
     </div>
   );
