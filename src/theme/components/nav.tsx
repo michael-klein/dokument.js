@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Menu } from 'antd';
 import { useDocContext } from '../../hooks/use_doc_context';
 import { useStoreState } from 'forimmer';
 
@@ -8,8 +9,8 @@ export function Nav(): JSX.Element {
 
   const { NavLevel } = useDocContext().componentList;
   return (
-    <nav>
-      <NavLevel {...{ navbar }}></NavLevel>
-    </nav>
+    <Menu defaultOpenKeys={['sub1']} mode="inline">
+      <NavLevel navbar={navbar}></NavLevel>
+    </Menu>
   );
 }

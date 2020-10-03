@@ -1,3 +1,4 @@
+/// <reference types="react" />
 import { Navbar } from '../../utils/document_interfaces';
 export interface NavLevelProps {
     navbar: Navbar;

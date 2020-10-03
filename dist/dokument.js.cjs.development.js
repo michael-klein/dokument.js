@@ -5,11 +5,13 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var React = require('react');
 var ReactDOM = require('react-dom');
 require('@babel/polyfill');
+var antd = require('antd');
+var icons = require('@ant-design/icons');
 var forimmer = require('forimmer');
 var Fuse = _interopDefault(require('fuse.js'));
-var reactRouterDom = require('react-router-dom');
 var ky = _interopDefault(require('ky'));
 var htmdx = require('htmdx');
+var reactRouterDom = require('react-router-dom');
 var innerText = _interopDefault(require('react-innertext'));
 var scrollIntoView = _interopDefault(require('scroll-into-view'));
 var reactRouter = require('react-router');
@@ -33,6 +35,57 @@ function _extends() {
 
   return _extends.apply(this, arguments);
 }
+
+var Header = antd.Layout.Header,
+    Sider = antd.Layout.Sider,
+    Content = antd.Layout.Content;
+var Docs = function Docs() {
+  var _React$useState = React.useState(false),
+      collapsed = _React$useState[0],
+      setCollapsed = _React$useState[1];
+
+  return React.createElement(React.Fragment, null, React.createElement(antd.Layout, null, React.createElement(Sider, {
+    trigger: null,
+    collapsible: true,
+    collapsed: collapsed
+  }, React.createElement("div", {
+    className: "logo"
+  }, "Docs"), React.createElement(antd.Menu, {
+    theme: "dark",
+    mode: "inline",
+    defaultSelectedKeys: ['1']
+  }, React.createElement(antd.Menu.Item, {
+    key: "1",
+    icon: React.createElement(icons.UserOutlined, null)
+  }, "nav 1"), React.createElement(antd.Menu.Item, {
+    key: "2",
+    icon: React.createElement(icons.VideoCameraOutlined, null)
+  }, "nav 2"), React.createElement(antd.Menu.Item, {
+    key: "3",
+    icon: React.createElement(icons.UploadOutlined, null)
+  }, "nav 3"))), React.createElement(antd.Layout, {
+    className: "site-layout"
+  }, React.createElement(Header, {
+    className: "site-layout-background",
+    style: {
+      padding: 0
+    }
+  }, React.createElement(collapsed ? icons.MenuUnfoldOutlined : icons.MenuFoldOutlined, {
+    className: 'trigger',
+    onClick: function onClick() {
+      return setCollapsed(function (c) {
+        return !c;
+      });
+    }
+  })), React.createElement(Content, {
+    className: "site-layout-background",
+    style: {
+      margin: '24px 16px',
+      padding: 24,
+      minHeight: 280
+    }
+  }, "Content"))));
+};
 
 var dokumentStore =
 /*#__PURE__*/
@@ -124,20 +177,6 @@ var docContext =
 /*#__PURE__*/
 React.createContext(docContextValue);
 
-function useDocContext() {
-  return React.useContext(docContext);
-}
-
-function Docs() {
-  var _useDocContext$compon = useDocContext().componentList,
-      SideBar = _useDocContext$compon.SideBar,
-      Main = _useDocContext$compon.Main,
-      Header = _useDocContext$compon.Header;
-  return React.createElement(React.Fragment, null, React.createElement(reactRouterDom.HashRouter, null, React.createElement(Header, null), React.createElement("div", {
-    className: "main-wrapper"
-  }, React.createElement(SideBar, null), React.createElement(Main, null))));
-}
-
 var getJSON = function getJSON(filePath) {
   try {
     return Promise.resolve(ky.get(filePath).json());
@@ -182,6 +221,10 @@ function join() {
 
   if (parts[0] === '') newParts.unshift('');
   return newParts.join('/') || (newParts.length ? '/' : '.');
+}
+
+function useDocContext() {
+  return React.useContext(docContext);
 }
 
 function LastChanged(props) {
@@ -306,24 +349,23 @@ function Nav() {
       navbar = _useStoreState[0];
 
   var NavLevel = useDocContext().componentList.NavLevel;
-  return React.createElement("nav", null, React.createElement(NavLevel, Object.assign({}, {
+  return React.createElement(antd.Menu, {
+    defaultOpenKeys: ['sub1'],
+    mode: "inline"
+  }, React.createElement(NavLevel, {
     navbar: navbar
-  })));
+  }));
 }
 
+var Sider$1 = antd.Layout.Sider;
 function SideBar() {
   var _useDocContext = useDocContext(),
       componentList = _useDocContext.componentList;
 
-  var Nav = componentList.Nav,
-      Recent = componentList.Recent;
-  return React.createElement("aside", {
-    className: "sidebar"
-  }, React.createElement(React.Suspense, {
+  var Nav = componentList.Nav;
+  return React.createElement(React.Suspense, {
     fallback: ""
-  }, React.createElement(Nav, null)), React.createElement(React.Suspense, {
-    fallback: ""
-  }, React.createElement(Recent, null)));
+  }, React.createElement(Sider$1, null, React.createElement(Nav, null)));
 }
 
 function RenderArticle() {
@@ -367,20 +409,29 @@ function Main() {
   }, React.createElement(RenderArticle, null))))));
 }
 
-function useHandleSearchFocus(setSearchQuery) {
+function useHandleSearchFocus(searchQuery, setSearchQuery, inputRef) {
+  var location = reactRouterDom.useLocation();
+  React.useEffect(function () {
+    setSearchQuery(null);
+  }, [location]);
+  React.useLayoutEffect(function () {
+    if (searchQuery === null) {
+      inputRef.current.blur();
+    }
+  }, [searchQuery]);
   React.useEffect(function () {
     var listener = function listener(event) {
       var target = event.target;
 
       if (target === document.body) {
-        setSearchQuery('');
+        setSearchQuery(null);
         return;
       }
 
       while (target !== document.body) {
         if (target instanceof HTMLAnchorElement) {
           if (target.href.replace(window.location.href.replace(window.location.hash, ''), '')[0] === '#') {
-            setSearchQuery('');
+            setSearchQuery(null);
             return;
           }
         }
@@ -394,6 +445,28 @@ function useHandleSearchFocus(setSearchQuery) {
       document.body.removeEventListener('click', listener);
     };
   }, []);
+  React.useEffect(function () {
+    var listener = function listener(e) {
+      if (e.key === 'Escape') {
+        setSearchQuery(null);
+      }
+    };
+
+    inputRef.current.addEventListener('keyup', listener);
+    return function () {
+      inputRef.current.removeEventListener('keyup', listener);
+    };
+  }, [inputRef.current]);
+  React.useEffect(function () {
+    var listener = function listener() {
+      setSearchQuery('');
+    };
+
+    inputRef.current.addEventListener('focus', listener);
+    return function () {
+      inputRef.current.removeEventListener('focus', listener);
+    };
+  }, [inputRef.current]);
 }
 
 function Search() {
@@ -403,15 +476,12 @@ function Search() {
 
   var SearchResults = componentList.SearchResults;
 
-  var _React$useState = React.useState(''),
+  var _React$useState = React.useState(null),
       searchQuery = _React$useState[0],
       setSearchQuery = _React$useState[1];
 
-  var location = reactRouterDom.useLocation();
-  React.useEffect(function () {
-    setSearchQuery('');
-  }, [location]);
-  useHandleSearchFocus(setSearchQuery);
+  var inputRef = React.useRef();
+  useHandleSearchFocus(searchQuery, setSearchQuery, inputRef);
 
   var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
     return [state.allDocumentsLoaded];
@@ -420,21 +490,17 @@ function Search() {
 
   return React.createElement("div", {
     className: "search"
-  }, searchQuery.length > 0 && React.createElement(SearchResults, {
+  }, searchQuery && searchQuery.length > 0 && React.createElement(SearchResults, {
     searchQuery: searchQuery
   }), React.createElement("input", {
+    ref: inputRef,
     type: "text",
     value: searchQuery,
     placeholder: allDocumentsLoaded ? 'Search documents' : 'Preparing search...',
     onChange: function onChange(e) {
       return setSearchQuery(e.currentTarget.value);
     },
-    disabled: !allDocumentsLoaded,
-    onKeyUp: function onKeyUp(e) {
-      if (e.key === 'Escape') {
-        setSearchQuery('');
-      }
-    }
+    disabled: !allDocumentsLoaded
   }));
 }
 
@@ -465,33 +531,6 @@ function PreviousAndNext(props) {
   }, next.title))));
 }
 
-function NavItem(props) {
-  var _useDocContext = useDocContext(),
-      dokumentStore = _useDocContext.dokumentStore;
-
-  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
-    return [state.documentMap];
-  }),
-      documentMap = _useStoreState[0];
-
-  var document = documentMap[props.slug];
-  var topHeading = document && document.headings[0] && document.headings[0].size === 1 ? document.headings[0] : undefined;
-  return React.createElement("li", {
-    className: "nav-item link"
-  }, React.createElement(reactRouterDom.Link, {
-    to: "" + props.path + (topHeading ? "/" + topHeading.slug : "")
-  }, topHeading ? topHeading.text : props.children), document && React.createElement("ul", {
-    className: "nav"
-  }, document.headings.filter(function (heading, index) {
-    return heading.size < 4 && (index > 0 || heading.size > 1);
-  }).map(function (heading) {
-    return React.createElement(NavItem, {
-      key: heading.raw,
-      path: props.path + "/" + heading.slug
-    }, heading.text);
-  })));
-}
-
 var NavbarItemType;
 
 (function (NavbarItemType) {
@@ -499,6 +538,44 @@ var NavbarItemType;
   NavbarItemType[NavbarItemType["DOCUMENT"] = 1] = "DOCUMENT";
 })(NavbarItemType || (NavbarItemType = {}));
 
+function NavItem(props) {
+  var _useDocContext = useDocContext(),
+      dokumentStore = _useDocContext.dokumentStore,
+      componentList = _useDocContext.componentList;
+
+  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
+    return [state.documentMap];
+  }),
+      documentMap = _useStoreState[0];
+
+  var NavLevel = componentList.NavLevel;
+  var document = documentMap[props.slug];
+  var topHeading = document && document.headings[0] && document.headings[0].size === 1 ? document.headings[0] : undefined;
+  var path = "" + props.path + (topHeading ? "/" + topHeading.slug : "");
+  var linkRef = React.useRef(undefined);
+  var subNav = document && document.headings.filter(function (heading, index) {
+    return heading.size < 4 && (index > 0 || heading.size > 1);
+  }).reduce(function (memo, heading) {
+    memo[heading.text] = {
+      type: NavbarItemType.DOCUMENT,
+      slug: (props.path + "/" + heading.slug).replace('document/', '')
+    };
+    return memo;
+  }, {});
+  return React.createElement(React.Fragment, null, React.createElement(antd.Menu.Item, {
+    key: path,
+    onClick: function onClick() {
+      return linkRef.current.click();
+    }
+  }, React.createElement(reactRouterDom.Link, {
+    to: "" + props.path + (topHeading ? "/" + topHeading.slug : ""),
+    ref: linkRef
+  }, topHeading ? topHeading.text : props.children)), subNav && React.createElement(NavLevel, {
+    navbar: subNav
+  }));
+}
+
+var SubMenu = antd.Menu.SubMenu;
 function NavLevel(props) {
   var navbar = props.navbar;
 
@@ -517,11 +594,9 @@ function NavLevel(props) {
       NavLevel = componentList.NavLevel;
   var titles = Object.keys(navbar);
   var docArray = Object.values(docMap);
-  var prevDocument = docArray[0];
-  var getTo = useGetTo();
-  return React.createElement("ul", {
-    className: "nav"
-  }, titles.map(function (title) {
+  var prevDocument = docArray[0]; //const getTo = useGetTo();
+
+  return React.createElement(SubMenu, null, titles.map(function (title) {
     var _navbar$title = navbar[title],
         type = _navbar$title.type,
         children = _navbar$title.children,
@@ -531,26 +606,15 @@ function NavLevel(props) {
       var next = docArray[docArray.indexOf(prevDocument) + 1];
 
       if (next && next.slug) {
-        var _getTo = getTo(next),
-            to = _getTo[0];
-
-        return React.createElement("li", {
-          className: "nav-item sub-nav",
-          key: slug
-        }, React.createElement(reactRouterDom.Link, {
-          to: to
-        }, title), React.createElement(NavLevel, Object.assign({}, {
+        //const [to] = getTo(next);
+        //<Link to={to}>{title}</Link>
+        return React.createElement(NavLevel, Object.assign({}, {
           navbar: children
-        })));
+        }));
       } else {
-        return React.createElement("li", {
-          className: "nav-item sub-nav",
-          key: slug
-        }, React.createElement("div", {
-          className: "nav-category"
-        }, title), React.createElement(NavLevel, Object.assign({}, {
+        return React.createElement(NavLevel, Object.assign({}, {
           navbar: children
-        })));
+        }));
       }
     } else {
       prevDocument = docMap[slug];
@@ -718,7 +782,7 @@ function Recent() {
   })));
 }
 
-function Header() {
+function Header$1() {
   var _useDocContext = useDocContext(),
       componentList = _useDocContext.componentList,
       title = _useDocContext.title;
@@ -745,7 +809,7 @@ var componentListValue = {
   Branding: Branding,
   LastChanged: LastChanged,
   Recent: Recent,
-  Header: Header
+  Header: Header$1
 };
 
 // A type of promise-like that resolves synchronously and supports only one observer

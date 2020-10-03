@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import '@babel/polyfill';
-import { Docs } from './theme/components/docs';
+import { Docs } from './theme/components/new/docs';
 import { setNavBar, setDocumentsLoaded } from './store/docStore';
 import { docContext, docContextValue } from './doc_context';
 import { join } from './utils/file_utils';

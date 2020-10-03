@@ -1,3 +1,4 @@
+/// <reference types="react" />
 import { DocumentData } from '../../utils/document_interfaces';
 export interface SearchResultsItemProps {
     doc: DocumentData;

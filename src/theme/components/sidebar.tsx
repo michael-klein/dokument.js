@@ -1,17 +1,16 @@
 import * as React from 'react';
 import { useDocContext } from '../../hooks/use_doc_context';
+import { Layout } from 'antd';
+const { Sider } = Layout;
 
 export function SideBar(): JSX.Element {
   const { componentList } = useDocContext();
-  const { Nav, Recent } = componentList;
+  const { Nav } = componentList;
   return (
-    <aside className="sidebar">
-      <React.Suspense fallback="">
+    <React.Suspense fallback="">
+      <Sider>
         <Nav></Nav>
-      </React.Suspense>
-      <React.Suspense fallback="">
-        <Recent></Recent>
-      </React.Suspense>
-    </aside>
+      </Sider>
+    </React.Suspense>
   );
 }
