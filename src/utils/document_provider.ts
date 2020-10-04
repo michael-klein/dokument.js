@@ -7,6 +7,7 @@ import {
   NavbarJSON,
   NavbarItemType,
   DocumentData,
+  NavbarItem,
 } from './document_interfaces';
 
 export function findHeadings(document: string): DocumentHeading[] {
@@ -33,14 +34,14 @@ export function findHeadings(document: string): DocumentHeading[] {
   return headings;
 }
 
-export function buildNavbar(navbarJSON: NavbarJSON): Navbar {
+export function buildNavbar(rootPath: string, navbarJSON: NavbarJSON): Navbar {
   let navbar: Navbar = {};
   for (const title of Object.keys(navbarJSON)) {
     const entry: string | NavbarJSON = navbarJSON[title];
     if (typeof entry === 'object') {
       navbar[title] = {
         type: NavbarItemType.CATEGORY,
-        children: buildNavbar(entry),
+        children: buildNavbar(rootPath, entry),
         slug: slugify(title),
       };
     } else {
@@ -48,18 +49,21 @@ export function buildNavbar(navbarJSON: NavbarJSON): Navbar {
       navbar[title] = {
         type: NavbarItemType.DOCUMENT,
         slug: slug,
-        path: entry,
+        path: join(rootPath, entry),
       };
     }
   }
   return navbar;
 }
 
-export async function fetchNavbar(path: string): Promise<Navbar> {
+export async function fetchNavbar(
+  rootPath: string,
+  navbarPath: string
+): Promise<Navbar> {
   const navbarJSON: NavbarJSON = await getJSON<NavbarJSON>(
-    join(path, 'navbar.docs.json')
+    join(join(rootPath, navbarPath), 'navbar.docs.json')
   );
-  return buildNavbar(navbarJSON);
+  return buildNavbar(rootPath, navbarJSON);
 }
 
 export function slugify(path: string): string {
@@ -81,21 +85,23 @@ export function slugify(path: string): string {
     .replace(/^-+/, '')
     .replace(/-+$/, '');
 }
+let fetching = false;
 
-export async function fetchDocuments(
-  rootPath: string,
-  navbar: Navbar
-): Promise<void> {
-  for (const title of Object.keys(navbar)) {
-    const { slug, children, type, path } = navbar[title];
-    if (type === NavbarItemType.CATEGORY) {
-      await fetchDocuments(rootPath, children);
-    } else {
-      const docPath: string = join(rootPath, path);
-      const document: DocumentData = JSON.parse(localStorage.getItem(slug));
+const documentQueue: string[] = [];
+const documentsToFetch = new Map<string, { title: string } & NavbarItem>();
+const fetchingDocuments: string[] = [];
+
+export const fetchDocumentNow = async (path: string) => {
+  if (documentQueue.includes(path) && !fetchingDocuments.includes(path)) {
+    fetchingDocuments.push(path);
+    documentQueue.splice(documentQueue.indexOf(path), 1);
+    const { title, slug } = documentsToFetch.get(path);
+    documentsToFetch.delete(path);
+    try {
+      let document: DocumentData = JSON.parse(localStorage.getItem(slug));
       let headers: Headers;
       try {
-        headers = await getHeaders(docPath);
+        headers = await getHeaders(path);
       } catch (e) {}
       const lastModified: string = headers && headers.get('last-modified');
 
@@ -106,22 +112,45 @@ export async function fetchDocuments(
       if (document) {
         if (document.lastModified === lastModifiedTimestamp) {
           await addDocument(document);
-          continue;
+          return;
         }
       }
-      try {
-        const content: string = await getFile(docPath);
-        const document = {
-          title,
-          content,
-          path: docPath,
-          slug,
-          headings: findHeadings(content),
-          lastModified: lastModifiedTimestamp,
-        };
-        localStorage.setItem(document.slug, JSON.stringify(document));
-        await addDocument(document);
-      } catch (e) {}
+      const content: string = await getFile(path);
+      document = {
+        title,
+        content,
+        path: path,
+        slug,
+        headings: findHeadings(content),
+        lastModified: lastModifiedTimestamp,
+      };
+
+      localStorage.setItem(document.slug, JSON.stringify(document));
+      await addDocument(document);
+    } catch (e) {}
+    fetchingDocuments.splice(fetchingDocuments.indexOf(path), 1);
+  }
+};
+
+const fetchDocuments = async () => {
+  fetching = true;
+  while (documentQueue.length > 0) {
+    await fetchDocumentNow(documentQueue[0]);
+  }
+  fetching = false;
+};
+
+export const qeueDocuments = (rootPath: string, navbar: Navbar) => {
+  for (const label of Object.keys(navbar)) {
+    const { children, type, path } = navbar[label];
+    if (type === NavbarItemType.CATEGORY) {
+      qeueDocuments(rootPath, children);
+    } else {
+      documentsToFetch.set(path, { title: label, ...navbar[label] });
+      documentQueue.push(path);
     }
   }
-}
+  if (!fetching) {
+    fetchDocuments();
+  }
+};

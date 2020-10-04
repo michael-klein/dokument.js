@@ -9,7 +9,6 @@ export interface NavItemProps extends NavbarItem {
 }
 export const renderNavItem = (props: NavItemProps) => {
   const { icon, slug, path, label } = props;
-  console.log('item');
   return (
     <Menu.Item icon={icon} key={slug}>
       <Link to={path}>{label}</Link>

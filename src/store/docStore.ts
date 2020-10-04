@@ -7,7 +7,6 @@ import {
 
 export const dokumentStore: Store<DocStoreState> = createStore<DocStoreState>({
   documentMap: {},
-  allDocumentsLoaded: false,
 });
 
 export const setNavBar = dokumentStore.createStoreAction(
@@ -34,15 +33,8 @@ export const addDocument = dokumentStore.createStoreAction(
   }
 );
 
-export const setDocumentsLoaded = dokumentStore.createStoreAction(async () => {
-  return draft => {
-    draft.allDocumentsLoaded = true;
-  };
-});
-
 export interface DocStoreState {
   navbar?: Navbar;
   documentMap?: DocumentMap;
   currentDocument?: DocumentData;
-  allDocumentsLoaded?: boolean;
 }

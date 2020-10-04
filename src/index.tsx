@@ -2,13 +2,12 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import '@babel/polyfill';
 import { Docs } from './theme/components/new/docs';
-import { setNavBar, setDocumentsLoaded } from './store/docStore';
+import { setNavBar } from './store/docStore';
 import { docContext, docContextValue } from './doc_context';
-import { join } from './utils/file_utils';
 import { ComponentList } from './theme/components/component_list';
 import { componentListValue } from './theme/components/component_list_value';
 import { HtmdxOptions } from 'htmdx';
-import { fetchDocuments, fetchNavbar } from './utils/document_provider';
+import { qeueDocuments, fetchNavbar } from './utils/document_provider';
 
 export interface DocsOptions {
   rootPath: string;
@@ -20,11 +19,9 @@ export interface DocsOptions {
 }
 
 async function load(options: DocsOptions) {
-  const navbar = await fetchNavbar(join(options.rootPath, options.navbarPath));
+  const navbar = await fetchNavbar(options.rootPath, options.navbarPath);
   await setNavBar(navbar);
-  console.log(navbar);
-  await fetchDocuments(options.rootPath, navbar);
-  setDocumentsLoaded();
+  qeueDocuments(options.rootPath, navbar);
 }
 
 export const defaultComponentList: ComponentList = { ...componentListValue };

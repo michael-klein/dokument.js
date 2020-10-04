@@ -20,7 +20,6 @@ dokumentStore.subscribe(model => {
     fuse.setCollection(
       Object.keys(docMap).flatMap(key => {
         const doc = docMap[key];
-        console.log(doc);
         return doc.content.split(`\n`).map(content => {
           return {
             content,

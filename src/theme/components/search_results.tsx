@@ -31,7 +31,6 @@ export function SearchResults(props: SearchResultsProps): JSX.Element {
     state.documentMap,
   ]);
   const result = useSearch(searchQuery);
-  console.log(result);
   return (
     <div className={'search-results'}>
       <h1>
