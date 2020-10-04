@@ -4,6 +4,7 @@ import { HashRouter } from 'react-router-dom';
 import { Search } from './search';
 import { SideBar } from './sidebar';
 import { PageSpinner } from './page_spinner';
+import { Main } from './main';
 
 const { Header, Content } = Layout;
 
@@ -43,62 +44,7 @@ export const Docs = () => {
                 marginTop: '70px',
               }}
             >
-              <h1>Lorem Ipsum</h1>
-              <p>
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                Facilis illo libero aut maiores maxime fugit dolor earum
-                voluptatibus labore necessitatibus quas repudiandae numquam
-                enim, consectetur repellendus vero tempore. Amet, repellendus.
-              </p>
-              <h1>Lorem Ipsum</h1>
-              <p>
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                Facilis illo libero aut maiores maxime fugit dolor earum
-                voluptatibus labore necessitatibus quas repudiandae numquam
-                enim, consectetur repellendus vero tempore. Amet, repellendus.
-              </p>
-              <h1>Lorem Ipsum</h1>
-              <p>
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                Facilis illo libero aut maiores maxime fugit dolor earum
-                voluptatibus labore necessitatibus quas repudiandae numquam
-                enim, consectetur repellendus vero tempore. Amet, repellendus.
-              </p>
-              <h1>Lorem Ipsum</h1>
-              <p>
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                Facilis illo libero aut maiores maxime fugit dolor earum
-                voluptatibus labore necessitatibus quas repudiandae numquam
-                enim, consectetur repellendus vero tempore. Amet, repellendus.
-              </p>
-              <h1>Lorem Ipsum</h1>
-              <p>
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                Facilis illo libero aut maiores maxime fugit dolor earum
-                voluptatibus labore necessitatibus quas repudiandae numquam
-                enim, consectetur repellendus vero tempore. Amet, repellendus.
-              </p>
-              <h1>Lorem Ipsum</h1>
-              <p>
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                Facilis illo libero aut maiores maxime fugit dolor earum
-                voluptatibus labore necessitatibus quas repudiandae numquam
-                enim, consectetur repellendus vero tempore. Amet, repellendus.
-              </p>
-              <h1>Lorem Ipsum</h1>
-              <p>
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                Facilis illo libero aut maiores maxime fugit dolor earum
-                voluptatibus labore necessitatibus quas repudiandae numquam
-                enim, consectetur repellendus vero tempore. Amet, repellendus.
-              </p>
-              <h1>Lorem Ipsum</h1>
-              <p>
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                Facilis illo libero aut maiores maxime fugit dolor earum
-                voluptatibus labore necessitatibus quas repudiandae numquam
-                enim, consectetur repellendus vero tempore. Amet, repellendus.
-              </p>
+              <Main></Main>
             </Content>
           </Layout>
         </Layout>

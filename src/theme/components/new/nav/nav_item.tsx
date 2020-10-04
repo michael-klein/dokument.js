@@ -8,10 +8,10 @@ export interface NavItemProps extends NavbarItem {
   label: string;
 }
 export const renderNavItem = (props: NavItemProps) => {
-  const { icon, slug, path, label } = props;
+  const { icon, slug, label } = props;
   return (
     <Menu.Item icon={icon} key={slug}>
-      <Link to={path}>{label}</Link>
+      <Link to={`/${slug}`}>{label}</Link>
     </Menu.Item>
   );
 };

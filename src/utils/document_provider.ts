@@ -1,6 +1,6 @@
 import { getFile, getJSON, join, getHeaders } from './file_utils';
 import removeMarkdown from 'remove-markdown';
-import { addDocument } from '../store/docStore';
+import { addDocument, addHeadingsToNavbarItem } from '../store/docStore';
 import {
   DocumentHeading,
   Navbar,
@@ -10,7 +10,7 @@ import {
   NavbarItem,
 } from './document_interfaces';
 
-export function findHeadings(document: string): DocumentHeading[] {
+function findHeadings(document: string): DocumentHeading[] {
   const parts: string[] = document.split(/\n/g);
   const headings: DocumentHeading[] = [];
   let i: number = 0;
@@ -34,14 +34,14 @@ export function findHeadings(document: string): DocumentHeading[] {
   return headings;
 }
 
-export function buildNavbar(rootPath: string, navbarJSON: NavbarJSON): Navbar {
+export function buildNavbar(navbarJSON: NavbarJSON): Navbar {
   let navbar: Navbar = {};
   for (const title of Object.keys(navbarJSON)) {
     const entry: string | NavbarJSON = navbarJSON[title];
     if (typeof entry === 'object') {
       navbar[title] = {
         type: NavbarItemType.CATEGORY,
-        children: buildNavbar(rootPath, entry),
+        children: buildNavbar(entry),
         slug: slugify(title),
       };
     } else {
@@ -49,7 +49,7 @@ export function buildNavbar(rootPath: string, navbarJSON: NavbarJSON): Navbar {
       navbar[title] = {
         type: NavbarItemType.DOCUMENT,
         slug: slug,
-        path: join(rootPath, entry),
+        path: entry,
       };
     }
   }
@@ -63,7 +63,7 @@ export async function fetchNavbar(
   const navbarJSON: NavbarJSON = await getJSON<NavbarJSON>(
     join(join(rootPath, navbarPath), 'navbar.docs.json')
   );
-  return buildNavbar(rootPath, navbarJSON);
+  return buildNavbar(navbarJSON);
 }
 
 export function slugify(path: string): string {
@@ -91,17 +91,18 @@ const documentQueue: string[] = [];
 const documentsToFetch = new Map<string, { title: string } & NavbarItem>();
 const fetchingDocuments: string[] = [];
 
-export const fetchDocumentNow = async (path: string) => {
+export const fetchDocumentNow = async (rootPath: string, path: string) => {
   if (documentQueue.includes(path) && !fetchingDocuments.includes(path)) {
     fetchingDocuments.push(path);
     documentQueue.splice(documentQueue.indexOf(path), 1);
     const { title, slug } = documentsToFetch.get(path);
     documentsToFetch.delete(path);
+    const docPath = join(rootPath, path);
     try {
       let document: DocumentData = JSON.parse(localStorage.getItem(slug));
       let headers: Headers;
       try {
-        headers = await getHeaders(path);
+        headers = await getHeaders(docPath);
       } catch (e) {}
       const lastModified: string = headers && headers.get('last-modified');
 
@@ -112,10 +113,14 @@ export const fetchDocumentNow = async (path: string) => {
       if (document) {
         if (document.lastModified === lastModifiedTimestamp) {
           await addDocument(document);
+          await addHeadingsToNavbarItem({
+            slug: document.slug,
+            headings: document.headings,
+          });
           return;
         }
       }
-      const content: string = await getFile(path);
+      const content: string = await getFile(docPath);
       document = {
         title,
         content,
@@ -127,15 +132,19 @@ export const fetchDocumentNow = async (path: string) => {
 
       localStorage.setItem(document.slug, JSON.stringify(document));
       await addDocument(document);
+      await addHeadingsToNavbarItem({
+        slug: document.slug,
+        headings: document.headings,
+      });
     } catch (e) {}
     fetchingDocuments.splice(fetchingDocuments.indexOf(path), 1);
   }
 };
 
-const fetchDocuments = async () => {
+const fetchDocuments = async (rootPath: string) => {
   fetching = true;
   while (documentQueue.length > 0) {
-    await fetchDocumentNow(documentQueue[0]);
+    await fetchDocumentNow(rootPath, documentQueue[0]);
   }
   fetching = false;
 };
@@ -151,6 +160,6 @@ export const qeueDocuments = (rootPath: string, navbar: Navbar) => {
     }
   }
   if (!fetching) {
-    fetchDocuments();
+    fetchDocuments(rootPath);
   }
 };

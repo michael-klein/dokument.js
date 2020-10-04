@@ -1,6 +1,6 @@
 {
-  "Intro": "documents/intro.mdx",
+  "Intro": "intro.mdx",
   "How to": {
-    "Usage": "documents/usage.mdx"
+    "Usage": "usage.mdx"
   }
 }

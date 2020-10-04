@@ -6,15 +6,16 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 require('@babel/polyfill');
 var antd = require('antd');
-var icons = require('@ant-design/icons');
+var reactRouterDom = require('react-router-dom');
+var Icon = require('@ant-design/icons');
+var Icon__default = _interopDefault(Icon);
 var forimmer = require('forimmer');
 var Fuse = _interopDefault(require('fuse.js'));
-var ky = _interopDefault(require('ky'));
+var reactRouter = require('react-router');
 var htmdx = require('htmdx');
-var reactRouterDom = require('react-router-dom');
 var innerText = _interopDefault(require('react-innertext'));
 var scrollIntoView = _interopDefault(require('scroll-into-view'));
-var reactRouter = require('react-router');
+var ky = _interopDefault(require('ky'));
 var removeMarkdown = _interopDefault(require('remove-markdown'));
 var Highlighter = _interopDefault(require('react-highlight-words'));
 
@@ -36,62 +37,83 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
-var Header = antd.Layout.Header,
-    Sider = antd.Layout.Sider,
-    Content = antd.Layout.Content;
-var Docs = function Docs() {
-  var _React$useState = React.useState(false),
-      collapsed = _React$useState[0],
-      setCollapsed = _React$useState[1];
+var renderTitle = function renderTitle(title) {
+  return React.createElement("span", null, title, React.createElement("a", {
+    style: {
+      "float": 'right'
+    },
+    href: "https://www.google.com/search?q=antd",
+    target: "_blank",
+    rel: "noopener noreferrer"
+  }, "more"));
+};
 
-  return React.createElement(React.Fragment, null, React.createElement(antd.Layout, null, React.createElement(Sider, {
-    trigger: null,
-    collapsible: true,
-    collapsed: collapsed
-  }, React.createElement("div", {
-    className: "logo"
-  }, "Docs"), React.createElement(antd.Menu, {
-    theme: "dark",
-    mode: "inline",
-    defaultSelectedKeys: ['1']
-  }, React.createElement(antd.Menu.Item, {
-    key: "1",
-    icon: React.createElement(icons.UserOutlined, null)
-  }, "nav 1"), React.createElement(antd.Menu.Item, {
-    key: "2",
-    icon: React.createElement(icons.VideoCameraOutlined, null)
-  }, "nav 2"), React.createElement(antd.Menu.Item, {
-    key: "3",
-    icon: React.createElement(icons.UploadOutlined, null)
-  }, "nav 3"))), React.createElement(antd.Layout, {
-    className: "site-layout"
-  }, React.createElement(Header, {
-    className: "site-layout-background",
+var renderItem = function renderItem(title, count) {
+  return {
+    value: title,
+    label: React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between'
+      }
+    }, title, React.createElement("span", null, React.createElement(Icon.UserOutlined, null), " ", count))
+  };
+};
+
+var options = [{
+  label:
+  /*#__PURE__*/
+  renderTitle('Libraries'),
+  options: [
+  /*#__PURE__*/
+  renderItem('AntDesign', 10000),
+  /*#__PURE__*/
+  renderItem('AntDesign UI', 10600)]
+}, {
+  label:
+  /*#__PURE__*/
+  renderTitle('Solutions'),
+  options: [
+  /*#__PURE__*/
+  renderItem('AntDesign UI FAQ', 60100),
+  /*#__PURE__*/
+  renderItem('AntDesign FAQ', 30010)]
+}, {
+  label:
+  /*#__PURE__*/
+  renderTitle('Articles'),
+  options: [
+  /*#__PURE__*/
+  renderItem('AntDesign design language', 100000)]
+}];
+var Search = function Search() {
+  var _React$useState = React.useState(''),
+      value = _React$useState[0],
+      setValue = _React$useState[1];
+
+  return React.createElement(antd.AutoComplete, {
+    dropdownClassName: "certain-category-search-dropdown",
+    dropdownMatchSelectWidth: 500,
+    open: value.length > 0,
+    onBlur: function onBlur() {
+      return setValue('');
+    },
+    onChange: setValue,
+    value: value,
     style: {
-      padding: 0
-    }
-  }, React.createElement(collapsed ? icons.MenuUnfoldOutlined : icons.MenuFoldOutlined, {
-    className: 'trigger',
-    onClick: function onClick() {
-      return setCollapsed(function (c) {
-        return !c;
-      });
-    }
-  })), React.createElement(Content, {
-    className: "site-layout-background",
-    style: {
-      margin: '24px 16px',
-      padding: 24,
-      minHeight: 280
-    }
-  }, "Content"))));
+      width: 250
+    },
+    options: options
+  }, React.createElement(antd.Input.Search, {
+    size: "large",
+    placeholder: "Type to search..."
+  }));
 };
 
 var dokumentStore =
 /*#__PURE__*/
 forimmer.createStore({
-  documentMap: {},
-  allDocumentsLoaded: false
+  documentMap: {}
 });
 var setNavBar =
 /*#__PURE__*/
@@ -107,18 +129,37 @@ dokumentStore.createStoreAction(function (currentDocument) {
     draft.currentDocument = currentDocument;
   });
 });
+
+var findNavbarItem = function findNavbarItem(slug, navbar) {
+  return Object.keys(navbar).map(function (key) {
+    return navbar[key];
+  }).find(function (item) {
+    if (item.slug === slug) {
+      return item;
+    } else {
+      return findNavbarItem(slug, item.children);
+    }
+  });
+};
+
+var addHeadingsToNavbarItem =
+/*#__PURE__*/
+dokumentStore.createStoreAction(function (_ref) {
+  var slug = _ref.slug,
+      headings = _ref.headings;
+  return Promise.resolve(function (draft) {
+    var item = findNavbarItem(slug, draft.navbar);
+
+    if (item) {
+      item.headings = headings;
+    }
+  });
+});
 var addDocument =
 /*#__PURE__*/
 dokumentStore.createStoreAction(function (document) {
   return Promise.resolve(function (draft) {
     draft.documentMap[document.slug] = document;
-  });
-});
-var setDocumentsLoaded =
-/*#__PURE__*/
-dokumentStore.createStoreAction(function () {
-  return Promise.resolve(function (draft) {
-    draft.allDocumentsLoaded = true;
   });
 });
 
@@ -136,7 +177,6 @@ dokumentStore.subscribe(function (model) {
     docMap = model.documentMap;
     fuse.setCollection(Object.keys(docMap).flatMap(function (key) {
       var doc = docMap[key];
-      console.log(doc);
       return doc.content.split("\n").map(function (content) {
         return {
           content: content,
@@ -177,55 +217,172 @@ var docContext =
 /*#__PURE__*/
 React.createContext(docContextValue);
 
-var getJSON = function getJSON(filePath) {
-  try {
-    return Promise.resolve(ky.get(filePath).json());
-  } catch (e) {
-    return Promise.reject(e);
-  }
-};
-var getFile = function getFile(filePath) {
-  try {
-    return Promise.resolve(ky.get(filePath).text());
-  } catch (e) {
-    return Promise.reject(e);
-  }
-};
-var getHeaders = function getHeaders(filePath) {
-  try {
-    return Promise.resolve(ky.head(filePath).then(function (r) {
-      return r.headers;
-    }));
-  } catch (e) {
-    return Promise.reject(e);
-  }
-};
-function join() {
-  var parts = [];
-
-  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-    args[_key] = arguments[_key];
-  }
-
-  for (var i = 0, l = args.length; i < l; i++) {
-    parts = parts.concat(args[i].split('/'));
-  }
-
-  var newParts = [];
-
-  for (var _i = 0, _l = parts.length; _i < _l; _i++) {
-    var part = parts[_i];
-    if (!part || part === '.') continue;
-    if (part === '..') newParts.pop();else newParts.push(part);
-  }
-
-  if (parts[0] === '') newParts.unshift('');
-  return newParts.join('/') || (newParts.length ? '/' : '.');
-}
-
 function useDocContext() {
   return React.useContext(docContext);
 }
+
+var Logo = function Logo(props) {
+  var collapsed = props.collapsed;
+  return React.createElement("div", {
+    className: "logo " + (collapsed && 'collapsed')
+  }, React.createElement(Icon.ReadOutlined, null), !collapsed && 'Docs');
+};
+
+var NavbarItemType;
+
+(function (NavbarItemType) {
+  NavbarItemType[NavbarItemType["CATEGORY"] = 0] = "CATEGORY";
+  NavbarItemType[NavbarItemType["DOCUMENT"] = 1] = "DOCUMENT";
+})(NavbarItemType || (NavbarItemType = {}));
+
+var renderNavItem = function renderNavItem(props) {
+  var icon = props.icon,
+      slug = props.slug,
+      label = props.label;
+  return React.createElement(antd.Menu.Item, {
+    icon: icon,
+    key: slug
+  }, React.createElement(reactRouterDom.Link, {
+    to: "/" + slug
+  }, label));
+};
+
+var Initials = function Initials(props) {
+  var initials = props.label.split(' ').map(function (s) {
+    return s[0];
+  }).slice(0, 2).join('').toUpperCase();
+  return React.createElement("span", {
+    role: "img"
+  }, initials);
+};
+
+var renderInitials = function renderInitials(label) {
+  return React.createElement(Icon__default, {
+    className: "nav-initials",
+    component: function component() {
+      return React.createElement(Initials, {
+        label: label
+      });
+    }
+  });
+};
+
+var SubMenu = antd.Menu.SubMenu;
+var renderNavItemGroup = function renderNavItemGroup(props) {
+  var slug = props.slug,
+      headings = props.headings,
+      label = props.label,
+      icon = props.icon;
+  return React.createElement(SubMenu, {
+    key: slug,
+    icon: icon || renderInitials(label),
+    title: label
+  }, headings.map(function (heading) {
+    return renderNavItem({
+      label: heading.text,
+      slug: slug + "/" + heading.slug,
+      type: NavbarItemType.DOCUMENT
+    });
+  }));
+};
+
+var SubMenu$1 = antd.Menu.SubMenu;
+var renderItem$1 = function renderItem(label, item) {
+  if (item.type === NavbarItemType.DOCUMENT) {
+    if (item.headings) {
+      return renderNavItemGroup(_extends({}, item, {
+        label: label
+      }));
+    } else {
+      return renderNavItem(_extends({}, item, {
+        label: label
+      }));
+    }
+  } else {
+    return renderNavLevel(_extends({}, item, {
+      label: label
+    }));
+  }
+};
+var renderNavLevel = function renderNavLevel(props) {
+  var children = props.children,
+      label = props.label,
+      icon = props.icon,
+      slug = props.slug;
+  return React.createElement(SubMenu$1, {
+    key: slug,
+    icon: icon || renderInitials(label),
+    title: label
+  }, Object.keys(children).map(function (label) {
+    return renderItem$1(label, children[label]);
+  }));
+};
+
+var getFirstDocumentItem = function getFirstDocumentItem(items) {
+  return Object.keys(items).map(function (key) {
+    return items[key];
+  }).find(function (item) {
+    if (item.type === NavbarItemType.DOCUMENT) {
+      return item;
+    } else {
+      return getFirstDocumentItem(item.children);
+    }
+  });
+};
+
+var Nav = function Nav(props) {
+  var items = props.items;
+  return React.createElement(antd.Menu, {
+    theme: "light",
+    defaultOpenKeys: Object.keys(items).map(function (key) {
+      return items[key].slug;
+    }),
+    defaultSelectedKeys: [getFirstDocumentItem(items).slug],
+    multiple: false,
+    mode: "inline"
+  }, Object.keys(items).map(function (label) {
+    return renderItem$1(label, _extends({}, items[label]));
+  }));
+};
+
+var Sider = antd.Layout.Sider;
+var SideBar = function SideBar(props) {
+  var collapsed = props.collapsed,
+      onCollapse = props.onCollapse;
+
+  var _useDocContext = useDocContext(),
+      dokumentStore = _useDocContext.dokumentStore;
+
+  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
+    return [state.navbar];
+  }),
+      navbar = _useStoreState[0];
+
+  return React.createElement(Sider, {
+    collapsible: true,
+    theme: "light",
+    collapsed: collapsed,
+    onCollapse: onCollapse,
+    style: {
+      overflow: 'auto',
+      height: '100vh',
+      position: 'fixed',
+      left: 0
+    }
+  }, React.createElement(Logo, {
+    collapsed: collapsed
+  }), React.createElement(Nav, {
+    items: navbar
+  }));
+};
+
+var PageSpinner = function PageSpinner() {
+  return React.createElement("div", {
+    className: "page_spinner"
+  }, React.createElement(antd.Spin, {
+    size: "large"
+  }));
+};
 
 function LastChanged(props) {
   return React.createElement("div", {
@@ -282,6 +439,193 @@ function DocumentRenderer(props) {
   var PreviousAndNext = componentList.PreviousAndNext;
   var Provider = mdxContext.Provider;
 
+  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
+    return [state.documentMap, state.currentDocument];
+  }),
+      documentMap = _useStoreState[0],
+      currentDocument = _useStoreState[1];
+
+  React.useEffect(function () {
+    var heading = document.getElementById(props.headingSlug);
+
+    if (heading) {
+      var scrollTarget = heading.parentElement.firstElementChild === heading ? document.querySelector('main') : heading;
+      scrollIntoView(scrollTarget, {
+        align: {
+          top: 0
+        }
+      });
+    }
+  }, [props.headingSlug, currentDocument]);
+  var previous;
+  var next;
+
+  if (currentDocument) {
+    var slugs = Object.keys(documentMap);
+    var docIndex = slugs.indexOf(currentDocument.slug);
+
+    if (docIndex > 0) {
+      previous = documentMap[slugs[docIndex - 1]];
+    }
+
+    if (docIndex < slugs.length - 1) {
+      next = documentMap[slugs[docIndex + 1]];
+    }
+  }
+
+  return React.createElement(Provider, {
+    value: {
+      currentDocument: currentDocument
+    }
+  }, React.createElement(PreviousAndNext, {
+    previous: previous,
+    next: next
+  }), React.createElement("div", null, htmdx.htmdx(currentDocument.content, React.createElement, _extends({}, htmdxOptions, {
+    components: _extends({}, components, {}, htmdxOptions.components)
+  }))), React.createElement(PreviousAndNext, {
+    previous: previous,
+    next: next
+  }), currentDocument.lastModified > -1 && React.createElement(LastChanged, {
+    timestamp: currentDocument.lastModified
+  }));
+}
+
+function RenderArticle() {
+  var _useDocContext = useDocContext(),
+      dokumentStore = _useDocContext.dokumentStore;
+
+  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
+    return [state.documentMap, state.currentDocument || null];
+  }),
+      documentMap = _useStoreState[0];
+
+  var _useParams = reactRouter.useParams(),
+      slug = _useParams.slug,
+      headingSlug = _useParams.headingSlug;
+
+  var documentForSlug = !slug ? Object.values(documentMap)[0] : documentMap[slug];
+
+  if (!headingSlug && documentForSlug) {
+    headingSlug = documentForSlug.headings[0].slug;
+  }
+
+  React.useEffect(function () {
+    if (documentForSlug) {
+      setCurrentDocument(documentForSlug);
+    }
+  }, [slug, documentForSlug]);
+  return React.createElement(DocumentRenderer, {
+    slug: slug,
+    headingSlug: headingSlug
+  });
+}
+
+function Main() {
+  return React.createElement(React.Fragment, null, React.createElement("article", null, React.createElement(reactRouter.Switch, null, React.createElement(reactRouter.Route, {
+    path: "/:slug?/:headingSlug?"
+  }, React.createElement(React.Suspense, {
+    fallback: React.createElement(React.Fragment, null)
+  }, React.createElement(RenderArticle, null))), React.createElement(reactRouter.Route, {
+    path: "/"
+  }, React.createElement(React.Suspense, {
+    fallback: React.createElement(React.Fragment, null)
+  }, React.createElement(RenderArticle, null))))));
+}
+
+var Header = antd.Layout.Header,
+    Content = antd.Layout.Content;
+var Docs = function Docs() {
+  var _React$useState = React.useState(false),
+      collapsed = _React$useState[0],
+      setCollapsed = _React$useState[1];
+
+  return React.createElement(reactRouterDom.HashRouter, null, React.createElement(React.Suspense, {
+    fallback: React.createElement(PageSpinner, null)
+  }, React.createElement(antd.Layout, null, React.createElement(SideBar, {
+    collapsed: collapsed,
+    onCollapse: setCollapsed
+  }), React.createElement(antd.Layout, {
+    className: "site-layout",
+    style: {
+      marginLeft: collapsed ? 80 : 200,
+      minHeight: '100vh',
+      transition: 'all 0.2s'
+    }
+  }, React.createElement(Header, {
+    className: "site-layout-background docs-header",
+    style: {
+      padding: 0,
+      position: 'fixed',
+      width: "calc(100% - " + (collapsed ? 80 : 200) + "px)"
+    }
+  }, React.createElement("span", {
+    className: "search-wrapper"
+  }, React.createElement(Search, null))), React.createElement(Content, {
+    className: "site-layout-background",
+    style: {
+      margin: '24px 16px',
+      padding: 24,
+      minHeight: 280,
+      marginTop: '70px'
+    }
+  }, React.createElement(Main, null))))));
+};
+
+function LastChanged$1(props) {
+  return React.createElement("div", {
+    className: "last-changed"
+  }, React.createElement("div", null, "last changed: "), React.createElement("div", null, new Date(props.timestamp).toLocaleString()));
+}
+
+var hCount$1 = 0;
+var mdxContext$1 =
+/*#__PURE__*/
+React.createContext({});
+var components$1 = {
+  Demo: function Demo() {
+    return React.createElement("h1", null, "This is a demo component");
+  }
+};
+['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].forEach(function (h) {
+  var Component = function Component(props) {
+    var _React$useContext = React.useContext(mdxContext$1),
+        currentDocument = _React$useContext.currentDocument;
+
+    var check = props.children;
+
+    if (check instanceof Array) {
+      check = React.createElement('div', {
+        children: props.children
+      });
+    }
+
+    var text = React.isValidElement(check) ? innerText(check) : props.children;
+    var heading = currentDocument.headings.find(function (heading) {
+      return text.toString().includes(heading.text);
+    });
+    return React.createElement(h, {
+      key: h + hCount$1++,
+      id: heading && heading.slug,
+      children: [React.createElement(React.Fragment, null, heading ? React.createElement(reactRouterDom.Link, {
+        to: "" + heading.slug
+      }, heading.text) : props.children)]
+    });
+  };
+
+  components$1[h] = Component;
+});
+function DocumentRenderer$1(props) {
+  var _useDocContext = useDocContext(),
+      componentList = _useDocContext.componentList,
+      _useDocContext$htmdxO = _useDocContext.htmdxOptions,
+      htmdxOptions = _useDocContext$htmdxO === void 0 ? {
+    components: {}
+  } : _useDocContext$htmdxO,
+      dokumentStore = _useDocContext.dokumentStore;
+
+  var PreviousAndNext = componentList.PreviousAndNext;
+  var Provider = mdxContext$1.Provider;
+
   var _useDocContext2 = useDocContext(),
       scrollContainerSelector = _useDocContext2.scrollContainerSelector;
 
@@ -330,16 +674,16 @@ function DocumentRenderer(props) {
     previous: previous,
     next: next
   }), React.createElement("div", null, htmdx.htmdx(currentDocument.content, React.createElement, _extends({}, htmdxOptions, {
-    components: _extends({}, components, {}, htmdxOptions.components)
+    components: _extends({}, components$1, {}, htmdxOptions.components)
   }))), React.createElement(PreviousAndNext, {
     previous: previous,
     next: next
-  }), currentDocument.lastModified > -1 && React.createElement(LastChanged, {
+  }), currentDocument.lastModified > -1 && React.createElement(LastChanged$1, {
     timestamp: currentDocument.lastModified
   }));
 }
 
-function Nav() {
+function Nav$1() {
   var _useDocContext = useDocContext(),
       dokumentStore = _useDocContext.dokumentStore;
 
@@ -358,7 +702,7 @@ function Nav() {
 }
 
 var Sider$1 = antd.Layout.Sider;
-function SideBar() {
+function SideBar$1() {
   var _useDocContext = useDocContext(),
       componentList = _useDocContext.componentList;
 
@@ -368,7 +712,7 @@ function SideBar() {
   }, React.createElement(Sider$1, null, React.createElement(Nav, null)));
 }
 
-function RenderArticle() {
+function RenderArticle$1() {
   var _useDocContext = useDocContext(),
       componentList = _useDocContext.componentList,
       dokumentStore = _useDocContext.dokumentStore;
@@ -396,17 +740,17 @@ function RenderArticle() {
   });
 }
 
-function Main() {
+function Main$1() {
   var Loading = useDocContext().componentList.Loading;
   return React.createElement("main", null, React.createElement("article", null, React.createElement(reactRouter.Switch, null, React.createElement(reactRouter.Route, {
-    path: "/document/:slug?/:headingSlug?"
+    path: "/:slug?/:headingSlug?"
   }, React.createElement(React.Suspense, {
     fallback: React.createElement(Loading, null)
-  }, React.createElement(RenderArticle, null))), React.createElement(reactRouter.Route, {
+  }, React.createElement(RenderArticle$1, null))), React.createElement(reactRouter.Route, {
     path: "/"
   }, React.createElement(React.Suspense, {
     fallback: React.createElement(Loading, null)
-  }, React.createElement(RenderArticle, null))))));
+  }, React.createElement(RenderArticle$1, null))))));
 }
 
 function useHandleSearchFocus(searchQuery, setSearchQuery, inputRef) {
@@ -469,39 +813,60 @@ function useHandleSearchFocus(searchQuery, setSearchQuery, inputRef) {
   }, [inputRef.current]);
 }
 
-function Search() {
-  var _useDocContext = useDocContext(),
-      componentList = _useDocContext.componentList,
-      dokumentStore = _useDocContext.dokumentStore;
-
-  var SearchResults = componentList.SearchResults;
-
+function Search$1() {
   var _React$useState = React.useState(null),
       searchQuery = _React$useState[0],
       setSearchQuery = _React$useState[1];
 
   var inputRef = React.useRef();
   useHandleSearchFocus(searchQuery, setSearchQuery, inputRef);
+  return React.createElement(React.Fragment, null);
+}
 
-  var _useStoreState = forimmer.useStoreState(dokumentStore, function (state) {
-    return [state.allDocumentsLoaded];
-  }),
-      allDocumentsLoaded = _useStoreState[0];
+var getJSON = function getJSON(filePath) {
+  try {
+    return Promise.resolve(ky.get(filePath).json());
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+var getFile = function getFile(filePath) {
+  try {
+    return Promise.resolve(ky.get(filePath).text());
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+var getHeaders = function getHeaders(filePath) {
+  try {
+    return Promise.resolve(ky.head(filePath).then(function (r) {
+      return r.headers;
+    }));
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+function join() {
+  var parts = [];
 
-  return React.createElement("div", {
-    className: "search"
-  }, searchQuery && searchQuery.length > 0 && React.createElement(SearchResults, {
-    searchQuery: searchQuery
-  }), React.createElement("input", {
-    ref: inputRef,
-    type: "text",
-    value: searchQuery,
-    placeholder: allDocumentsLoaded ? 'Search documents' : 'Preparing search...',
-    onChange: function onChange(e) {
-      return setSearchQuery(e.currentTarget.value);
-    },
-    disabled: !allDocumentsLoaded
-  }));
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  for (var i = 0, l = args.length; i < l; i++) {
+    parts = parts.concat(args[i].split('/'));
+  }
+
+  var newParts = [];
+
+  for (var _i = 0, _l = parts.length; _i < _l; _i++) {
+    var part = parts[_i];
+    if (!part || part === '.') continue;
+    if (part === '..') newParts.pop();else newParts.push(part);
+  }
+
+  if (parts[0] === '') newParts.unshift('');
+  return newParts.join('/') || (newParts.length ? '/' : '.');
 }
 
 function useGetTo() {
@@ -530,13 +895,6 @@ function PreviousAndNext(props) {
     to: getTo(next)[0]
   }, next.title))));
 }
-
-var NavbarItemType;
-
-(function (NavbarItemType) {
-  NavbarItemType[NavbarItemType["CATEGORY"] = 0] = "CATEGORY";
-  NavbarItemType[NavbarItemType["DOCUMENT"] = 1] = "DOCUMENT";
-})(NavbarItemType || (NavbarItemType = {}));
 
 function NavItem(props) {
   var _useDocContext = useDocContext(),
@@ -575,7 +933,7 @@ function NavItem(props) {
   }));
 }
 
-var SubMenu = antd.Menu.SubMenu;
+var SubMenu$2 = antd.Menu.SubMenu;
 function NavLevel(props) {
   var navbar = props.navbar;
 
@@ -596,7 +954,7 @@ function NavLevel(props) {
   var docArray = Object.values(docMap);
   var prevDocument = docArray[0]; //const getTo = useGetTo();
 
-  return React.createElement(SubMenu, null, titles.map(function (title) {
+  return React.createElement(SubMenu$2, null, titles.map(function (title) {
     var _navbar$title = navbar[title],
         type = _navbar$title.type,
         children = _navbar$title.children,
@@ -664,7 +1022,6 @@ function SearchResults(props) {
       documentMap = _useStoreState[0];
 
   var result = useSearch(searchQuery);
-  console.log(result);
   return React.createElement("div", {
     className: 'search-results'
   }, React.createElement("h1", null, "Listing ", result.length, " document", result.length !== 1 ? 's' : '', " with search results for ", searchQuery, ":"), React.createElement("ul", null, result.map(function (r) {
@@ -795,19 +1152,19 @@ function Header$1() {
 }
 
 var componentListValue = {
-  DocumentRenderer: DocumentRenderer,
+  DocumentRenderer: DocumentRenderer$1,
   NavItem: NavItem,
   NavLevel: NavLevel,
-  Nav: Nav,
-  SideBar: SideBar,
-  Main: Main,
-  Search: Search,
+  Nav: Nav$1,
+  SideBar: SideBar$1,
+  Main: Main$1,
+  Search: Search$1,
   PreviousAndNext: PreviousAndNext,
   SearchResults: SearchResults,
   SearchResultsItem: SearchResultsItem,
   Loading: Loading,
   Branding: Branding,
-  LastChanged: LastChanged,
+  LastChanged: LastChanged$1,
   Recent: Recent,
   Header: Header$1
 };
@@ -881,97 +1238,96 @@ function _isSettledPact(thenable) {
 	return thenable instanceof _Pact && thenable.s & 1;
 }
 
-// Asynchronously iterate through an object that has a length property, passing the index as the first argument to the callback (even as the length property changes)
-function _forTo(array, body, check) {
-	var i = -1, pact, reject;
-	function _cycle(result) {
-		try {
-			while (++i < array.length && (!check || !check())) {
-				result = body(i);
-				if (result && result.then) {
-					if (_isSettledPact(result)) {
-						result = result.v;
-					} else {
-						result.then(_cycle, reject || (reject = _settle.bind(null, pact = new _Pact(), 2)));
-						return;
-					}
-				}
-			}
-			if (pact) {
-				_settle(pact, 1, result);
-			} else {
-				pact = result;
-			}
-		} catch (e) {
-			_settle(pact || (pact = new _Pact()), 2, e);
-		}
-	}
-	_cycle();
-	return pact;
-}
-
 const _iteratorSymbol = /*#__PURE__*/ typeof Symbol !== "undefined" ? (Symbol.iterator || (Symbol.iterator = Symbol("Symbol.iterator"))) : "@@iterator";
 
-// Asynchronously iterate through an object's values
-// Uses for...of if the runtime supports it, otherwise iterates until length on a copy
-function _forOf(target, body, check) {
-	if (typeof target[_iteratorSymbol] === "function") {
-		var iterator = target[_iteratorSymbol](), step, pact, reject;
-		function _cycle(result) {
-			try {
-				while (!(step = iterator.next()).done && (!check || !check())) {
-					result = body(step.value);
-					if (result && result.then) {
-						if (_isSettledPact(result)) {
-							result = result.v;
-						} else {
-							result.then(_cycle, reject || (reject = _settle.bind(null, pact = new _Pact(), 2)));
-							return;
-						}
-					}
-				}
-				if (pact) {
-					_settle(pact, 1, result);
-				} else {
-					pact = result;
-				}
-			} catch (e) {
-				_settle(pact || (pact = new _Pact()), 2, e);
-			}
-		}
-		_cycle();
-		if (iterator.return) {
-			var _fixup = function(value) {
-				try {
-					if (!step.done) {
-						iterator.return();
-					}
-				} catch(e) {
-				}
-				return value;
-			};
-			if (pact && pact.then) {
-				return pact.then(_fixup, function(e) {
-					throw _fixup(e);
-				});
-			}
-			_fixup();
-		}
-		return pact;
-	}
-	// No support for Symbol.iterator
-	if (!("length" in target)) {
-		throw new TypeError("Object is not iterable");
-	}
-	// Handle live collections properly
-	var values = [];
-	for (var i = 0; i < target.length; i++) {
-		values.push(target[i]);
-	}
-	return _forTo(values, function(i) { return body(values[i]); }, check);
-}
-
 const _asyncIteratorSymbol = /*#__PURE__*/ typeof Symbol !== "undefined" ? (Symbol.asyncIterator || (Symbol.asyncIterator = Symbol("Symbol.asyncIterator"))) : "@@asyncIterator";
+
+// Asynchronously implement a generic for loop
+function _for(test, update, body) {
+	var stage;
+	for (;;) {
+		var shouldContinue = test();
+		if (_isSettledPact(shouldContinue)) {
+			shouldContinue = shouldContinue.v;
+		}
+		if (!shouldContinue) {
+			return result;
+		}
+		if (shouldContinue.then) {
+			stage = 0;
+			break;
+		}
+		var result = body();
+		if (result && result.then) {
+			if (_isSettledPact(result)) {
+				result = result.s;
+			} else {
+				stage = 1;
+				break;
+			}
+		}
+		if (update) {
+			var updateValue = update();
+			if (updateValue && updateValue.then && !_isSettledPact(updateValue)) {
+				stage = 2;
+				break;
+			}
+		}
+	}
+	var pact = new _Pact();
+	var reject = _settle.bind(null, pact, 2);
+	(stage === 0 ? shouldContinue.then(_resumeAfterTest) : stage === 1 ? result.then(_resumeAfterBody) : updateValue.then(_resumeAfterUpdate)).then(void 0, reject);
+	return pact;
+	function _resumeAfterBody(value) {
+		result = value;
+		do {
+			if (update) {
+				updateValue = update();
+				if (updateValue && updateValue.then && !_isSettledPact(updateValue)) {
+					updateValue.then(_resumeAfterUpdate).then(void 0, reject);
+					return;
+				}
+			}
+			shouldContinue = test();
+			if (!shouldContinue || (_isSettledPact(shouldContinue) && !shouldContinue.v)) {
+				_settle(pact, 1, result);
+				return;
+			}
+			if (shouldContinue.then) {
+				shouldContinue.then(_resumeAfterTest).then(void 0, reject);
+				return;
+			}
+			result = body();
+			if (_isSettledPact(result)) {
+				result = result.v;
+			}
+		} while (!result || !result.then);
+		result.then(_resumeAfterBody).then(void 0, reject);
+	}
+	function _resumeAfterTest(shouldContinue) {
+		if (shouldContinue) {
+			result = body();
+			if (result && result.then) {
+				result.then(_resumeAfterBody).then(void 0, reject);
+			} else {
+				_resumeAfterBody(result);
+			}
+		} else {
+			_settle(pact, 1, result);
+		}
+	}
+	function _resumeAfterUpdate() {
+		if (shouldContinue = test()) {
+			if (shouldContinue.then) {
+				shouldContinue.then(_resumeAfterTest).then(void 0, reject);
+			} else {
+				_resumeAfterTest(shouldContinue);
+			}
+		} else {
+			_settle(pact, 1, result);
+		}
+	}
+}
 
 // Asynchronously call a function and send errors to recovery continuation
 function _catch(body, recover) {
@@ -986,103 +1342,6 @@ function _catch(body, recover) {
 	return result;
 }
 
-var fetchDocuments =
-/*#__PURE__*/
-function (_fetchDocuments) {
-  function fetchDocuments(_x, _x2) {
-    return _fetchDocuments.apply(this, arguments);
-  }
-
-  fetchDocuments.toString = function () {
-    return _fetchDocuments.toString();
-  };
-
-  return fetchDocuments;
-}(function (rootPath, navbar) {
-  try {
-    return Promise.resolve(_forOf(Object.keys(navbar), function (title) {
-      var _navbar$title = navbar[title],
-          slug = _navbar$title.slug,
-          children = _navbar$title.children,
-          type = _navbar$title.type,
-          path = _navbar$title.path;
-
-      var _temp7 = function () {
-        if (type === NavbarItemType.CATEGORY) {
-          return Promise.resolve(fetchDocuments(rootPath, children)).then(function () {});
-        } else {
-          var _temp8 = function _temp8() {
-            function _temp4() {
-              var _temp2 = _catch(function () {
-                return Promise.resolve(getFile(_docPath)).then(function (content) {
-                  var document = {
-                    title: title,
-                    content: content,
-                    path: _docPath,
-                    slug: slug,
-                    headings: findHeadings(content),
-                    lastModified: lastModifiedTimestamp
-                  };
-                  localStorage.setItem(document.slug, JSON.stringify(document));
-                  return Promise.resolve(addDocument(document)).then(function () {});
-                });
-              }, function () {});
-
-              if (_temp2 && _temp2.then) return _temp2.then(function () {});
-            }
-
-            var lastModified = _headers && _headers.get('last-modified');
-
-            var lastModifiedTimestamp = -1;
-
-            if (lastModified) {
-              lastModifiedTimestamp = new Date(lastModified).getTime();
-            }
-
-            var _temp3 = function () {
-              if (_document) {
-                var _temp10 = function () {
-                  if (_document.lastModified === lastModifiedTimestamp) {
-                    return Promise.resolve(addDocument(_document)).then(function () {});
-                  }
-                }();
-
-                if (_temp10 && _temp10.then) return _temp10.then(function () {});
-              }
-            }();
-
-            return _temp3 && _temp3.then ? _temp3.then(_temp4) : _temp4(_temp3);
-          };
-
-          var _docPath = join(rootPath, path);
-
-          var _document = JSON.parse(localStorage.getItem(slug));
-
-          var _headers;
-
-          var _temp9 = _catch(function () {
-            return Promise.resolve(getHeaders(_docPath)).then(function (_getHeaders) {
-              _headers = _getHeaders;
-            });
-          }, function () {});
-
-          return _temp9 && _temp9.then ? _temp9.then(_temp8) : _temp8(_temp9);
-        }
-      }();
-
-      if (_temp7 && _temp7.then) return _temp7.then(function () {});
-    }));
-  } catch (e) {
-    return Promise.reject(e);
-  }
-});
-var fetchNavbar = function fetchNavbar(path) {
-  try {
-    return Promise.resolve(getJSON(join(path, 'navbar.docs.json'))).then(buildNavbar);
-  } catch (e) {
-    return Promise.reject(e);
-  }
-};
 function findHeadings(document) {
   var parts = document.split(/\n/g);
   var headings = [];
@@ -1123,6 +1382,14 @@ function findHeadings(document) {
 
   return headings;
 }
+
+var fetchNavbar = function fetchNavbar(rootPath, navbarPath) {
+  try {
+    return Promise.resolve(getJSON(join(join(rootPath, navbarPath), 'navbar.docs.json'))).then(buildNavbar);
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
 function buildNavbar(navbarJSON) {
   var navbar = {};
 
@@ -1133,7 +1400,8 @@ function buildNavbar(navbarJSON) {
     if (typeof entry === 'object') {
       navbar[title] = {
         type: NavbarItemType.CATEGORY,
-        children: buildNavbar(entry)
+        children: buildNavbar(entry),
+        slug: slugify(title)
       };
     } else {
       var slug = slugify(entry);
@@ -1155,6 +1423,145 @@ function slugify(path) {
     return b.charAt(a.indexOf(c));
   }).replace(/&/g, '-and-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
 }
+var fetching = false;
+var documentQueue = [];
+var documentsToFetch =
+/*#__PURE__*/
+new Map();
+var fetchingDocuments = [];
+var fetchDocumentNow = function fetchDocumentNow(rootPath, path) {
+  try {
+    var _exit3 = false;
+    return Promise.resolve(function () {
+      if (documentQueue.includes(path) && !fetchingDocuments.includes(path)) {
+        var _temp7 = function _temp7(_result3) {
+          if (_exit3) return _result3;
+          fetchingDocuments.splice(fetchingDocuments.indexOf(path), 1);
+        };
+
+        fetchingDocuments.push(path);
+        documentQueue.splice(documentQueue.indexOf(path), 1);
+
+        var _documentsToFetch$get = documentsToFetch.get(path),
+            title = _documentsToFetch$get.title,
+            slug = _documentsToFetch$get.slug;
+
+        documentsToFetch["delete"](path);
+        var docPath = join(rootPath, path);
+
+        var _temp8 = _catch(function () {
+          function _temp4() {
+            var _exit2 = false;
+
+            function _temp2(_result2) {
+              return _exit2 ? _result2 : Promise.resolve(getFile(docPath)).then(function (content) {
+                document = {
+                  title: title,
+                  content: content,
+                  path: path,
+                  slug: slug,
+                  headings: findHeadings(content),
+                  lastModified: lastModifiedTimestamp
+                };
+                localStorage.setItem(document.slug, JSON.stringify(document));
+                return Promise.resolve(addDocument(document)).then(function () {
+                  return Promise.resolve(addHeadingsToNavbarItem({
+                    slug: document.slug,
+                    headings: document.headings
+                  })).then(function () {});
+                });
+              });
+            }
+
+            var lastModified = headers && headers.get('last-modified');
+            var lastModifiedTimestamp = -1;
+
+            if (lastModified) {
+              lastModifiedTimestamp = new Date(lastModified).getTime();
+            }
+
+            var _temp = function () {
+              if (document) {
+                return function () {
+                  if (document.lastModified === lastModifiedTimestamp) {
+                    return Promise.resolve(addDocument(document)).then(function () {
+                      return Promise.resolve(addHeadingsToNavbarItem({
+                        slug: document.slug,
+                        headings: document.headings
+                      })).then(function () {
+                        _exit3 = true;
+                      });
+                    });
+                  }
+                }();
+              }
+            }();
+
+            return _temp && _temp.then ? _temp.then(_temp2) : _temp2(_temp);
+          }
+
+          var document = JSON.parse(localStorage.getItem(slug));
+          var headers;
+
+          var _temp3 = _catch(function () {
+            return Promise.resolve(getHeaders(docPath)).then(function (_getHeaders) {
+              headers = _getHeaders;
+            });
+          }, function () {});
+
+          return _temp3 && _temp3.then ? _temp3.then(_temp4) : _temp4(_temp3);
+        }, function () {});
+
+        return _temp8 && _temp8.then ? _temp8.then(_temp7) : _temp7(_temp8);
+      }
+    }());
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+
+var fetchDocuments = function fetchDocuments(rootPath) {
+  try {
+    var _temp11 = function _temp11() {
+      fetching = false;
+    };
+
+    fetching = true;
+
+    var _temp12 = _for(function () {
+      return documentQueue.length > 0;
+    }, void 0, function () {
+      return Promise.resolve(fetchDocumentNow(rootPath, documentQueue[0])).then(function () {});
+    });
+
+    return Promise.resolve(_temp12 && _temp12.then ? _temp12.then(_temp11) : _temp11(_temp12));
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+
+var qeueDocuments = function qeueDocuments(rootPath, navbar) {
+  for (var _i3 = 0, _Object$keys2 = Object.keys(navbar); _i3 < _Object$keys2.length; _i3++) {
+    var label = _Object$keys2[_i3];
+    var _navbar$label = navbar[label],
+        children = _navbar$label.children,
+        type = _navbar$label.type,
+        path = _navbar$label.path;
+
+    if (type === NavbarItemType.CATEGORY) {
+      qeueDocuments(rootPath, children);
+    } else {
+      documentsToFetch.set(path, _extends({
+        title: label
+      }, navbar[label]));
+      documentQueue.push(path);
+    }
+  }
+
+  if (!fetching) {
+    fetchDocuments(rootPath);
+  }
+};
 
 var dokument = function dokument(container, optionsIn) {
   if (optionsIn === void 0) {
@@ -1185,11 +1592,9 @@ var dokument = function dokument(container, optionsIn) {
 
 var load = function load(options) {
   try {
-    return Promise.resolve(fetchNavbar(join(options.rootPath, options.navbarPath))).then(function (navbar) {
+    return Promise.resolve(fetchNavbar(options.rootPath, options.navbarPath)).then(function (navbar) {
       return Promise.resolve(setNavBar(navbar)).then(function () {
-        return Promise.resolve(fetchDocuments(options.rootPath, navbar)).then(function () {
-          setDocumentsLoaded();
-        });
+        qeueDocuments(options.rootPath, navbar);
       });
     });
   } catch (e) {

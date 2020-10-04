@@ -1,7 +1,5 @@
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useDocContext } from '../../hooks/use_doc_context';
-import { useStoreState } from 'forimmer';
 
 function useHandleSearchFocus(
   searchQuery: string,
@@ -69,34 +67,10 @@ function useHandleSearchFocus(
 }
 
 export function Search(): JSX.Element {
-  const { componentList, dokumentStore } = useDocContext();
-  const { SearchResults } = componentList;
   const [searchQuery, setSearchQuery] = React.useState<string>(null);
   const inputRef = React.useRef<HTMLInputElement>();
 
   useHandleSearchFocus(searchQuery, setSearchQuery, inputRef);
 
-  const [allDocumentsLoaded] = useStoreState(dokumentStore, state => [
-    state.allDocumentsLoaded,
-  ]);
-
-  return (
-    <div className="search">
-      {searchQuery && searchQuery.length > 0 && (
-        <SearchResults searchQuery={searchQuery}></SearchResults>
-      )}
-      <input
-        ref={inputRef}
-        type="text"
-        value={searchQuery}
-        placeholder={
-          allDocumentsLoaded ? 'Search documents' : 'Preparing search...'
-        }
-        onChange={(e: React.SyntheticEvent<HTMLInputElement>) =>
-          setSearchQuery(e.currentTarget.value)
-        }
-        disabled={!allDocumentsLoaded}
-      ></input>
-    </div>
-  );
+  return <></>;
 }

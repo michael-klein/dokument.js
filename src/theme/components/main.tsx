@@ -3,6 +3,7 @@ import { useDocContext } from '../../hooks/use_doc_context';
 import { Switch, Route, useParams } from 'react-router';
 import { useStoreState } from 'forimmer';
 import { setCurrentDocument } from '../../store/docStore';
+
 function RenderArticle() {
   const { componentList, dokumentStore } = useDocContext();
   const { DocumentRenderer } = componentList;
@@ -10,7 +11,10 @@ function RenderArticle() {
     state.documentMap,
     state.currentDocument || null,
   ]);
-  let { slug, headingSlug } = useParams();
+  let { slug, headingSlug } = useParams<{
+    slug: string;
+    headingSlug: string;
+  }>();
   const documentForSlug = !slug
     ? Object.values(documentMap)[0]
     : documentMap[slug];
@@ -30,7 +34,7 @@ export function Main(): JSX.Element {
     <main>
       <article>
         <Switch>
-          <Route path={`/document/:slug?/:headingSlug?`}>
+          <Route path={`/:slug?/:headingSlug?`}>
             <React.Suspense fallback={<Loading></Loading>}>
               <RenderArticle></RenderArticle>
             </React.Suspense>

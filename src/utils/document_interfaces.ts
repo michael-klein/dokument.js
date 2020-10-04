@@ -15,6 +15,7 @@ export interface NavbarItem {
   type: NavbarItemType;
   path?: string;
   slug?: string;
+  headings?: DocumentHeading[];
   children?: Navbar;
 }
 

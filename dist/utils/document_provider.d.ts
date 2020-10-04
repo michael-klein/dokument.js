@@ -1,6 +1,6 @@
-import { DocumentHeading, Navbar, NavbarJSON } from './document_interfaces';
-export declare function findHeadings(document: string): DocumentHeading[];
+import { Navbar, NavbarJSON } from './document_interfaces';
 export declare function buildNavbar(navbarJSON: NavbarJSON): Navbar;
-export declare function fetchNavbar(path: string): Promise<Navbar>;
+export declare function fetchNavbar(rootPath: string, navbarPath: string): Promise<Navbar>;
 export declare function slugify(path: string): string;
-export declare function fetchDocuments(rootPath: string, navbar: Navbar): Promise<void>;
+export declare const fetchDocumentNow: (rootPath: string, path: string) => Promise<void>;
+export declare const qeueDocuments: (rootPath: string, navbar: Navbar) => void;

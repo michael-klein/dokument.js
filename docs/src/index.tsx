@@ -28,7 +28,8 @@ docReady(() =>
           },
         }),
     },
-    navbarPath: 'documents/',
+    navbarPath: '/',
+    rootPath: 'documents/',
     componentList: {
       Branding: ({ children }) => {
         return (

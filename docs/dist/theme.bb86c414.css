@@ -30991,11 +30991,20 @@ div.ant-typography-edit-content.ant-typography-rtl {
   justify-content: center;
 }
 .nav-initials {
+  font-size: 0.7em !important;
+  transform: translateY(-0.2rem);
+  margin-right: 0.75em !important;
+}
+.nav-initials > span {
   border: 1px solid black;
   padding-left: 1px;
   padding-right: 1px;
-  font-size: 0.7em !important;
-  transform: translateY(-0.15rem);
+  width: 1.7em;
+  height: 1.6em;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  display: inline-flex;
 }
 .docs-header {
   background: white;
@@ -31021,6 +31030,24 @@ div.ant-typography-edit-content.ant-typography-rtl {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+article {
+  text-align: justify;
+}
+h1 {
+  font-size: 2em;
+}
+h2 {
+  font-size: 1.6em;
+}
+h3 {
+  font-size: 1.3em;
+}
+h4 {
+  font-size: 1.2em;
+}
+h5 {
+  font-size: 1.1em;
 }
 
 
