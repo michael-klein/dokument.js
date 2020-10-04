@@ -41,6 +41,7 @@ export function buildNavbar(navbarJSON: NavbarJSON): Navbar {
       navbar[title] = {
         type: NavbarItemType.CATEGORY,
         children: buildNavbar(entry),
+        slug: slugify(title),
       };
     } else {
       const slug: string = slugify(entry);

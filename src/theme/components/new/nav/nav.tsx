@@ -1,22 +1,43 @@
 import { Menu } from 'antd';
 import * as React from 'react';
-import { renderNavLevel, NavLevelProps } from './nav_level';
+import {
+  Navbar,
+  NavbarItem,
+  NavbarItemType,
+} from '../../../../utils/document_interfaces';
+import { renderItem } from './nav_level';
 
 export interface NavProps {
-  items: NavLevelProps[];
+  items: Navbar;
 }
+
+const getFirstDocumentItem = (items: Navbar): NavbarItem => {
+  return Object.keys(items)
+    .map(key => items[key])
+    .find(item => {
+      if (item.type === NavbarItemType.DOCUMENT) {
+        return item;
+      } else {
+        return getFirstDocumentItem(item.children);
+      }
+    });
+};
 
 export const Nav = (props: NavProps) => {
   const { items } = props;
   return (
     <Menu
       theme="light"
-      defaultOpenKeys={items.map(item => item.key)}
-      defaultSelectedKeys={[items[0].items[0].key]}
+      defaultOpenKeys={Object.keys(items).map(key => items[key].slug)}
+      defaultSelectedKeys={[getFirstDocumentItem(items).slug]}
       multiple={false}
       mode="inline"
     >
-      {items.map(item => renderNavLevel(item))}
+      {Object.keys(items).map(label =>
+        renderItem(label, {
+          ...items[label],
+        })
+      )}
     </Menu>
   );
 };

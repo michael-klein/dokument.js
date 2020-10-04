@@ -1,22 +1,20 @@
 import { Menu } from 'antd';
 import Icon from '@ant-design/icons';
 import * as React from 'react';
-import { NavItemProps, renderNavItem } from './nav_item';
+import { renderNavItem } from './nav_item';
+import {  NavbarItem, NavbarItemType } from '../../../../utils/document_interfaces';
 
 const { SubMenu } = Menu;
-export interface NavLevelProps {
-  type: 'nav-level';
-  title: string;
-  key: string;
+export interface NavLevelProps extends NavbarItem {
+  label: string;
   icon?: JSX.Element;
-  items: (NavItemProps | NavLevelProps)[];
 }
 
-const renderItem = (item: NavItemProps | NavLevelProps) => {
-  if (item.type === 'nav-item') {
-    return renderNavItem(item);
+export const renderItem = (label:string, item: NavbarItem) => {
+  if (item.type === NavbarItemType.DOCUMENT) {
+    return renderNavItem({...item, label});
   } else {
-    return renderNavLevel(item);
+    return renderNavLevel({...item, label});
   }
 };
 
@@ -26,10 +24,12 @@ const Initials = (props:{label:string}) => {
 }
 
 export const renderNavLevel = (props: NavLevelProps) => {
-  const { items, title, icon, key } = props;
+  const { children, label, icon, slug } = props;
   return (
-    <SubMenu icon={icon ?? <Icon className="nav-initials" component={() => <Initials label={title}></Initials>} />} key={key} title={title}>
-      {items.map(renderItem)}
+    <SubMenu key={slug} icon={icon ?? <Icon className="nav-initials" component={() => <Initials label={label}></Initials>} />}  title={label}>
+      {Object.keys(children).map(label => {
+        return renderItem( label,children[label])
+      })}
     </SubMenu>
   );
 };

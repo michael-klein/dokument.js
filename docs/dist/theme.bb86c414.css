@@ -31013,6 +31013,15 @@ div.ant-typography-edit-content.ant-typography-rtl {
 .docs-header .search-wrapper .ant-select.ant-select-focused {
   width: 500px !important;
 }
+.page_spinner {
+  position: fixed;
+  background: white;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 
 /*# sourceMappingURL=/theme.bb86c414.css.map */

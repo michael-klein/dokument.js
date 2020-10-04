@@ -1,20 +1,18 @@
 import { Menu } from 'antd';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import { NavbarItem } from '../../../../utils/document_interfaces';
 
-export interface NavItemProps {
-  type: 'nav-item';
-  label: string;
-  url: string;
+export interface NavItemProps extends NavbarItem {
   icon?: JSX.Element;
-  key: string;
+  label: string;
 }
 export const renderNavItem = (props: NavItemProps) => {
-  const { label, url, icon, key } = props;
+  const { icon, slug, path, label } = props;
   console.log('item');
   return (
-    <Menu.Item icon={icon} key={key}>
-      <Link to={url}>{label}</Link>
+    <Menu.Item icon={icon} key={slug}>
+      <Link to={path}>{label}</Link>
     </Menu.Item>
   );
 };

@@ -22,6 +22,7 @@ export interface DocsOptions {
 async function load(options: DocsOptions) {
   const navbar = await fetchNavbar(join(options.rootPath, options.navbarPath));
   await setNavBar(navbar);
+  console.log(navbar);
   await fetchDocuments(options.rootPath, navbar);
   setDocumentsLoaded();
 }
