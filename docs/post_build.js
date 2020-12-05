@@ -9,7 +9,7 @@ index = index
 
 writeFileSync('./index.html', index);
 
-copydir.sync('./dist/documents', './documents', {
+copydir.sync('./src/documents', './documents', {
   utimes: true,
   mode: true,
   cover: true,

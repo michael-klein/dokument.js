@@ -4,8 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "parcel src/index.html",
-    "build": "parcel build src/index.html && node post_build.js"
+    "start": "node copy_docs.js && parcel src/index.html",
+    "build": "parcel build src/index.html && node post_build.js && node copy_docs.js"
   },
   "dependencies": {
     "prism-react-renderer": "^1.0.2",

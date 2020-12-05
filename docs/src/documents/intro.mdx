@@ -1,0 +1,22 @@
+# Introduction
+
+## What is this?
+
+Dokument.js is a documentation generator which runs entirely in your browser. It loads and compiles [.mdx](https://mdxjs.com) (markdown + React JSX) documents and displays them in a beautiful documentation website.
+
+Dokument.js is heavily inspired by [docsify](https://docsify.js.org/#/), but aims to use .mdx instead of pure markdown and as such is built with [React](https://reactjs.org) instead of [Vue.js](https://vuejs.org).
+
+## Features
+
+- Leverages the power of React components to enhance your documents
+- Easy to use (just drop it into your file system and point it to some documents)
+- ... but very extensible (Theming, overwriting of Components, plugins...)
+- Written in Typescipt
+
+## Roadmap
+
+Dokument.js is not yet read for prime time, so here's a roadmap of features and improvements that we intend to ship:
+
+- markdown-only mode (no JSX) for smaller bundle sizes
+  - The MDX runtime adds significant overhead to the bundle size, so a mode that uses just a simple markdown compiler is desireable by some users.
+- Explore if there could be a MDX runtime with a significanty smaller memory footprint

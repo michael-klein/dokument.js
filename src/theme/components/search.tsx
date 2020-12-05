@@ -1,10 +1,12 @@
+import { useDocContext } from '../../hooks/use_doc_context';
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
 
 function useHandleSearchFocus(
   searchQuery: string,
   setSearchQuery: (query: string) => void,
-  inputRef: React.MutableRefObject<HTMLInputElement>
+  inputRef: React.MutableRefObject<HTMLInputElement>,
+  containerRef: React.MutableRefObject<HTMLDivElement>
 ) {
   const location = useLocation();
   React.useEffect(() => {
@@ -18,23 +20,13 @@ function useHandleSearchFocus(
   React.useEffect(() => {
     const listener: (event: MouseEvent) => void = event => {
       let target: HTMLElement = event.target as HTMLElement;
-      if (target === document.body) {
+      if (
+        target === document.body ||
+        (target !== containerRef.current &&
+          !containerRef.current.contains(target))
+      ) {
         setSearchQuery(null);
         return;
-      }
-      while (target !== document.body) {
-        if (target instanceof HTMLAnchorElement) {
-          if (
-            target.href.replace(
-              window.location.href.replace(window.location.hash, ''),
-              ''
-            )[0] === '#'
-          ) {
-            setSearchQuery(null);
-            return;
-          }
-        }
-        target = target.parentElement;
       }
     };
     document.body.addEventListener('click', listener);
@@ -67,10 +59,28 @@ function useHandleSearchFocus(
 }
 
 export function Search(): JSX.Element {
+  const { componentList } = useDocContext();
+  const { SearchResults } = componentList;
   const [searchQuery, setSearchQuery] = React.useState<string>(null);
   const inputRef = React.useRef<HTMLInputElement>();
+  const containerRef = React.useRef<HTMLDivElement>();
 
-  useHandleSearchFocus(searchQuery, setSearchQuery, inputRef);
+  useHandleSearchFocus(searchQuery, setSearchQuery, inputRef, containerRef);
 
-  return <></>;
+  return (
+    <div
+      className="flex-auto flex items-center justify-center pl-2 pr-2"
+      ref={containerRef}
+    >
+      <input
+        value={searchQuery ?? null}
+        type="text"
+        placeholder="...search"
+        className="rounded-sm p-1 w-full max-w-md"
+        ref={inputRef}
+        onChange={e => setSearchQuery((e.target as HTMLInputElement).value)}
+      ></input>
+      <SearchResults searchQuery={searchQuery}></SearchResults>
+    </div>
+  );
 }

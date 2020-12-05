@@ -1,2 +1,3 @@
 /// <reference types="react" />
-export declare function Docs(): JSX.Element;
+import './styles/style.css';
+export declare const Docs: () => JSX.Element;

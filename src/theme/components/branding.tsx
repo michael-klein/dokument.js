@@ -1,8 +1,8 @@
 import * as React from 'react';
 
 export interface BrandingProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
-export function Branding(props: BrandingProps): JSX.Element {
-  return <div className="branding">{props.children}</div>;
+export function Branding(): JSX.Element {
+  return <span className="text-xl text-white">dokument.js</span>;
 }

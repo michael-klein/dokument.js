@@ -1,15 +1,14 @@
-import { useState, createElement, createContext, useContext, useEffect, isValidElement, Fragment, Suspense, useRef, useLayoutEffect } from 'react';
+import { createContext, useContext, createElement, useEffect, isValidElement, Fragment, Suspense, useState, useRef, useLayoutEffect } from 'react';
 import { render } from 'react-dom';
 import '@babel/polyfill';
-import { AutoComplete, Input, Menu, Layout, Spin } from 'antd';
-import { Link, HashRouter, useLocation } from 'react-router-dom';
-import Icon, { UserOutlined, ReadOutlined } from '@ant-design/icons';
 import { createStore, useStoreState } from 'forimmer';
 import Fuse from 'fuse.js';
-import { Switch, Route, useParams } from 'react-router';
+import { HashRouter, Link, useLocation, useHistory } from 'react-router-dom';
 import { htmdx } from 'htmdx';
 import innerText from 'react-innertext';
 import scrollIntoView from 'scroll-into-view';
+import { Menu, Layout } from 'antd';
+import { Switch, Route, useParams } from 'react-router';
 import ky from 'ky';
 import removeMarkdown from 'remove-markdown';
 import Highlighter from 'react-highlight-words';
@@ -32,94 +31,57 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
-var renderTitle = function renderTitle(title) {
-  return createElement("span", null, title, createElement("a", {
-    style: {
-      "float": 'right'
-    },
-    href: "https://www.google.com/search?q=antd",
-    target: "_blank",
-    rel: "noopener noreferrer"
-  }, "more"));
-};
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
 
-var renderItem = function renderItem(title, count) {
-  return {
-    value: title,
-    label: createElement("div", {
-      style: {
-        display: 'flex',
-        justifyContent: 'space-between'
-      }
-    }, title, createElement("span", null, createElement(UserOutlined, null), " ", count))
-  };
-};
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
 
-var options = [{
-  label:
-  /*#__PURE__*/
-  renderTitle('Libraries'),
-  options: [
-  /*#__PURE__*/
-  renderItem('AntDesign', 10000),
-  /*#__PURE__*/
-  renderItem('AntDesign UI', 10600)]
-}, {
-  label:
-  /*#__PURE__*/
-  renderTitle('Solutions'),
-  options: [
-  /*#__PURE__*/
-  renderItem('AntDesign UI FAQ', 60100),
-  /*#__PURE__*/
-  renderItem('AntDesign FAQ', 30010)]
-}, {
-  label:
-  /*#__PURE__*/
-  renderTitle('Articles'),
-  options: [
-  /*#__PURE__*/
-  renderItem('AntDesign design language', 100000)]
-}];
-var Search = function Search() {
-  var _React$useState = useState(''),
-      value = _React$useState[0],
-      setValue = _React$useState[1];
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
 
-  return createElement(AutoComplete, {
-    dropdownClassName: "certain-category-search-dropdown",
-    dropdownMatchSelectWidth: 500,
-    open: value.length > 0,
-    onBlur: function onBlur() {
-      return setValue('');
-    },
-    onChange: setValue,
-    value: value,
-    style: {
-      width: 250
-    },
-    options: options
-  }, createElement(Input.Search, {
-    size: "large",
-    placeholder: "Type to search..."
-  }));
-};
+  return arr2;
+}
 
-var dokumentStore =
-/*#__PURE__*/
-createStore({
+function _createForOfIteratorHelperLoose(o, allowArrayLike) {
+  var it;
+
+  if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) {
+    if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+      if (it) o = it;
+      var i = 0;
+      return function () {
+        if (i >= o.length) return {
+          done: true
+        };
+        return {
+          done: false,
+          value: o[i++]
+        };
+      };
+    }
+
+    throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+
+  it = o[Symbol.iterator]();
+  return it.next.bind(it);
+}
+
+var dokumentStore = /*#__PURE__*/createStore({
   documentMap: {}
 });
-var setNavBar =
-/*#__PURE__*/
-dokumentStore.createStoreAction(function (navbar) {
+var setNavBar = /*#__PURE__*/dokumentStore.createStoreAction(function (navbar) {
   return Promise.resolve(function (draft) {
     draft.navbar = navbar;
   });
 });
-var setCurrentDocument =
-/*#__PURE__*/
-dokumentStore.createStoreAction(function (currentDocument) {
+var setCurrentDocument = /*#__PURE__*/dokumentStore.createStoreAction(function (currentDocument) {
   return Promise.resolve(function (draft) {
     draft.currentDocument = currentDocument;
   });
@@ -137,9 +99,7 @@ var findNavbarItem = function findNavbarItem(slug, navbar) {
   });
 };
 
-var addHeadingsToNavbarItem =
-/*#__PURE__*/
-dokumentStore.createStoreAction(function (_ref) {
+var addHeadingsToNavbarItem = /*#__PURE__*/dokumentStore.createStoreAction(function (_ref) {
   var slug = _ref.slug,
       headings = _ref.headings;
   return Promise.resolve(function (draft) {
@@ -150,17 +110,13 @@ dokumentStore.createStoreAction(function (_ref) {
     }
   });
 });
-var addDocument =
-/*#__PURE__*/
-dokumentStore.createStoreAction(function (document) {
+var addDocument = /*#__PURE__*/dokumentStore.createStoreAction(function (document) {
   return Promise.resolve(function (draft) {
     draft.documentMap[document.slug] = document;
   });
 });
 
-var fuse =
-/*#__PURE__*/
-new Fuse([], {
+var fuse = /*#__PURE__*/new Fuse([], {
   includeScore: true,
   keys: ['content'],
   minMatchCharLength: 3,
@@ -208,175 +164,18 @@ var docContextValue = {
   htmdxOptions: {},
   scrollContainerSelector: 'main'
 };
-var docContext =
-/*#__PURE__*/
-createContext(docContextValue);
+var docContext = /*#__PURE__*/createContext(docContextValue);
 
 function useDocContext() {
   return useContext(docContext);
 }
 
-var Logo = function Logo(props) {
-  var collapsed = props.collapsed;
-  return createElement("div", {
-    className: "logo " + (collapsed && 'collapsed')
-  }, createElement(ReadOutlined, null), !collapsed && 'Docs');
-};
-
-var NavbarItemType;
-
-(function (NavbarItemType) {
-  NavbarItemType[NavbarItemType["CATEGORY"] = 0] = "CATEGORY";
-  NavbarItemType[NavbarItemType["DOCUMENT"] = 1] = "DOCUMENT";
-})(NavbarItemType || (NavbarItemType = {}));
-
-var renderNavItem = function renderNavItem(props) {
-  var icon = props.icon,
-      slug = props.slug,
-      label = props.label;
-  return createElement(Menu.Item, {
-    icon: icon,
-    key: slug
-  }, createElement(Link, {
-    to: "/" + slug
-  }, label));
-};
-
-var Initials = function Initials(props) {
-  var initials = props.label.split(' ').map(function (s) {
-    return s[0];
-  }).slice(0, 2).join('').toUpperCase();
-  return createElement("span", {
-    role: "img"
-  }, initials);
-};
-
-var renderInitials = function renderInitials(label) {
-  return createElement(Icon, {
-    className: "nav-initials",
-    component: function component() {
-      return createElement(Initials, {
-        label: label
-      });
-    }
-  });
-};
-
-var SubMenu = Menu.SubMenu;
-var renderNavItemGroup = function renderNavItemGroup(props) {
-  var slug = props.slug,
-      headings = props.headings,
-      label = props.label,
-      icon = props.icon;
-  return createElement(SubMenu, {
-    key: slug,
-    icon: icon || renderInitials(label),
-    title: label
-  }, headings.map(function (heading) {
-    return renderNavItem({
-      label: heading.text,
-      slug: slug + "/" + heading.slug,
-      type: NavbarItemType.DOCUMENT
-    });
-  }));
-};
-
-var SubMenu$1 = Menu.SubMenu;
-var renderItem$1 = function renderItem(label, item) {
-  if (item.type === NavbarItemType.DOCUMENT) {
-    if (item.headings) {
-      return renderNavItemGroup(_extends({}, item, {
-        label: label
-      }));
-    } else {
-      return renderNavItem(_extends({}, item, {
-        label: label
-      }));
-    }
-  } else {
-    return renderNavLevel(_extends({}, item, {
-      label: label
-    }));
-  }
-};
-var renderNavLevel = function renderNavLevel(props) {
-  var children = props.children,
-      label = props.label,
-      icon = props.icon,
-      slug = props.slug;
-  return createElement(SubMenu$1, {
-    key: slug,
-    icon: icon || renderInitials(label),
-    title: label
-  }, Object.keys(children).map(function (label) {
-    return renderItem$1(label, children[label]);
-  }));
-};
-
-var getFirstDocumentItem = function getFirstDocumentItem(items) {
-  return Object.keys(items).map(function (key) {
-    return items[key];
-  }).find(function (item) {
-    if (item.type === NavbarItemType.DOCUMENT) {
-      return item;
-    } else {
-      return getFirstDocumentItem(item.children);
-    }
-  });
-};
-
-var Nav = function Nav(props) {
-  var items = props.items;
-  return createElement(Menu, {
-    theme: "light",
-    defaultOpenKeys: Object.keys(items).map(function (key) {
-      return items[key].slug;
-    }),
-    defaultSelectedKeys: [getFirstDocumentItem(items).slug],
-    multiple: false,
-    mode: "inline"
-  }, Object.keys(items).map(function (label) {
-    return renderItem$1(label, _extends({}, items[label]));
-  }));
-};
-
-var Sider = Layout.Sider;
-var SideBar = function SideBar(props) {
-  var collapsed = props.collapsed,
-      onCollapse = props.onCollapse;
-
+var Docs = function Docs() {
   var _useDocContext = useDocContext(),
-      dokumentStore = _useDocContext.dokumentStore;
+      componentList = _useDocContext.componentList;
 
-  var _useStoreState = useStoreState(dokumentStore, function (state) {
-    return [state.navbar];
-  }),
-      navbar = _useStoreState[0];
-
-  return createElement(Sider, {
-    collapsible: true,
-    theme: "light",
-    collapsed: collapsed,
-    onCollapse: onCollapse,
-    style: {
-      overflow: 'auto',
-      height: '100vh',
-      position: 'fixed',
-      left: 0
-    }
-  }, createElement(Logo, {
-    collapsed: collapsed
-  }), createElement(Nav, {
-    items: navbar
-  }));
-};
-
-var PageSpinner = function PageSpinner() {
-  return createElement("div", {
-    className: "page_spinner"
-  }, createElement(Spin, {
-    size: "large"
-  }));
+  var Header = componentList.Header;
+  return createElement(HashRouter, null, createElement(Header, null));
 };
 
 function LastChanged(props) {
@@ -386,9 +185,7 @@ function LastChanged(props) {
 }
 
 var hCount = 0;
-var mdxContext =
-/*#__PURE__*/
-createContext({});
+var mdxContext = /*#__PURE__*/createContext({});
 var components = {
   Demo: function Demo() {
     return createElement("h1", null, "This is a demo component");
@@ -433,193 +230,6 @@ function DocumentRenderer(props) {
 
   var PreviousAndNext = componentList.PreviousAndNext;
   var Provider = mdxContext.Provider;
-
-  var _useStoreState = useStoreState(dokumentStore, function (state) {
-    return [state.documentMap, state.currentDocument];
-  }),
-      documentMap = _useStoreState[0],
-      currentDocument = _useStoreState[1];
-
-  useEffect(function () {
-    var heading = document.getElementById(props.headingSlug);
-
-    if (heading) {
-      var scrollTarget = heading.parentElement.firstElementChild === heading ? document.querySelector('main') : heading;
-      scrollIntoView(scrollTarget, {
-        align: {
-          top: 0
-        }
-      });
-    }
-  }, [props.headingSlug, currentDocument]);
-  var previous;
-  var next;
-
-  if (currentDocument) {
-    var slugs = Object.keys(documentMap);
-    var docIndex = slugs.indexOf(currentDocument.slug);
-
-    if (docIndex > 0) {
-      previous = documentMap[slugs[docIndex - 1]];
-    }
-
-    if (docIndex < slugs.length - 1) {
-      next = documentMap[slugs[docIndex + 1]];
-    }
-  }
-
-  return createElement(Provider, {
-    value: {
-      currentDocument: currentDocument
-    }
-  }, createElement(PreviousAndNext, {
-    previous: previous,
-    next: next
-  }), createElement("div", null, htmdx(currentDocument.content, createElement, _extends({}, htmdxOptions, {
-    components: _extends({}, components, {}, htmdxOptions.components)
-  }))), createElement(PreviousAndNext, {
-    previous: previous,
-    next: next
-  }), currentDocument.lastModified > -1 && createElement(LastChanged, {
-    timestamp: currentDocument.lastModified
-  }));
-}
-
-function RenderArticle() {
-  var _useDocContext = useDocContext(),
-      dokumentStore = _useDocContext.dokumentStore;
-
-  var _useStoreState = useStoreState(dokumentStore, function (state) {
-    return [state.documentMap, state.currentDocument || null];
-  }),
-      documentMap = _useStoreState[0];
-
-  var _useParams = useParams(),
-      slug = _useParams.slug,
-      headingSlug = _useParams.headingSlug;
-
-  var documentForSlug = !slug ? Object.values(documentMap)[0] : documentMap[slug];
-
-  if (!headingSlug && documentForSlug) {
-    headingSlug = documentForSlug.headings[0].slug;
-  }
-
-  useEffect(function () {
-    if (documentForSlug) {
-      setCurrentDocument(documentForSlug);
-    }
-  }, [slug, documentForSlug]);
-  return createElement(DocumentRenderer, {
-    slug: slug,
-    headingSlug: headingSlug
-  });
-}
-
-function Main() {
-  return createElement(Fragment, null, createElement("article", null, createElement(Switch, null, createElement(Route, {
-    path: "/:slug?/:headingSlug?"
-  }, createElement(Suspense, {
-    fallback: createElement(Fragment, null)
-  }, createElement(RenderArticle, null))), createElement(Route, {
-    path: "/"
-  }, createElement(Suspense, {
-    fallback: createElement(Fragment, null)
-  }, createElement(RenderArticle, null))))));
-}
-
-var Header = Layout.Header,
-    Content = Layout.Content;
-var Docs = function Docs() {
-  var _React$useState = useState(false),
-      collapsed = _React$useState[0],
-      setCollapsed = _React$useState[1];
-
-  return createElement(HashRouter, null, createElement(Suspense, {
-    fallback: createElement(PageSpinner, null)
-  }, createElement(Layout, null, createElement(SideBar, {
-    collapsed: collapsed,
-    onCollapse: setCollapsed
-  }), createElement(Layout, {
-    className: "site-layout",
-    style: {
-      marginLeft: collapsed ? 80 : 200,
-      minHeight: '100vh',
-      transition: 'all 0.2s'
-    }
-  }, createElement(Header, {
-    className: "site-layout-background docs-header",
-    style: {
-      padding: 0,
-      position: 'fixed',
-      width: "calc(100% - " + (collapsed ? 80 : 200) + "px)"
-    }
-  }, createElement("span", {
-    className: "search-wrapper"
-  }, createElement(Search, null))), createElement(Content, {
-    className: "site-layout-background",
-    style: {
-      margin: '24px 16px',
-      padding: 24,
-      minHeight: 280,
-      marginTop: '70px'
-    }
-  }, createElement(Main, null))))));
-};
-
-function LastChanged$1(props) {
-  return createElement("div", {
-    className: "last-changed"
-  }, createElement("div", null, "last changed: "), createElement("div", null, new Date(props.timestamp).toLocaleString()));
-}
-
-var hCount$1 = 0;
-var mdxContext$1 =
-/*#__PURE__*/
-createContext({});
-var components$1 = {
-  Demo: function Demo() {
-    return createElement("h1", null, "This is a demo component");
-  }
-};
-['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].forEach(function (h) {
-  var Component = function Component(props) {
-    var _React$useContext = useContext(mdxContext$1),
-        currentDocument = _React$useContext.currentDocument;
-
-    var check = props.children;
-
-    if (check instanceof Array) {
-      check = createElement('div', {
-        children: props.children
-      });
-    }
-
-    var text = isValidElement(check) ? innerText(check) : props.children;
-    var heading = currentDocument.headings.find(function (heading) {
-      return text.toString().includes(heading.text);
-    });
-    return createElement(h, {
-      key: h + hCount$1++,
-      id: heading && heading.slug,
-      children: [createElement(Fragment, null, heading ? createElement(Link, {
-        to: "" + heading.slug
-      }, heading.text) : props.children)]
-    });
-  };
-
-  components$1[h] = Component;
-});
-function DocumentRenderer$1(props) {
-  var _useDocContext = useDocContext(),
-      componentList = _useDocContext.componentList,
-      _useDocContext$htmdxO = _useDocContext.htmdxOptions,
-      htmdxOptions = _useDocContext$htmdxO === void 0 ? {
-    components: {}
-  } : _useDocContext$htmdxO,
-      dokumentStore = _useDocContext.dokumentStore;
-
-  var PreviousAndNext = componentList.PreviousAndNext;
-  var Provider = mdxContext$1.Provider;
 
   var _useDocContext2 = useDocContext(),
       scrollContainerSelector = _useDocContext2.scrollContainerSelector;
@@ -669,16 +279,16 @@ function DocumentRenderer$1(props) {
     previous: previous,
     next: next
   }), createElement("div", null, htmdx(currentDocument.content, createElement, _extends({}, htmdxOptions, {
-    components: _extends({}, components$1, {}, htmdxOptions.components)
+    components: _extends({}, components, htmdxOptions.components)
   }))), createElement(PreviousAndNext, {
     previous: previous,
     next: next
-  }), currentDocument.lastModified > -1 && createElement(LastChanged$1, {
+  }), currentDocument.lastModified > -1 && createElement(LastChanged, {
     timestamp: currentDocument.lastModified
   }));
 }
 
-function Nav$1() {
+function Nav() {
   var _useDocContext = useDocContext(),
       dokumentStore = _useDocContext.dokumentStore;
 
@@ -696,18 +306,18 @@ function Nav$1() {
   }));
 }
 
-var Sider$1 = Layout.Sider;
-function SideBar$1() {
+var Sider = Layout.Sider;
+function SideBar() {
   var _useDocContext = useDocContext(),
       componentList = _useDocContext.componentList;
 
   var Nav = componentList.Nav;
   return createElement(Suspense, {
     fallback: ""
-  }, createElement(Sider$1, null, createElement(Nav, null)));
+  }, createElement(Sider, null, createElement(Nav, null)));
 }
 
-function RenderArticle$1() {
+function RenderArticle() {
   var _useDocContext = useDocContext(),
       componentList = _useDocContext.componentList,
       dokumentStore = _useDocContext.dokumentStore;
@@ -735,20 +345,20 @@ function RenderArticle$1() {
   });
 }
 
-function Main$1() {
+function Main() {
   var Loading = useDocContext().componentList.Loading;
   return createElement("main", null, createElement("article", null, createElement(Switch, null, createElement(Route, {
     path: "/:slug?/:headingSlug?"
   }, createElement(Suspense, {
     fallback: createElement(Loading, null)
-  }, createElement(RenderArticle$1, null))), createElement(Route, {
+  }, createElement(RenderArticle, null))), createElement(Route, {
     path: "/"
   }, createElement(Suspense, {
     fallback: createElement(Loading, null)
-  }, createElement(RenderArticle$1, null))))));
+  }, createElement(RenderArticle, null))))));
 }
 
-function useHandleSearchFocus(searchQuery, setSearchQuery, inputRef) {
+function useHandleSearchFocus(searchQuery, setSearchQuery, inputRef, containerRef) {
   var location = useLocation();
   useEffect(function () {
     setSearchQuery(null);
@@ -762,20 +372,9 @@ function useHandleSearchFocus(searchQuery, setSearchQuery, inputRef) {
     var listener = function listener(event) {
       var target = event.target;
 
-      if (target === document.body) {
+      if (target === document.body || target !== containerRef.current && !containerRef.current.contains(target)) {
         setSearchQuery(null);
         return;
-      }
-
-      while (target !== document.body) {
-        if (target instanceof HTMLAnchorElement) {
-          if (target.href.replace(window.location.href.replace(window.location.hash, ''), '')[0] === '#') {
-            setSearchQuery(null);
-            return;
-          }
-        }
-
-        target = target.parentElement;
       }
     };
 
@@ -808,14 +407,34 @@ function useHandleSearchFocus(searchQuery, setSearchQuery, inputRef) {
   }, [inputRef.current]);
 }
 
-function Search$1() {
+function Search() {
+  var _useDocContext = useDocContext(),
+      componentList = _useDocContext.componentList;
+
+  var SearchResults = componentList.SearchResults;
+
   var _React$useState = useState(null),
       searchQuery = _React$useState[0],
       setSearchQuery = _React$useState[1];
 
   var inputRef = useRef();
-  useHandleSearchFocus(searchQuery, setSearchQuery, inputRef);
-  return createElement(Fragment, null);
+  var containerRef = useRef();
+  useHandleSearchFocus(searchQuery, setSearchQuery, inputRef, containerRef);
+  return createElement("div", {
+    className: "flex-auto flex items-center justify-center pl-2 pr-2",
+    ref: containerRef
+  }, createElement("input", {
+    value: searchQuery != null ? searchQuery : null,
+    type: "text",
+    placeholder: "...search",
+    className: "rounded-sm p-1 w-full max-w-md",
+    ref: inputRef,
+    onChange: function onChange(e) {
+      return setSearchQuery(e.target.value);
+    }
+  }), createElement(SearchResults, {
+    searchQuery: searchQuery
+  }));
 }
 
 var getJSON = function getJSON(filePath) {
@@ -891,6 +510,13 @@ function PreviousAndNext(props) {
   }, next.title))));
 }
 
+var NavbarItemType;
+
+(function (NavbarItemType) {
+  NavbarItemType[NavbarItemType["CATEGORY"] = 0] = "CATEGORY";
+  NavbarItemType[NavbarItemType["DOCUMENT"] = 1] = "DOCUMENT";
+})(NavbarItemType || (NavbarItemType = {}));
+
 function NavItem(props) {
   var _useDocContext = useDocContext(),
       dokumentStore = _useDocContext.dokumentStore,
@@ -928,7 +554,7 @@ function NavItem(props) {
   }));
 }
 
-var SubMenu$2 = Menu.SubMenu;
+var SubMenu = Menu.SubMenu;
 function NavLevel(props) {
   var navbar = props.navbar;
 
@@ -949,7 +575,7 @@ function NavLevel(props) {
   var docArray = Object.values(docMap);
   var prevDocument = docArray[0]; //const getTo = useGetTo();
 
-  return createElement(SubMenu$2, null, titles.map(function (title) {
+  return createElement(SubMenu, null, titles.map(function (title) {
     var _navbar$title = navbar[title],
         type = _navbar$title.type,
         children = _navbar$title.children,
@@ -1017,16 +643,42 @@ function SearchResults(props) {
       documentMap = _useStoreState[0];
 
   var result = useSearch(searchQuery);
-  return createElement("div", {
-    className: 'search-results'
-  }, createElement("h1", null, "Listing ", result.length, " document", result.length !== 1 ? 's' : '', " with search results for ", searchQuery, ":"), createElement("ul", null, result.map(function (r) {
+  return createElement(Fragment, null, result.length > 0 && createElement("div", {
+    className: "bg-white shadow overflow-hidden sm:rounded-lg fixed top-20 max-w-4xl w-full"
+  }, createElement("div", {
+    className: "px-4 py-5 sm:px-6"
+  }, createElement("h3", {
+    className: "text-lg leading-6 font-medium text-gray-900"
+  }, "Search Results")), createElement("div", {
+    className: "border-t border-gray-200"
+  }, createElement("dl", null, result.map(function (r, index) {
     var doc = documentMap[r.slug];
     return createElement(SearchResultsItem, {
       doc: doc,
+      index: index,
       searchQuery: searchQuery
     });
-  })));
+  })))));
 }
+/*
+<h1>
+Listing {result.length} document{result.length !== 1 ? 's' : ''} with
+search results for {searchQuery}:
+</h1>
+<ul>
+{result.map(r => {
+  const doc = documentMap[r.slug];
+  return (
+    <SearchResultsItem
+      doc={doc}
+      searchQuery={searchQuery}
+    ></SearchResultsItem>
+  );
+})}
+</ul>
+</div>
+);
+*/
 
 function getSentencesWithSearchResults(text, searchWords) {
   return text.split(/[.?!\n]/).filter(function (n) {
@@ -1036,18 +688,26 @@ function getSentencesWithSearchResults(text, searchWords) {
 
 function SearchResultsItem(props) {
   var doc = props.doc,
-      searchQuery = props.searchQuery;
+      searchQuery = props.searchQuery,
+      index = props.index;
   var getTo = useGetTo();
-  return createElement("li", {
-    key: doc.slug
-  }, createElement("label", null, createElement(Link, {
-    to: getTo(doc)[0]
+  var history = useHistory();
+  return createElement("div", {
+    className: "cursor-pointer px-4 py-5 sm:grid sm:grid-cols-8 sm:gap-4 sm:px-6 " + (index % 2 ? 'bg-white' : 'bg-gray-50'),
+    key: doc.slug,
+    onClick: function onClick() {
+      history.push(getTo(doc)[0]);
+    }
+  }, createElement("dt", {
+    className: "text-sm font-medium text-gray-500"
   }, createElement(Highlighter, {
     highlightClassName: "search-highlight",
     searchWords: [searchQuery],
     autoEscape: true,
     textToHighlight: doc.title
-  }))), getSentencesWithSearchResults(removeMarkdown(doc.content), [searchQuery]).map(function (item) {
+  })), createElement("dd", {
+    className: "mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-7"
+  }, getSentencesWithSearchResults(removeMarkdown(doc.content), [searchQuery]).map(function (item) {
     return createElement("pre", {
       key: item
     }, createElement(Highlighter, {
@@ -1056,7 +716,7 @@ function SearchResultsItem(props) {
       autoEscape: true,
       textToHighlight: item
     }));
-  }));
+  })));
 }
 
 function Loading() {
@@ -1075,10 +735,10 @@ function Loading() {
   })));
 }
 
-function Branding(props) {
-  return createElement("div", {
-    className: "branding"
-  }, props.children);
+function Branding() {
+  return createElement("span", {
+    className: "text-xl text-white"
+  }, "dokument.js");
 }
 
 function Recent() {
@@ -1134,34 +794,72 @@ function Recent() {
   })));
 }
 
-function Header$1() {
+function Header() {
   var _useDocContext = useDocContext(),
-      componentList = _useDocContext.componentList,
-      title = _useDocContext.title;
+      componentList = _useDocContext.componentList;
 
-  var Search = componentList.Search,
-      Branding = componentList.Branding;
+  var Branding = componentList.Branding,
+      Search = componentList.Search;
   return createElement("header", {
-    className: "header"
-  }, createElement(Branding, null, title), createElement(Search, null));
+    className: "bg-gray-800"
+  }, createElement("div", {
+    className: "max-w-7xl mx-auto px-2 sm:px-6 lg:px-8"
+  }, createElement("div", {
+    className: "relative flex items-center justify-between h-16"
+  }, createElement("div", {
+    className: "absolute inset-y-0 left-0 flex items-center sm:hidden"
+  }, createElement("button", {
+    className: "inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white",
+    "aria-expanded": "false"
+  }, createElement("span", {
+    className: "sr-only"
+  }, "Open main menu"), createElement("svg", {
+    className: "block h-6 w-6",
+    xmlns: "http://www.w3.org/2000/svg",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    "aria-hidden": "true"
+  }, createElement("path", {
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "M4 6h16M4 12h16M4 18h16"
+  })), createElement("svg", {
+    className: "hidden h-6 w-6",
+    xmlns: "http://www.w3.org/2000/svg",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    "aria-hidden": "true"
+  }, createElement("path", {
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "stroke-width": "2",
+    d: "M6 18L18 6M6 6l12 12"
+  })))), createElement("div", {
+    className: "flex-1 flex items-center justify-center sm:items-stretch sm:justify-start"
+  }, createElement("div", {
+    className: "flex-shrink-0 flex items-center"
+  }, createElement(Branding, null)), createElement(Search, null)))));
 }
 
 var componentListValue = {
-  DocumentRenderer: DocumentRenderer$1,
+  DocumentRenderer: DocumentRenderer,
   NavItem: NavItem,
   NavLevel: NavLevel,
-  Nav: Nav$1,
-  SideBar: SideBar$1,
-  Main: Main$1,
-  Search: Search$1,
+  Nav: Nav,
+  SideBar: SideBar,
+  Main: Main,
+  Search: Search,
   PreviousAndNext: PreviousAndNext,
   SearchResults: SearchResults,
   SearchResultsItem: SearchResultsItem,
   Loading: Loading,
   Branding: Branding,
-  LastChanged: LastChanged$1,
+  LastChanged: LastChanged,
   Recent: Recent,
-  Header: Header$1
+  Header: Header
 };
 
 // A type of promise-like that resolves synchronously and supports only one observer
@@ -1342,19 +1040,8 @@ function findHeadings(document) {
   var headings = [];
   var i = 0;
 
-  for (var _iterator = parts, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-    var _ref;
-
-    if (_isArray) {
-      if (_i >= _iterator.length) break;
-      _ref = _iterator[_i++];
-    } else {
-      _i = _iterator.next();
-      if (_i.done) break;
-      _ref = _i.value;
-    }
-
-    var part = _ref;
+  for (var _iterator = _createForOfIteratorHelperLoose(parts), _step; !(_step = _iterator()).done;) {
+    var part = _step.value;
 
     if (part.trim()[0] === '#') {
       var size = 1;
@@ -1388,8 +1075,8 @@ var fetchNavbar = function fetchNavbar(rootPath, navbarPath) {
 function buildNavbar(navbarJSON) {
   var navbar = {};
 
-  for (var _i2 = 0, _Object$keys = Object.keys(navbarJSON); _i2 < _Object$keys.length; _i2++) {
-    var title = _Object$keys[_i2];
+  for (var _i = 0, _Object$keys = Object.keys(navbarJSON); _i < _Object$keys.length; _i++) {
+    var title = _Object$keys[_i];
     var entry = navbarJSON[title];
 
     if (typeof entry === 'object') {
@@ -1420,9 +1107,7 @@ function slugify(path) {
 }
 var fetching = false;
 var documentQueue = [];
-var documentsToFetch =
-/*#__PURE__*/
-new Map();
+var documentsToFetch = /*#__PURE__*/new Map();
 var fetchingDocuments = [];
 var fetchDocumentNow = function fetchDocumentNow(rootPath, path) {
   try {
@@ -1536,8 +1221,8 @@ var fetchDocuments = function fetchDocuments(rootPath) {
 };
 
 var qeueDocuments = function qeueDocuments(rootPath, navbar) {
-  for (var _i3 = 0, _Object$keys2 = Object.keys(navbar); _i3 < _Object$keys2.length; _i3++) {
-    var label = _Object$keys2[_i3];
+  for (var _i2 = 0, _Object$keys2 = Object.keys(navbar); _i2 < _Object$keys2.length; _i2++) {
+    var label = _Object$keys2[_i2];
     var _navbar$label = navbar[label],
         children = _navbar$label.children,
         type = _navbar$label.type,
@@ -1570,14 +1255,14 @@ var dokument = function dokument(container, optionsIn) {
       htmdxOptions: _extends({}, optionsIn.htmdxOptions),
       navbarPath: ''
     }, optionsIn, {
-      componentList: _extends({}, componentListValue, {}, optionsIn.componentList || {})
+      componentList: _extends({}, componentListValue, optionsIn.componentList || {})
     });
 
     document.title = options.title;
     load(options);
     var Provider = docContext.Provider;
     render(createElement(Provider, {
-      value: _extends({}, docContextValue, {}, options)
+      value: _extends({}, docContextValue, options)
     }, createElement(Docs, null)), container);
     return Promise.resolve();
   } catch (e) {
@@ -1597,9 +1282,7 @@ var load = function load(options) {
   }
 };
 
-var defaultComponentList =
-/*#__PURE__*/
-_extends({}, componentListValue);
+var defaultComponentList = /*#__PURE__*/_extends({}, componentListValue);
 
 export { defaultComponentList, dokument };
 //# sourceMappingURL=dokument.js.esm.js.map

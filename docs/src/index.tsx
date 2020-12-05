@@ -30,24 +30,6 @@ docReady(() =>
     },
     navbarPath: '/',
     rootPath: 'documents/',
-    componentList: {
-      Branding: ({ children }) => {
-        return (
-          <div className="branding">
-            {children}
-            <div className="license">
-              <img
-                alt="GitHub"
-                src="https://img.shields.io/github/license/michael-klein/dokument.js?color=%232580b3&style=flat-square"
-              />
-              <img
-                alt="GitHub last commit"
-                src="https://img.shields.io/github/last-commit/michael-klein/dokument.js?color=%232580b3&style=flat-square"
-              ></img>
-            </div>
-          </div>
-        );
-      },
-    },
+    componentList: {},
   })
 );
