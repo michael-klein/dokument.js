@@ -21,7 +21,7 @@ async function load(options: DocsOptions) {
 const Test = () => {
   const docState = useDocs(state => state);
   console.log(docState);
-  return <div>hi </div>;
+  return <div>hiho </div>;
 };
 
 export const dokument = async (

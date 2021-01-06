@@ -1,4 +1,4 @@
-import { dokument } from "../build/src/index.js";
+import { dokument } from "../build/lib/index.js";
 
 dokument({
   navbarPath: "/",

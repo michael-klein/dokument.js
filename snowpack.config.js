@@ -8,5 +8,19 @@ module.exports = {
   // installOptions: {},
   // devOptions: {},
   // buildOptions: {},
-  exclude: ["**/docs/**/*"]
+  exclude: ["**/docs/**/*"],
+  plugins: [
+    [
+      "snowpack-plugin-rollup-bundle",
+      {
+        entrypoints: "build/lib/index.js",
+        extendConfig: config => {
+          config.outputOptions.entryFileNames = "[name].js";
+          config.outputOptions.chunkFileNames = "[name].js";
+
+          return config;
+        }
+      }
+    ]
+  ]
 };
