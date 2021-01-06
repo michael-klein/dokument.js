@@ -11,6 +11,8 @@ module.exports = {
   exclude: ["**/docs/**/*"],
   plugins: [
     [
+      "@snowpack/plugin-build-script",
+      { cmd: "npx postcss", input: [".css"], output: [".css"] },
       "snowpack-plugin-rollup-bundle",
       {
         entrypoints: "build/lib/index.js",

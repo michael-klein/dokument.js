@@ -10,15 +10,11 @@ export const createStoreHook = <
   const useStore = <Producer extends (state: State) => any>(
     producer: Producer
   ): ReturnType<Producer> => {
-    const { getState } = store;
+    const { getState, subscribe } = store;
     const [currentState, setCurrentState] = useState(() =>
       producer(getState())
     );
-    useEffect(() => {
-      console.log(store);
-      const { subscribe } = store;
-      return subscribe(setCurrentState, producer, shallow);
-    }, [store]);
+    useEffect(() => subscribe(setCurrentState, producer, shallow), []);
     return currentState;
   };
   return useStore;
