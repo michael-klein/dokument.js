@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "htmdx": "^0.3.5",
+    "immer": "^8.0.0",
     "ky": "^0.25.1",
     "preact": "^10.5.9",
     "remove-markdown": "^0.3.0",

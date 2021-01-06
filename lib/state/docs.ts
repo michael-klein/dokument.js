@@ -7,6 +7,7 @@ import {
   DocumentHeading,
   NavbarItem
 } from "../utils/document_interfaces";
+import produce from "immer";
 
 const findNavbarItem = (slug: string, navbar: Navbar): NavbarItem => {
   return Object.keys(navbar)
@@ -29,26 +30,32 @@ export type DocState = {
 };
 export const docs = create<DocState>(set => ({
   setNavBar: (navbar: Navbar) =>
-    set(state => {
-      state.navbar = navbar;
-      return state;
-    }),
+    set(
+      produce(state => {
+        state.navbar = navbar;
+        return state;
+      })
+    ),
   addDocument: (document: DocumentData) =>
-    set(state => {
-      if (!state.documents) {
-        state.documents = {};
-      }
-      state.documents[document.slug] = document;
-      return state;
-    }),
+    set(
+      produce(state => {
+        if (!state.documents) {
+          state.documents = {};
+        }
+        state.documents[document.slug] = document;
+        return state;
+      })
+    ),
   addHeadingsToNavbarItem: (slug: string, headings: DocumentHeading[]) =>
-    set(state => {
-      const item = findNavbarItem(slug, state.navbar);
-      if (item) {
-        item.headings = headings;
-      }
-      return state;
-    })
+    set(
+      produce(state => {
+        const item = findNavbarItem(slug, state.navbar);
+        if (item) {
+          item.headings = headings;
+        }
+        return state;
+      })
+    )
 }));
 
 export const useDocs = createStoreHook(docs);
