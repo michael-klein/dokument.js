@@ -1,23 +1,23 @@
-import { getFile, getJSON, join, getHeaders } from './file_utils';
-import removeMarkdown from 'remove-markdown';
-import { addDocument, addHeadingsToNavbarItem } from '../store/docStore';
+import { getFile, getJSON, join, getHeaders } from "./file_utils";
+import removeMarkdown from "remove-markdown";
 import {
   DocumentHeading,
   Navbar,
   NavbarJSON,
   NavbarItemType,
   DocumentData,
-  NavbarItem,
-} from './document_interfaces';
+  NavbarItem
+} from "./document_interfaces";
+import { docs } from "../state/docs";
 
 function findHeadings(document: string): DocumentHeading[] {
   const parts: string[] = document.split(/\n/g);
   const headings: DocumentHeading[] = [];
   let i: number = 0;
   for (const part of parts) {
-    if (part.trim()[0] === '#') {
+    if (part.trim()[0] === "#") {
       let size: number = 1;
-      while (part[size] && part[size] === '#') {
+      while (part[size] && part[size] === "#") {
         size++;
       }
       let text: string = removeMarkdown(part);
@@ -26,7 +26,7 @@ function findHeadings(document: string): DocumentHeading[] {
         size,
         text,
         raw: part,
-        slug: `${i}-${slugify(text)}`,
+        slug: `${i}-${slugify(text)}`
       });
       i++;
     }
@@ -38,18 +38,18 @@ export function buildNavbar(navbarJSON: NavbarJSON): Navbar {
   let navbar: Navbar = {};
   for (const title of Object.keys(navbarJSON)) {
     const entry: string | NavbarJSON = navbarJSON[title];
-    if (typeof entry === 'object') {
+    if (typeof entry === "object") {
       navbar[title] = {
         type: NavbarItemType.CATEGORY,
         children: buildNavbar(entry),
-        slug: slugify(title),
+        slug: slugify(title)
       };
     } else {
       const slug: string = slugify(entry);
       navbar[title] = {
         type: NavbarItemType.DOCUMENT,
         slug: slug,
-        path: entry,
+        path: entry
       };
     }
   }
@@ -61,29 +61,29 @@ export async function fetchNavbar(
   navbarPath: string
 ): Promise<Navbar> {
   const navbarJSON: NavbarJSON = await getJSON<NavbarJSON>(
-    join(join(rootPath, navbarPath), 'navbar.docs.json')
+    join(join(rootPath, navbarPath), "navbar.docs.json")
   );
   return buildNavbar(navbarJSON);
 }
 
 export function slugify(path: string): string {
   const a =
-    'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;';
+    "àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;";
   const b =
-    'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnooooooooprrsssssttuuuuuuuuuwxyyzzz------';
-  const p = new RegExp(a.split('').join('|'), 'g');
+    "aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnooooooooprrsssssttuuuuuuuuuwxyyzzz------";
+  const p = new RegExp(a.split("").join("|"), "g");
 
   return path
     .toString()
     .toLowerCase()
-    .replace(/.mdx/g, '')
-    .replace(/\s+/g, '-')
+    .replace(/.mdx/g, "")
+    .replace(/\s+/g, "-")
     .replace(p, c => b.charAt(a.indexOf(c)))
-    .replace(/&/g, '-and-')
-    .replace(/[^\w\-]+/g, '')
-    .replace(/\-\-+/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '');
+    .replace(/&/g, "-and-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
 }
 let fetching = false;
 
@@ -99,12 +99,12 @@ export const fetchDocumentNow = async (rootPath: string, path: string) => {
     documentsToFetch.delete(path);
     const docPath = join(rootPath, path);
     try {
-      let document: DocumentData = JSON.parse(localStorage.getItem(slug));
+      let document: DocumentData = docs.getState().documents?.[slug];
       let headers: Headers;
       try {
         headers = await getHeaders(docPath);
       } catch (e) {}
-      const lastModified: string = headers && headers.get('last-modified');
+      const lastModified: string = headers && headers.get("last-modified");
 
       let lastModifiedTimestamp: number = -1;
       if (lastModified) {
@@ -112,11 +112,10 @@ export const fetchDocumentNow = async (rootPath: string, path: string) => {
       }
       if (document) {
         if (document.lastModified === lastModifiedTimestamp) {
-          await addDocument(document);
-          await addHeadingsToNavbarItem({
-            slug: document.slug,
-            headings: document.headings,
-          });
+          docs.getState().addDocument(document);
+          docs
+            .getState()
+            .addHeadingsToNavbarItem(document.slug, document.headings);
           return;
         }
       }
@@ -127,15 +126,10 @@ export const fetchDocumentNow = async (rootPath: string, path: string) => {
         path: path,
         slug,
         headings: findHeadings(content),
-        lastModified: lastModifiedTimestamp,
+        lastModified: lastModifiedTimestamp
       };
-
-      localStorage.setItem(document.slug, JSON.stringify(document));
-      await addDocument(document);
-      await addHeadingsToNavbarItem({
-        slug: document.slug,
-        headings: document.headings,
-      });
+      docs.getState().addDocument(document);
+      docs.getState().addHeadingsToNavbarItem(document.slug, document.headings);
     } catch (e) {}
     fetchingDocuments.splice(fetchingDocuments.indexOf(path), 1);
   }

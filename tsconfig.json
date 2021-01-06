@@ -9,7 +9,7 @@
     "sourceMap": true,
     "rootDir": "./",
     "strict": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "strictNullChecks": false,
     "strictFunctionTypes": true,
     "strictPropertyInitialization": false,
@@ -25,7 +25,8 @@
     "paths": {
       "*": ["src/*", "node_modules/*"]
     },
-    "jsx": "react",
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
     "esModuleInterop": true
   }
 }

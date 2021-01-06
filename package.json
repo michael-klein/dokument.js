@@ -1,65 +1,37 @@
 {
   "name": "dokument.js",
-  "version": "0.1.0",
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
-  "typings": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.tsx",
   "scripts": {
-    "reset-watchers": "echo fs.inotify.max_user_watchers=54288 || sudo tee -a /etc/sysctl.conf && sudo sysctl -p",
-    "start": "tsdx watch",
-    "build": "tsdx build",
-    "test": "tsdx test --env=jsdom",
-    "lint": "tsdx lint"
+    "start": "npm-run-all -p watch dev-server",
+    "build": "snowpack build",
+    "watch": "snowpack build --watch",
+    "dev-server": "npx es-dev-server --watch --open=docs/index.html"
   },
-  "peerDependencies": {
-    "react": ">=16"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michael-klein/dokument.js.git"
   },
-  "prettier": {
-    "printWidth": 80,
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "es5"
+  "keywords": [],
+  "author": "Michael Klein",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michael-klein/dokument.js/issues"
   },
+  "homepage": "https://github.com/michael-klein/dokument.js#readme",
   "devDependencies": {
-    "@types/jest": "^24.9.1",
-    "@types/react": "^16.9.49",
-    "@types/react-dom": "^16.9.8",
-    "@typescript-eslint/eslint-plugin": "^4.1.0",
-    "acorn": "^6.4.1",
-    "cssnano": "^4.1.10",
-    "husky": "^3.1.0",
-    "install": "^0.13.0",
-    "npm": "^6.14.9",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "rollup-plugin-css-porter": "^1.0.2",
-    "rollup-plugin-postcss": "^3.1.8",
-    "tsdx": "^0.9.3",
-    "tslib": "^1.13.0",
-    "typescript": "^3.9.7"
+    "es-dev-server": "^2.0.2",
+    "npm-run-all": "^4.1.5",
+    "snowpack": "^2.18.5",
+    "tslib": "^2.1.0",
+    "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@ant-design/icons": "^4.2.2",
-    "@types/react-router": "^5.1.8",
-    "@types/react-router-dom": "^5.1.5",
-    "antd": "^4.6.4",
-    "autoprefixer": "^9.8.6",
-    "forimmer": "^0.1.0",
-    "fuse.js": "^6.4.1",
-    "hooks": "^0.3.2",
-    "htmdx": "^0.3.0",
-    "ky": "^0.15.0",
-    "postcss": "^7.0.35",
-    "react-highlight-words": "^0.16.0",
-    "react-innertext": "^1.1.5",
-    "react-router-dom": "^5.2.0",
+    "htmdx": "^0.3.5",
+    "ky": "^0.25.1",
+    "preact": "^10.5.9",
     "remove-markdown": "^0.3.0",
-    "scroll-into-view": "^1.15.0",
-    "store": "^2.0.12",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.1",
-    "theme": "^0.1.0"
+    "zustand": "^3.2.0"
   }
 }

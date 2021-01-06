@@ -1,57 +1,48 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import '@babel/polyfill';
-import { Docs } from './theme/components/docs';
-import { setNavBar } from './store/docStore';
-import { docContext, docContextValue } from './doc_context';
-import { ComponentList } from './theme/components/component_list';
-import { componentListValue } from './theme/components/component_list_value';
-import { HtmdxOptions } from 'htmdx';
-import { qeueDocuments, fetchNavbar } from './utils/document_provider';
+import { HtmdxOptions } from "htmdx";
+import { render, h } from "preact";
+import { docs, useDocs } from "./state/docs";
+import { fetchNavbar, qeueDocuments } from "./utils/document_provider";
 
 export interface DocsOptions {
   rootPath: string;
   navbarPath: string;
-  componentList: ComponentList;
   htmdxOptions: HtmdxOptions;
   title?: string;
   scrollContainerSelector?: string;
+  container?: HTMLElement;
 }
 
 async function load(options: DocsOptions) {
   const navbar = await fetchNavbar(options.rootPath, options.navbarPath);
-  await setNavBar(navbar);
+  await docs.getState().setNavBar(navbar);
   qeueDocuments(options.rootPath, navbar);
 }
 
-export const defaultComponentList: ComponentList = { ...componentListValue };
+const Test = () => {
+  const docState = useDocs(state => state);
+  console.log(docState);
+  return <div>hi </div>;
+};
 
-export async function dokument(
-  container: HTMLElement,
-  optionsIn: Partial<
-    Omit<DocsOptions, 'componentList'> & {
-      componentList: Partial<ComponentList>;
-    }
-  > = {}
-): Promise<void> {
+export const dokument = async (
+  optionsIn: Partial<Omit<DocsOptions, "componentList">> = {}
+): Promise<void> => {
   const options: DocsOptions = {
-    rootPath: './',
-    title: 'Documentation',
+    rootPath: "./",
+    title: "Documentation",
+    container: document.body,
     htmdxOptions: { ...optionsIn.htmdxOptions },
-    navbarPath: '',
-    ...optionsIn,
-    componentList: {
-      ...componentListValue,
-      ...(optionsIn.componentList || {}),
-    },
+    navbarPath: "",
+    ...optionsIn
   };
   document.title = options.title;
   load(options);
-  const Provider = docContext.Provider;
-  ReactDOM.render(
-    <Provider value={{ ...docContextValue, ...options }}>
-      <Docs></Docs>
-    </Provider>,
-    container
-  );
-}
+  const start = () => {
+    render(<Test />, options.container);
+  };
+  if (document.readyState === "complete" || document.readyState !== "loading") {
+    start();
+  } else {
+    document.addEventListener("DOMContentLoaded", start);
+  }
+};
