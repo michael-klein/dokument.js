@@ -1,32 +1,26 @@
 {
-  "include": ["lib", "types"],
   "compilerOptions": {
-    "target": "es5",
-    "module": "esnext",
-    "lib": ["dom", "esnext"],
-    "importHelpers": true,
-    "declaration": true,
-    "sourceMap": true,
-    "rootDir": "./",
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "types": [],
+    "allowJs": false,
+    "skipLibCheck": false,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "noImplicitAny": false,
     "strictNullChecks": false,
     "strictFunctionTypes": true,
     "strictPropertyInitialization": false,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
-    "baseUrl": "./",
-    "typeRoots": ["./types"],
-    "paths": {
-      "*": ["lib/*", "node_modules/*"]
-    },
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
-    "esModuleInterop": true
-  }
+    "noEmit": true,
+    "jsx": "react",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment"
+  },
+  "include": ["src"]
 }

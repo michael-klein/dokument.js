@@ -1,8 +1,10 @@
 import { HtmdxOptions } from "htmdx";
 import { render, h } from "preact";
 import { docs, useDocs } from "./state/docs";
+import "./theme/theme.less";
 import { fetchNavbar, qeueDocuments } from "./utils/document_provider";
-import { Sidebar } from "./sidebar";
+
+import { Header } from "./header";
 export interface DocsOptions {
   rootPath: string;
   navbarPath: string;
@@ -21,7 +23,11 @@ async function load(options: DocsOptions) {
 const Test = () => {
   const docState = useDocs(state => state);
   console.log(docState);
-  return <Sidebar></Sidebar>;
+  return (
+    <div>
+      <Header></Header>
+    </div>
+  );
 };
 
 export const dokument = async (
