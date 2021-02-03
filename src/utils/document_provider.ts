@@ -6,7 +6,7 @@ import {
   NavbarJSON,
   NavbarItemType,
   DocumentData,
-  NavbarItem
+  SidebarItem
 } from "./document_interfaces";
 import { docs } from "../state/docs";
 
@@ -88,7 +88,7 @@ export function slugify(path: string): string {
 let fetching = false;
 
 const documentQueue: string[] = [];
-const documentsToFetch = new Map<string, { title: string } & NavbarItem>();
+const documentsToFetch = new Map<string, { title: string } & SidebarItem>();
 const fetchingDocuments: string[] = [];
 
 export const fetchDocumentNow = async (rootPath: string, path: string) => {

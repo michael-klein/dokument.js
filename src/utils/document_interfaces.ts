@@ -9,9 +9,9 @@ export interface NavbarJSON {
 
 export enum NavbarItemType {
   CATEGORY,
-  DOCUMENT,
+  DOCUMENT
 }
-export interface NavbarItem {
+export interface SidebarItem {
   type: NavbarItemType;
   path?: string;
   slug?: string;
@@ -20,7 +20,7 @@ export interface NavbarItem {
 }
 
 export interface Navbar {
-  [title: string]: NavbarItem;
+  [title: string]: SidebarItem;
 }
 
 export interface DocumentHeading {

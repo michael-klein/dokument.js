@@ -1,10 +1,10 @@
 import { HtmdxOptions } from "htmdx";
 import { render, h } from "preact";
 import { docs, useDocs } from "./state/docs";
-import "./theme/theme.less";
+import "./theme/theme.scss";
 import { fetchNavbar, qeueDocuments } from "./utils/document_provider";
-
-import { Header } from "./header";
+import { componentList, ComponentList } from "./components/component_list";
+import { componentListContext } from "./utils/component_list_context";
 export interface DocsOptions {
   rootPath: string;
   navbarPath: string;
@@ -12,27 +12,27 @@ export interface DocsOptions {
   title?: string;
   scrollContainerSelector?: string;
   container?: HTMLElement;
+  componentListModifier?: {
+    [key in keyof ComponentList]?: (
+      OriginalComponent: ComponentList[key]
+    ) => ComponentList[key];
+  };
 }
-
 async function load(options: DocsOptions) {
   const navbar = await fetchNavbar(options.rootPath, options.navbarPath);
   await docs.getState().setNavBar(navbar);
   qeueDocuments(options.rootPath, navbar);
 }
 
-const Test = () => {
-  const docState = useDocs(state => state);
-  console.log(docState);
-  return (
-    <div>
-      <Header></Header>
-    </div>
-  );
-};
-
 export const dokument = async (
   optionsIn: Partial<Omit<DocsOptions, "componentList">> = {}
 ): Promise<void> => {
+  const newComponentList = { ...componentList };
+  Object.keys(optionsIn?.componentListModifier ?? {}).forEach(key => {
+    newComponentList[key] = optionsIn.componentListModifier[key](
+      newComponentList[key]
+    );
+  });
   const options: DocsOptions = {
     rootPath: "./",
     title: "Documentation",
@@ -43,8 +43,15 @@ export const dokument = async (
   };
   document.title = options.title;
   load(options);
+  const { App } = newComponentList;
+  const { Provider } = componentListContext;
   const start = () => {
-    render(<Test />, options.container);
+    render(
+      <Provider value={newComponentList}>
+        <App />
+      </Provider>,
+      options.container
+    );
   };
   if (document.readyState === "complete" || document.readyState !== "loading") {
     start();

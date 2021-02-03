@@ -5,11 +5,11 @@ import {
   Navbar,
   DocumentData,
   DocumentHeading,
-  NavbarItem
+  SidebarItem
 } from "../utils/document_interfaces";
 import produce from "immer";
 
-const findNavbarItem = (slug: string, navbar: Navbar): NavbarItem => {
+const findNavbarItem = (slug: string, navbar: Navbar): SidebarItem => {
   return Object.keys(navbar)
     .map(key => navbar[key])
     .find(item => {
@@ -59,3 +59,7 @@ export const docs = create<DocState>(set => ({
 }));
 
 export const useDocs = createStoreHook(docs);
+
+export const useDocuments = () => useDocs(state => state.documents);
+
+export const useNavbar = () => useDocs(state => state.navbar);

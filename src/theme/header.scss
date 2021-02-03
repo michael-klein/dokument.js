@@ -1,0 +1,31 @@
+header {
+  display: flex;
+  position: sticky;
+  top: 0px;
+  padding: 20px;
+  margin: 0px;
+  figure.logo {
+    padding: 0;
+    margin: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+  div:last-child {
+    flex: 1;
+  }
+  .search {
+    flex: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    input {
+      max-width: 50%;
+      width: 50vw;
+      margin: 0;
+      &::placeholder {
+        color: lighten($color-text, 20);
+      }
+    }
+  }
+}
