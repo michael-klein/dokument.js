@@ -1,0 +1,12 @@
+.main-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+  background: #eff1f4;
+  main {
+    flex: auto;
+    max-width: 800px;
+    padding: 0px;
+    background-color: white;
+  }
+}

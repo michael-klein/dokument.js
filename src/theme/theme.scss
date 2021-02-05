@@ -1,15 +1,15 @@
 @import "../../node_modules/sakura.css/scss/sakura.scss";
-$color-text: #676892;
+$color-text: #657699;
 
 $color-blossom: white;
 $color-fade: #484d5a;
 
 $color-bg: #f9f9f9;
-$color-bg-alt: #dde5f0;
+$color-bg-alt: #e5e9f0;
 @import "../../node_modules/sakura.css/scss/_main.scss";
 @import "./header.scss";
 @import "./sidebar.scss";
-
+@import "./content.scss";
 body {
   font-family: "Roboto", sand-serif;
   max-width: initial;
@@ -17,13 +17,12 @@ body {
   display: flex;
   height: 100vh;
   flex-direction: column;
-}
 
-.content {
-  flex: auto;
   display: grid;
   grid-template-columns: max-content 1fr;
-  grid-template-rows: 1fr;
+  grid-template-rows: max-content 1fr;
   gap: 0px 0px;
-  grid-template-areas: ". .";
+  grid-template-areas:
+    ". ."
+    ". .";
 }
