@@ -5,19 +5,8 @@ import "./theme/theme.scss";
 import { fetchNavbar, qeueDocuments } from "./utils/document_provider";
 import { componentList, ComponentList } from "./components/component_list";
 import { componentListContext } from "./utils/component_list_context";
-export interface DocsOptions {
-  rootPath: string;
-  navbarPath: string;
-  htmdxOptions: HtmdxOptions;
-  title?: string;
-  scrollContainerSelector?: string;
-  container?: HTMLElement;
-  componentListModifier?: {
-    [key in keyof ComponentList]?: (
-      OriginalComponent: ComponentList[key]
-    ) => ComponentList[key];
-  };
-}
+import { docsOptionsContext, DocsOptions } from "./utils/docs_options_context";
+
 async function load(options: DocsOptions) {
   const navbar = await fetchNavbar(options.rootPath, options.navbarPath);
   await docs.getState().setNavBar(navbar);
@@ -45,11 +34,14 @@ export const dokument = async (
   load(options);
   const { App } = newComponentList;
   const { Provider } = componentListContext;
+  const { Provider: DocsOptionsProvider } = docsOptionsContext;
   const start = () => {
     render(
-      <Provider value={newComponentList}>
-        <App />
-      </Provider>,
+      <DocsOptionsProvider value={options}>
+        <Provider value={newComponentList}>
+          <App />
+        </Provider>
+      </DocsOptionsProvider>,
       options.container
     );
   };

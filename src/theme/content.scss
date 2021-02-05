@@ -8,5 +8,23 @@
     max-width: 800px;
     padding: 0px;
     background-color: white;
+    font-size: 0.9em;
+    pre.bread-crumb {
+      margin: 0;
+      padding: 10px;
+    }
+    article {
+      padding: 20px;
+      h1:first-child {
+        margin-top: 0px;
+      }
+    }
+    a,
+    a:link,
+    a:active,
+    a:hover {
+      color: #800100;
+    }
+    text-align: justify;
   }
 }

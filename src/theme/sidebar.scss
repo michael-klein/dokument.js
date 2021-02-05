@@ -12,4 +12,17 @@ nav.sidebar {
     padding-left: 20px;
     list-style: none;
   }
+  a,
+  a:link,
+  a:active,
+  a:hover {
+    color: inherit;
+  }
+  a.active {
+    &:before {
+      content: ">";
+      position: absolute;
+      margin-left: -0.6em;
+    }
+  }
 }
