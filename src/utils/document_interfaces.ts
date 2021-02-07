@@ -11,8 +11,9 @@ export enum NavbarItemType {
   CATEGORY,
   DOCUMENT
 }
-export interface SidebarItem {
+export interface NavbarItem {
   type: NavbarItemType;
+  title: string;
   path?: string;
   slug?: string;
   headings?: DocumentHeading[];
@@ -20,7 +21,7 @@ export interface SidebarItem {
 }
 
 export interface Navbar {
-  [title: string]: SidebarItem;
+  [title: string]: NavbarItem;
 }
 
 export interface DocumentHeading {

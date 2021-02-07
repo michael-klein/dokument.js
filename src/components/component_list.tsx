@@ -7,6 +7,9 @@ import { Sidebar } from "./sidebar";
 import { SidebarLevel } from "./sidebar_level";
 import { SidebarCategory } from "./sidebar_category";
 import { SidebarItem } from "./sidebar_item";
+import { SidebarMenu } from "./sidebar_menu";
+import { DocumentRenderer } from "./document_renderer";
+import { Main } from "./main";
 
 export const componentList = {
   Header,
@@ -17,7 +20,10 @@ export const componentList = {
   Sidebar,
   SidebarLevel,
   SidebarCategory,
-  SidebarItem
+  SidebarItem,
+  Main,
+  SidebarMenu,
+  DocumentRenderer
 };
 
 export type ComponentList = typeof componentList;

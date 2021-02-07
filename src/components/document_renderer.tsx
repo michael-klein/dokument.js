@@ -1,14 +1,5 @@
-import {
-  h,
-  Fragment,
-  createContext,
-  Context,
-  FunctionComponent,
-  JSX,
-  isValidElement
-} from "preact";
-import { useEffect } from "preact/hooks";
-import { useDocuments } from "../state/docs";
+import { h, Fragment, FunctionComponent, JSX } from "preact";
+import { useDocument } from "../state/docs";
 import { useDocsOptions } from "../utils/docs_options_context";
 
 import { htmdx } from "htmdx";
@@ -51,10 +42,8 @@ export interface DocumentRendererProps {
 }
 
 export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
-  const documents = useDocuments() ?? {};
-  const currentDocument = documents[props.slug];
+  const currentDocument = useDocument(props.slug, true);
   const { htmdxOptions = { components: {} } } = useDocsOptions();
-  console.log(currentDocument.content);
   return (
     <>
       <article>

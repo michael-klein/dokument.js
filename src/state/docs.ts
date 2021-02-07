@@ -5,11 +5,12 @@ import {
   Navbar,
   DocumentData,
   DocumentHeading,
-  SidebarItem
+  NavbarItem
 } from "../utils/document_interfaces";
 import produce from "immer";
+import { useEffect, useRef, useState } from "preact/hooks";
 
-const findNavbarItem = (slug: string, navbar: Navbar): SidebarItem => {
+const findNavbarItem = (slug: string, navbar: Navbar): NavbarItem => {
   return Object.keys(navbar)
     .map(key => navbar[key])
     .find(item => {
@@ -62,4 +63,41 @@ export const useDocs = createStoreHook(docs);
 
 export const useDocuments = () => useDocs(state => state.documents);
 
+export const useDocument = (slug: string, fallBackToFirst: boolean = false) =>
+  useDocs(
+    state =>
+      state.documents[slug] ??
+      (fallBackToFirst && state.documents[Object.keys(state.documents)[0]])
+  );
+
 export const useNavbar = () => useDocs(state => state.navbar);
+
+export interface FlatNavbarItem {
+  slug: string;
+  path: string;
+}
+const flattenNavbar = (navbar: Navbar): FlatNavbarItem[] => {
+  return Object.keys(navbar).flatMap(key => {
+    const item = navbar[key];
+    return [
+      {
+        slug: item.slug,
+        path: item.path
+      },
+      ...(item.children ? flattenNavbar(item.children) : [])
+    ].filter(i => i.path);
+  });
+};
+export const useFlatNavbar = () => {
+  const navbar = useNavbar();
+  const [flatNavbar, setFlatNavbar] = useState(() => flattenNavbar(navbar));
+  const initRef = useRef(false);
+  useEffect(() => {
+    if (initRef.current) {
+      setFlatNavbar(() => flattenNavbar(navbar));
+    }
+    initRef.current = true;
+  }, [navbar]);
+
+  return flatNavbar;
+};

@@ -6,7 +6,7 @@ import {
   NavbarJSON,
   NavbarItemType,
   DocumentData,
-  SidebarItem
+  NavbarItem
 } from "./document_interfaces";
 import { docs } from "../state/docs";
 
@@ -42,14 +42,16 @@ export function buildNavbar(navbarJSON: NavbarJSON): Navbar {
       navbar[title] = {
         type: NavbarItemType.CATEGORY,
         children: buildNavbar(entry),
-        slug: slugify(title)
+        slug: slugify(title),
+        title
       };
     } else {
       const slug: string = slugify(entry);
       navbar[title] = {
         type: NavbarItemType.DOCUMENT,
         slug: slug,
-        path: entry
+        path: entry,
+        title
       };
     }
   }
@@ -88,7 +90,7 @@ export function slugify(path: string): string {
 let fetching = false;
 
 const documentQueue: string[] = [];
-const documentsToFetch = new Map<string, { title: string } & SidebarItem>();
+const documentsToFetch = new Map<string, { title: string } & NavbarItem>();
 const fetchingDocuments: string[] = [];
 
 export const fetchDocumentNow = async (rootPath: string, path: string) => {

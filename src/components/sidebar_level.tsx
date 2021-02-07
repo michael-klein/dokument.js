@@ -1,5 +1,4 @@
 import { h } from "preact";
-import { useDocs } from "../state/docs";
 import { useComponentList } from "../utils/component_list_context";
 import { Navbar } from "../utils/document_interfaces";
 
@@ -10,9 +9,7 @@ export const SidebarLevel = (level: Navbar) => {
       {Object.keys(level).map(key => {
         const item = level[key];
         if (!item.children) {
-          return (
-            <SidebarItem key={key} label={key} path={item.path}></SidebarItem>
-          );
+          return <SidebarItem key={key} item={item}></SidebarItem>;
         } else {
           return (
             <SidebarCategory

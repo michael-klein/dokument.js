@@ -1,19 +1,12 @@
 import { h } from "preact";
-import { Link } from "preact-router/match";
-import { useDocsOptions } from "../utils/docs_options_context";
-import { join } from "../utils/file_utils";
+import { NavbarItem } from "../utils/document_interfaces";
+import { SidebarLink } from "./sidebar_link";
 
-export const SidebarItem = (props: {
-  key: string;
-  label: string;
-  path: string;
-}) => {
-  const { rootPath } = useDocsOptions();
+export const SidebarItem = (props: { item: NavbarItem }) => {
+  const { item } = props;
   return (
-    <li key={props.key} className="navbar_item">
-      <Link activeClassName="active" href={join("/", rootPath, props.path)}>
-        {props.label}
-      </Link>
+    <li key={item.path + item.slug} className="navbar_item">
+      <SidebarLink item={item}></SidebarLink>
     </li>
   );
 };

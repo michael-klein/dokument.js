@@ -1,13 +1,14 @@
 import { h } from "preact";
-import { useNavbar } from "../state/docs";
+import { Suspense } from "preact/compat";
 import { useComponentList } from "../utils/component_list_context";
 
 export const Sidebar = () => {
-  const navbar = useNavbar() ?? {};
-  const { SidebarLevel } = useComponentList();
+  const { SidebarMenu } = useComponentList();
   return (
     <nav className="sidebar">
-      <SidebarLevel {...navbar}></SidebarLevel>
+      <Suspense fallback="">
+        <SidebarMenu></SidebarMenu>
+      </Suspense>
     </nav>
   );
 };
