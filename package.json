@@ -14,6 +14,7 @@
     "preact": "^10.5.9",
     "preact-router": "^3.2.1",
     "remove-markdown": "^0.3.0",
+    "ss-search": "^1.5.21",
     "zustand": "^3.2.0"
   },
   "devDependencies": {

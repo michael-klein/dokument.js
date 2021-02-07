@@ -1,4 +1,5 @@
 import { h, Fragment } from "preact";
+import { Suspense } from "preact/compat";
 import { useComponentList } from "../utils/component_list_context";
 
 export const Header = () => {
@@ -7,7 +8,9 @@ export const Header = () => {
     <>
       <Logo></Logo>
       <header>
-        <Search></Search>
+        <Suspense fallback="...">
+          <Search></Search>
+        </Suspense>
       </header>
     </>
   );
