@@ -15,9 +15,6 @@ export const Main = () => {
   const { rootPath } = useDocsOptions();
   return (
     <main>
-      <Match path="/">
-        {({ matches, path, url }) => <pre className="bread-crumb">{url}</pre>}
-      </Match>
       <Router history={createHashHistory() as any}>
         {
           <Fragment path="/">
