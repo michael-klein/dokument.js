@@ -18,7 +18,7 @@ export const Main = () => {
       <Match path="/">
         {({ matches, path, url }) => <pre className="bread-crumb">{url}</pre>}
       </Match>
-      <Router history={createHashHistory()}>
+      <Router history={createHashHistory() as any}>
         {
           <Fragment path="/">
             <DocumentRenderer slug={documents?.[0]?.slug}></DocumentRenderer>

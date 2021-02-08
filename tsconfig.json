@@ -16,6 +16,7 @@
     "noImplicitAny": false,
     "strictNullChecks": false,
     "strictFunctionTypes": true,
+
     "strictPropertyInitialization": false,
     "noEmit": true,
     "jsx": "react",

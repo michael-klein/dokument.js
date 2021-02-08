@@ -1,6 +1,5 @@
-import { HtmdxOptions } from "htmdx";
 import { render, h } from "preact";
-import { docs, useDocs } from "./state/docs";
+import { docs } from "./state/docs";
 import "./theme/theme.scss";
 import { fetchNavbar, queueDocuments } from "./utils/document_provider";
 import { componentList, ComponentList } from "./components/component_list";

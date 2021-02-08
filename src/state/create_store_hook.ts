@@ -38,7 +38,7 @@ export const createStoreHook = <
         const value = produceResult(store, producer);
         if (value !== currentState) {
           setCurrentState(value);
-          resolve();
+          resolve(undefined);
         }
       });
     });
