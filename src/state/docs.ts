@@ -8,19 +8,33 @@ import {
 } from "../utils/document_interfaces";
 import produce from "immer";
 
-const findNavbarItem = (slug: string, navbar: Navbar): NavbarItem => {
-  return Object.keys(navbar)
-    .map(key => navbar[key])
-    .find(item => {
-      if (item.slug === slug) {
-        return item;
-      } else {
-        return findNavbarItem(slug, item.children);
+const findNavbarItem = (navbar: Navbar, slug: string) => {
+  for (const key of Object.keys(navbar)) {
+    const item = navbar[key];
+    if (item.slug === slug) {
+      return item;
+    }
+    if (item.children) {
+      const child = findNavbarItem(item.children, slug);
+      if (child) {
+        return child;
       }
-    });
+    }
+  }
+  return undefined;
 };
 
+const flattenNavbar = (navbar: Navbar): NavbarItem[] => {
+  return Object.keys(navbar).flatMap(key => {
+    const item = navbar[key];
+    return [
+      item,
+      ...(item.children ? flattenNavbar(item.children) : [])
+    ].filter(i => i.path);
+  });
+};
 export type DocState = {
+  flatNavbar?: NavbarItem[];
   navbar?: Navbar;
   documents?: DocumentMap;
   setNavBar: (navbar: Navbar) => void;
@@ -32,7 +46,7 @@ export const docs = create<DocState>(set => ({
     set(
       produce(state => {
         state.navbar = navbar;
-        return state;
+        state.flatNavbar = flattenNavbar(navbar);
       })
     ),
   addDocument: (document: DocumentData) =>
@@ -42,17 +56,16 @@ export const docs = create<DocState>(set => ({
           state.documents = {};
         }
         state.documents[document.slug] = document;
-        return state;
       })
     ),
   addHeadingsToNavbarItem: (slug: string, headings: DocumentHeading[]) =>
     set(
       produce(state => {
-        const item = findNavbarItem(slug, state.navbar);
+        const item = findNavbarItem(state.navbar, slug);
         if (item) {
           item.headings = headings;
+          state.flatNavbar = flattenNavbar(state.navbar);
         }
-        return state;
       })
     )
 }));

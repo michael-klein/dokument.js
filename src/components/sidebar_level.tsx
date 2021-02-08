@@ -9,6 +9,7 @@ export const SidebarLevel = (level: Navbar) => {
       {Object.keys(level).map(key => {
         const item = level[key];
         if (!item.children) {
+          console.log(item);
           return <SidebarItem key={key} item={item}></SidebarItem>;
         } else {
           return (

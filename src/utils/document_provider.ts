@@ -9,7 +9,6 @@ import {
   NavbarItem
 } from "./document_interfaces";
 import { docs } from "../state/docs";
-import { FlatNavbarItem } from "../state/hooks/use_flat_navbar";
 
 function findHeadings(document: string): DocumentHeading[] {
   const parts: string[] = document.split(/\n/g);
@@ -96,7 +95,7 @@ const fetchingDocuments: string[] = [];
 
 export const fetchDocumentNowBySlug = async (
   rootPath: string,
-  flatNavbar: FlatNavbarItem[],
+  flatNavbar: NavbarItem[],
   slug: string
 ) => {
   const path = flatNavbar.find(item => item.slug === slug)?.path;
