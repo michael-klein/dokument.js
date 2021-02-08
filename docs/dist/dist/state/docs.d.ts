@@ -1,5 +1,6 @@
-import { DocumentMap, Navbar, DocumentData, DocumentHeading } from "../utils/document_interfaces";
+import { DocumentMap, Navbar, DocumentData, DocumentHeading, NavbarItem } from "../utils/document_interfaces";
 export declare type DocState = {
+    flatNavbar?: NavbarItem[];
     navbar?: Navbar;
     documents?: DocumentMap;
     setNavBar: (navbar: Navbar) => void;

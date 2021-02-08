@@ -1,5 +1,1 @@
-export interface FlatNavbarItem {
-    slug: string;
-    path: string;
-}
-export declare const useFlatNavbar: () => FlatNavbarItem[];
+export declare const useFlatNavbar: () => import("../../utils/document_interfaces").NavbarItem[];
