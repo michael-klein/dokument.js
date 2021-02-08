@@ -1,5 +1,4 @@
 import { h } from "preact";
-import { useState } from "preact/hooks";
 
 export const SearchInput = (props: { onChange?: (query: string) => {} }) => {
   return (

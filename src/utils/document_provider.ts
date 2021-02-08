@@ -9,6 +9,7 @@ import {
   NavbarItem
 } from "./document_interfaces";
 import { docs } from "../state/docs";
+import { FlatNavbarItem } from "../state/hooks/use_flat_navbar";
 
 function findHeadings(document: string): DocumentHeading[] {
   const parts: string[] = document.split(/\n/g);
@@ -93,6 +94,17 @@ const documentQueue: string[] = [];
 const documentsToFetch = new Map<string, { title: string } & NavbarItem>();
 const fetchingDocuments: string[] = [];
 
+export const fetchDocumentNowBySlug = async (
+  rootPath: string,
+  flatNavbar: FlatNavbarItem[],
+  slug: string
+) => {
+  const path = flatNavbar.find(item => item.slug === slug)?.path;
+  if (path) {
+    await fetchDocumentNow(rootPath, path);
+  }
+};
+
 export const fetchDocumentNow = async (rootPath: string, path: string) => {
   if (documentQueue.includes(path) && !fetchingDocuments.includes(path)) {
     fetchingDocuments.push(path);
@@ -145,11 +157,11 @@ const fetchDocuments = async (rootPath: string) => {
   fetching = false;
 };
 
-export const qeueDocuments = (rootPath: string, navbar: Navbar) => {
+export const queueDocuments = (rootPath: string, navbar: Navbar) => {
   for (const label of Object.keys(navbar)) {
     const { children, type, path } = navbar[label];
     if (type === NavbarItemType.CATEGORY) {
-      qeueDocuments(rootPath, children);
+      queueDocuments(rootPath, children);
     } else {
       documentsToFetch.set(path, { title: label, ...navbar[label] });
       documentQueue.push(path);

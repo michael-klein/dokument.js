@@ -1,5 +1,5 @@
 import { h, Fragment, FunctionComponent, JSX } from "preact";
-import { useDocument } from "../state/docs";
+import { useDocument } from "../state/hooks/use_document";
 import { useDocsOptions } from "../utils/docs_options_context";
 
 import { htmdx } from "htmdx";
@@ -42,7 +42,7 @@ export interface DocumentRendererProps {
 }
 
 export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
-  const currentDocument = useDocument(props.slug, true);
+  const currentDocument = useDocument(props.slug, false);
   const { htmdxOptions = { components: {} } } = useDocsOptions();
   return (
     <>

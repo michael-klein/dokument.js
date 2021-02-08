@@ -1,6 +1,5 @@
 import { StoreApi } from "zustand/vanilla";
-import { useEffect, useRef, useState } from "preact/hooks";
-import shallow from "zustand/shallow";
+import { useEffect, useState } from "preact/hooks";
 
 const MISSING = Symbol();
 const produceResult = <

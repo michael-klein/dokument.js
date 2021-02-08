@@ -1,7 +1,7 @@
 import { h } from "preact";
 import { useComponentList } from "../utils/component_list_context";
 import { search } from "ss-search";
-import { useDocuments } from "../state/docs";
+import { useDocuments } from "../state/hooks/use_documents";
 import { useCallback } from "preact/hooks";
 
 export const Search = () => {

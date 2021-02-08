@@ -1,6 +1,5 @@
 import { h } from "preact";
 import { Link } from "preact-router/match";
-import { useDocuments } from "../state/docs";
 import { useDocsOptions } from "../utils/docs_options_context";
 import { NavbarItem } from "../utils/document_interfaces";
 import { join } from "../utils/file_utils";
