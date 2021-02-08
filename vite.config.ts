@@ -10,6 +10,8 @@ export default defineConfig({
   },
   plugins: [preactRefresh()],
   build: {
+    sourcemap: true,
+
     lib: {
       entry: path.resolve(__dirname, "src/index.tsx"),
       name: "dokumentjs"

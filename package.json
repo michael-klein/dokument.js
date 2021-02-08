@@ -1,6 +1,6 @@
 {
   "name": "dokumentjs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {
     "predeploy": "npm run prepare",
     "deploy": "gh-pages -d docs",
