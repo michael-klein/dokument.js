@@ -22,18 +22,20 @@
       padding-bottom: 5px;
       &:after {
         position: absolute;
-        background: #c8cbd2;
+        background: #dcdfe6;
         content: "";
-        left: 0px;
+        left: 1px;
         right: 0px;
         transform: skewX(-30deg);
-        border-right: 1px solid gray;
+        box-shadow: 1px 1px 20px #fcfdff;
         top: 0px;
         bottom: 0px;
         z-index: -1;
       }
-      &:first-child:after {
-        left: -30px;
+      &:first-child {
+        &:after {
+          left: -30px;
+        }
       }
     }
   }
