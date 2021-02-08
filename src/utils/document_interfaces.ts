@@ -9,10 +9,11 @@ export interface NavbarJSON {
 
 export enum NavbarItemType {
   CATEGORY,
-  DOCUMENT,
+  DOCUMENT
 }
 export interface NavbarItem {
   type: NavbarItemType;
+  title: string;
   path?: string;
   slug?: string;
   headings?: DocumentHeading[];

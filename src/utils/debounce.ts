@@ -1,4 +1,3 @@
-import * as React from 'react';
 export const debounce = <T extends (...args: any[]) => any>(
   callback: T,
   waitFor: number
@@ -12,11 +11,4 @@ export const debounce = <T extends (...args: any[]) => any>(
     }, waitFor);
     return result;
   };
-};
-
-export const useDebounce = <T extends (...args: any[]) => any>(
-  callback: T,
-  waitFor: number
-) => {
-  return React.useState(() => debounce(callback, waitFor))[0];
 };

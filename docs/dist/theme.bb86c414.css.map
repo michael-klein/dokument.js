@@ -1,1 +1,0 @@
-{"version":3,"sources":["../src/theme/styles/theme.less"],"names":[],"mappings":"AAAA;AACA;AACA","file":"theme.bb86c414.css","sourceRoot":"../src","sourcesContent":["@tailwind base;\n@tailwind components;\n@tailwind utilities;\n"]}
