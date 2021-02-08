@@ -3,6 +3,7 @@ import { useDocument } from "../state/hooks/use_document";
 import { useDocsOptions } from "../utils/docs_options_context";
 
 import { htmdx } from "htmdx";
+import { useCurrentDocument } from "../utils/current_document_context";
 const components: { [key: string]: FunctionComponent } = {};
 /*
 let hCount: number = 0;
@@ -41,8 +42,8 @@ export interface DocumentRendererProps {
   slug: string;
 }
 
-export function DocumentRenderer(props: DocumentRendererProps): JSX.Element {
-  const currentDocument = useDocument(props.slug, false);
+export function DocumentRenderer(): JSX.Element {
+  const currentDocument = useCurrentDocument();
   const { htmdxOptions = { components: {} } } = useDocsOptions();
   return (
     <>

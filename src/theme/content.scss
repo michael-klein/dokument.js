@@ -2,6 +2,7 @@
   display: flex;
   align-items: center;
   flex-direction: column;
+  overflow: auto;
 
   .bread-crumb {
     margin: 0;
@@ -12,6 +13,9 @@
     background: #dcdfe6;
     font-size: 0.7em;
     overflow: hidden;
+    flex: none;
+    position: sticky;
+    top: 0px;
     > span {
       display: inline-block;
       position: relative;
@@ -49,7 +53,7 @@
     flex-direction: column;
     main {
       flex: auto;
-      max-width: 800px;
+      max-width: 100%;
       padding: 0px;
       background-color: white;
       font-size: 0.9em;

@@ -1,3 +1,4 @@
+import { head } from "lodash";
 import { h } from "preact";
 import { NavbarItem } from "../utils/document_interfaces";
 import { SidebarLink } from "./sidebar_link";
@@ -11,7 +12,11 @@ export const SidebarItem = (props: { item: NavbarItem }) => {
       {headings.length > 0 && (
         <ul>
           {headings.map(heading => {
-            return <li>{heading.text}</li>;
+            return (
+              <li>
+                <SidebarLink item={item} heading={heading}></SidebarLink>
+              </li>
+            );
           })}
         </ul>
       )}

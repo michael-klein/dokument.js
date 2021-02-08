@@ -6,11 +6,11 @@ figure.logo {
   align-items: center;
   justify-content: center;
   font-size: 1.2em;
+  background: #f9f9f9;
 }
 header {
   display: flex;
-  position: sticky;
-  top: 0px;
+  background: #f9f9f9;
   padding: 20px;
   margin: 0px;
   .search {

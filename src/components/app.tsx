@@ -6,16 +6,27 @@ import { useComponentList } from "../utils/component_list_context";
 const BreadCrumbs = () => {
   return (
     <Match path="">
-      {({}) => (
-        <div className="bread-crumb">
-          {window.location.hash
-            .split("/")
-            .filter(p => p.length > 0 && p !== "#")
-            .map(part => {
-              return <span key={part}>{part}</span>;
-            })}
-        </div>
-      )}
+      {({}) => {
+        let sawMD = false;
+        return (
+          <div className="bread-crumb">
+            {window.location.hash
+              .split("/")
+              .filter(p => {
+                if (sawMD) {
+                  return false;
+                }
+                if (p.includes(".md")) {
+                  sawMD = true;
+                }
+                return p.length > 0 && p !== "#";
+              })
+              .map(part => {
+                return <span key={part}>{part}</span>;
+              })}
+          </div>
+        );
+      }}
     </Match>
   );
 };
