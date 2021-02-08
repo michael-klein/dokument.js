@@ -2,6 +2,8 @@
   "name": "dokumentjs",
   "version": "0.0.1",
   "scripts": {
+    "predeploy": "npm run prepare",
+    "deploy": "gh-pages -d docs",
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
