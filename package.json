@@ -5,7 +5,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
-    "prepare": "npm run build"
+    "prepare": "npm run build && cp -rf dist docs/dist"
   },
   "dependencies": {
     "history": "^5.0.0",
