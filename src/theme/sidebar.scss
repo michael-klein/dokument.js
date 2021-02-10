@@ -26,4 +26,13 @@ nav.sidebar {
       margin-left: -0.6em;
     }
   }
+  li.sidebar-heading:not(:first-child) {
+    margin-top: -5px;
+    color: lighten($color-text, 20);
+  }
+  @for $i from 1 through 10 {
+    li.sidebar-heading-#{$i} {
+      padding-left: #{$i - 1}em;
+    }
+  }
 }
