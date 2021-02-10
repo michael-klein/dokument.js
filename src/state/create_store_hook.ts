@@ -1,6 +1,18 @@
 import { StoreApi } from "zustand/vanilla";
 import { useEffect, useState } from "preact/hooks";
 
+const isEmptyObject = (obj: any): boolean =>
+  obj &&
+  obj instanceof Object &&
+  Object.keys(obj).length === 0 &&
+  obj.constructor === Object;
+
+const isEmptyArray = (obj: any): boolean =>
+  obj && obj instanceof Array && obj.length === 0;
+
+const EMPTY_OBJECT = {};
+const EMPTY_ARRAY = [];
+
 const MISSING = Symbol();
 const produceResult = <
   State extends Record<string | number | symbol, unknown>,
@@ -11,7 +23,19 @@ const produceResult = <
 ) => {
   const { getState } = store;
   try {
-    return producer(getState()) ?? MISSING;
+    const result = producer(getState());
+    if (result) {
+      if (isEmptyObject(result)) {
+        return EMPTY_OBJECT;
+      }
+      if (isEmptyArray(result)) {
+        return EMPTY_ARRAY;
+      }
+
+      return result;
+    } else {
+      return MISSING;
+    }
   } catch (e) {
     return MISSING;
   }
