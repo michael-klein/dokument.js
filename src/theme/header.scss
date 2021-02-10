@@ -41,7 +41,7 @@ header {
       color: lighten($color-text, 10);
       border: 1px solid #d7dbe3;
       &::placeholder {
-        color: lighten($color-text, 25);
+        color: lighten($color-text, 20);
       }
     }
     &:focus-within {

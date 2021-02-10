@@ -16,6 +16,11 @@
     flex: none;
     position: sticky;
     top: 0px;
+    .bread-icon {
+      height: 1.2em;
+      transform: translateY(0.2em);
+      margin-right: 5px;
+    }
     > span {
       display: inline-block;
       position: relative;

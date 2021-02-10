@@ -22,7 +22,6 @@ const FallbackDocumentRenderer = () => {
   const fallbackDocumentSlug = useDocs(
     state => Object.values(state.documents)[0].slug
   );
-
   return <RendererWrapper slug={fallbackDocumentSlug}></RendererWrapper>;
 };
 export const Main = () => {

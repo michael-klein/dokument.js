@@ -6,38 +6,8 @@ import { useComponentList } from "../utils/component_list_context";
 import { useDocsOptions } from "../utils/docs_options_context";
 import { join } from "../utils/file_utils";
 
-const BreadCrumbs = () => {
-  const document = useCurrentDocument();
-  const { rootPath } = useDocsOptions();
-  return (
-    <Match path="">
-      {({}) => {
-        let sawMD = false;
-        return (
-          <div className="bread-crumb">
-            {join(rootPath, document?.path ?? "")
-              .split("/")
-              .filter(p => {
-                if (sawMD) {
-                  return false;
-                }
-                if (p.includes(".md")) {
-                  sawMD = true;
-                }
-                return p.length > 0 && p !== "#";
-              })
-              .map(part => {
-                return <span key={part}>{part}</span>;
-              })}
-          </div>
-        );
-      }}
-    </Match>
-  );
-};
-
 export const App = () => {
-  const { Header, Sidebar, Main } = useComponentList();
+  const { Header, Sidebar, Main, BreadCrumbs } = useComponentList();
   return (
     <>
       <Header></Header>
