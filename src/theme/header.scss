@@ -18,6 +18,22 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
+    button.go {
+      background: #d7dbe3;
+      border: #d7dbe3;
+      height: 100%;
+      margin-right: -6px;
+      border-radius: 4px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      padding-left: 4px;
+      padding-right: 8px;
+      svg {
+        color: #f9f9f9;
+        height: 24px;
+      }
+    }
     input {
       max-width: 50%;
       width: 50vw;
@@ -26,6 +42,15 @@ header {
       border: 1px solid #d7dbe3;
       &::placeholder {
         color: lighten($color-text, 25);
+      }
+    }
+    &:focus-within {
+      input {
+        border: 1px solid #a8b3cb;
+        outline: 0;
+      }
+      button {
+        background: #a8b3cb;
       }
     }
   }

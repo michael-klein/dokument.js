@@ -9,7 +9,6 @@ import { join } from "../utils/file_utils";
 const BreadCrumbs = () => {
   const document = useCurrentDocument();
   const { rootPath } = useDocsOptions();
-  console.log(document);
   return (
     <Match path="">
       {({}) => {
