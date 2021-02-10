@@ -51,9 +51,10 @@
     display: flex;
     align-items: center;
     flex-direction: column;
+    flex: auto;
     main {
       flex: auto;
-      max-width: 100%;
+      max-width: 800px;
       padding: 0px;
       background-color: white;
       font-size: 0.9em;

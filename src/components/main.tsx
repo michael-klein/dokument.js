@@ -6,19 +6,17 @@ import { useDocs } from "../state/hooks/use_docs";
 import { useDocsOptions } from "../utils/docs_options_context";
 import { join } from "../utils/file_utils";
 import { createHashHistory } from "history";
-import { currentDocumentContext } from "../utils/current_document_context";
 import { useDocument } from "../state/hooks/use_document";
-import { Suspense } from "preact/compat";
+import { Suspense, useEffect } from "preact/compat";
 
 const RendererWrapper = (props: { slug: string }) => {
   const document = useDocument(props.slug);
-  const { Provider } = currentDocumentContext;
   const { DocumentRenderer } = useComponentList();
-  return (
-    <Provider value={document}>
-      <DocumentRenderer></DocumentRenderer>
-    </Provider>
-  );
+  const setCurrentDocument = useDocs(state => state.setCurrentDocument);
+  useEffect(() => {
+    setCurrentDocument(document);
+  }, [document]);
+  return <DocumentRenderer></DocumentRenderer>;
 };
 const FallbackDocumentRenderer = () => {
   const fallbackDocumentSlug = useDocs(

@@ -34,10 +34,12 @@ const flattenNavbar = (navbar: Navbar): NavbarItem[] => {
   });
 };
 export type DocState = {
+  currentDocument?: DocumentData;
   flatNavbar?: NavbarItem[];
   navbar?: Navbar;
   documents?: DocumentMap;
   setNavBar: (navbar: Navbar) => void;
+  setCurrentDocument: (document: DocumentData) => void;
   addDocument: (document: DocumentData) => void;
   addHeadingsToNavbarItem: (slug: string, headings: DocumentHeading[]) => void;
 };
@@ -47,6 +49,12 @@ export const docs = create<DocState>(set => ({
       produce(state => {
         state.navbar = navbar;
         state.flatNavbar = flattenNavbar(navbar);
+      })
+    ),
+  setCurrentDocument: (document: DocumentData) =>
+    set(
+      produce(state => {
+        state.currentDocument = document;
       })
     ),
   addDocument: (document: DocumentData) =>

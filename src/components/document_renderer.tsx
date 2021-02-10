@@ -3,7 +3,7 @@ import { useDocument } from "../state/hooks/use_document";
 import { useDocsOptions } from "../utils/docs_options_context";
 
 import { htmdx } from "htmdx";
-import { useCurrentDocument } from "../utils/current_document_context";
+import { useCurrentDocument } from "../state/hooks/use_current_document";
 const components: { [key: string]: FunctionComponent } = {};
 /*
 let hCount: number = 0;

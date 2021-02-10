@@ -1,16 +1,22 @@
 import { h, Fragment } from "preact";
 import Match from "preact-router/match";
 import { Suspense } from "preact/compat";
+import { useCurrentDocument } from "../state/hooks/use_current_document";
+import { useDocs } from "../state/hooks/use_docs";
 import { useComponentList } from "../utils/component_list_context";
+import { useDocsOptions } from "../utils/docs_options_context";
+import { join } from "../utils/file_utils";
 
 const BreadCrumbs = () => {
+  const document = useCurrentDocument();
+  const { rootPath } = useDocsOptions();
   return (
     <Match path="">
       {({}) => {
         let sawMD = false;
         return (
           <div className="bread-crumb">
-            {window.location.hash
+            {join(rootPath, document?.path ?? "")
               .split("/")
               .filter(p => {
                 if (sawMD) {
