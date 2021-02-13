@@ -1,5 +1,5 @@
-import { StoreApi } from "zustand/vanilla";
-import { useEffect, useState } from "preact/hooks";
+import { StoreApi, Subscribe } from "zustand/vanilla";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 const isEmptyObject = (obj: any): boolean =>
   obj &&
@@ -24,7 +24,7 @@ const produceResult = <
   const { getState } = store;
   try {
     const result = producer(getState());
-    if (result) {
+    if (result !== undefined) {
       if (isEmptyObject(result)) {
         return EMPTY_OBJECT;
       }
@@ -40,7 +40,17 @@ const produceResult = <
     return MISSING;
   }
 };
-
+const compare = (result1: any, result2: any) => {
+  if (result1 !== result2) {
+    if (result1 instanceof Array && result2 instanceof Array) {
+      if (result1.length === result2.length) {
+        return !result1.find((value, index) => !compare(result2[index], value));
+      }
+    }
+    return false;
+  }
+  return true;
+};
 export const createStoreHook = <
   State extends Record<string | number | symbol, unknown>
 >(
@@ -55,14 +65,15 @@ export const createStoreHook = <
     let unsub;
     const promise = new Promise(resolve => {
       const result = produceResult(store, producer);
-      if (result !== currentState) {
+      if (!compare(result, currentState)) {
         setCurrentState(result);
       }
       unsub = store.subscribe(() => {
         const value = produceResult(store, producer);
-        if (value !== currentState) {
+        if (!compare(value, currentState)) {
           setCurrentState(value);
           resolve(undefined);
+          unsub();
         }
       });
     });

@@ -1,7 +1,15 @@
 import { h, Fragment } from "preact";
-import { StateUpdater, Suspense, useEffect, useState } from "preact/compat";
+import {
+  StateUpdater,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from "preact/compat";
 import { useComponentList } from "../utils/component_list_context";
 import { HexColorPicker } from "react-colorful";
+import { useColors } from "../state/hooks/use_colors";
 
 const ColorPicker = (props: {
   color: string;
@@ -16,14 +24,15 @@ const ColorPicker = (props: {
 };
 const Color = (props: { name: string }) => {
   const { name } = props;
-  const [color, setColor] = useState(() =>
-    getComputedStyle(document.documentElement).getPropertyValue(name)
-  );
-  useEffect(() => {
-    if (color) {
-      document.documentElement.style.setProperty(name, color);
-    }
-  }, [color]);
+
+  const [color, setColor, resetColors] = useColors(state => [
+    state[name],
+    state.setColor,
+    state.resetColors
+  ]);
+  if (color === "") {
+    resetColors();
+  }
   return (
     <div className="color">
       <figure>
@@ -34,20 +43,38 @@ const Color = (props: { name: string }) => {
         ></div>
         <label>{name}</label>
       </figure>
-      <ColorPicker color={color} setColor={setColor}></ColorPicker>
+      <ColorPicker
+        color={color}
+        setColor={value => setColor(name, value)}
+      ></ColorPicker>
     </div>
   );
 };
-const colorNames = [
-  "--color-base",
-  "--color-base2",
-  "--color-text",
-  "--color-extra-light"
-];
 const Colors = () => {
   const [show, setShow] = useState(false);
+  const colorRef = useRef<HTMLDivElement>();
+  useEffect(() => {
+    if (show) {
+      const handler = e => {
+        if (!colorRef.current.contains((e as any).target)) {
+          setShow(false);
+        }
+      };
+      document.body.addEventListener("click", handler);
+      return () => {
+        document.body.removeEventListener("click", handler);
+      };
+    }
+  }, [show]);
+  const [colorNames, resetColors] = useColors(
+    state =>
+      [
+        Object.keys(state).filter(key => key.startsWith("--")),
+        state.resetColors
+      ] as [string[], () => void]
+  );
   return (
-    <div className="colors">
+    <div className="colors" ref={colorRef}>
       <button className="colors-toggle" onClick={() => setShow(s => !s)}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -65,6 +92,9 @@ const Colors = () => {
       </button>
       {show && (
         <div className="colors-wrapper">
+          <div>
+            <button onClick={resetColors}>reset</button>
+          </div>
           {colorNames.map(name => {
             return <Color key={name} name={name}></Color>;
           })}
