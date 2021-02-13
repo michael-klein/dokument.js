@@ -1,12 +1,24 @@
 @import "./reset.scss";
 @import "../../node_modules/sakura.css/scss/sakura.scss";
-$color-text: #657699;
 
-$color-blossom: white;
-$color-fade: #484d5a;
+:root {
+  --color-base: #236a7f;
+  --color-base2: #3a99b6;
+  --color-text: #236a7f;
+  --color-extra-light: #ffffff;
+}
+$color-base: var(--color-base, #236a7f);
+$color-base2: var(--color-base2, #3a99b6);
 
-$color-bg: #f9f9f9;
-$color-bg-alt: #e5e9f0;
+$color-text: var(--color-text, #246b81);
+
+$color-extra-light: var(--color-extra-light, white);
+$color-fade: #0f4956;
+
+$color-bg: $color-base2;
+$gradient: linear-gradient(to right, $color-bg, $color-base);
+$color-bg-alt: #dcdfe6;
+
 @import "../../node_modules/sakura.css/scss/_main.scss";
 @import "./header.scss";
 @import "./sidebar.scss";

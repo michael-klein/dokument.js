@@ -23,7 +23,7 @@ nav.sidebar {
   > ul {
     > li {
       > *:first-child {
-        background: #6e7c99;
+        background: $color-bg;
         margin-left: -20px;
         padding-left: 20px;
         margin-right: -20px;
@@ -32,6 +32,7 @@ nav.sidebar {
         display: flex;
         align-items: center;
         color: white;
+        margin-bottom: 10px;
       }
       > a:first-child {
         &,
@@ -42,7 +43,7 @@ nav.sidebar {
         }
         &:active,
         &:hover {
-          background: #8091b2;
+          filter: brightness(90%);
         }
       }
     }
@@ -56,7 +57,7 @@ nav.sidebar {
   }
   li.sidebar-heading:not(:first-child) {
     margin-top: -5px;
-    color: lighten($color-text, 20);
+    color: $color-text;
   }
   @for $i from 1 through 10 {
     li.sidebar-heading-#{$i} {

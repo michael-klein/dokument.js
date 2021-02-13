@@ -6,21 +6,92 @@ figure.logo {
   align-items: center;
   justify-content: center;
   font-size: 1.2em;
-  background: #f9f9f9;
+  background: $color-bg;
+  color: white;
+  font-family: "Raleway", sans-serif;
+  svg {
+    height: 1em;
+  }
 }
 header {
   display: flex;
-  background: #f9f9f9;
+  background: $color-bg;
   padding: 20px;
   margin: 0px;
+  background: $gradient;
+  .colors {
+    position: relative;
+    .colors-toggle {
+      background: transparent;
+      border: none;
+      height: 20px;
+      margin: 0px;
+      padding: 0px;
+      svg {
+        height: 20px;
+        color: white;
+      }
+    }
+    .colors-wrapper {
+      color: white;
+      font-size: 0.8em;
+      position: absolute;
+      white-space: pre;
+      right: 0px;
+      background: black;
+      padding: 10px;
+      z-index: 900;
+      box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.2);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      .color {
+        position: relative;
+        figure {
+          display: flex;
+          align-items: center;
+          div {
+            background-color: var(--color-base);
+            width: 1em;
+            height: 1em;
+            border-radius: 1px;
+            border: 1px solid $color-extra-light;
+          }
+          label {
+            margin: 0;
+            margin-left: 0.3em;
+          }
+        }
+        .color-picker {
+          display: none;
+        }
+        &:hover {
+          .color-picker {
+            display: block;
+          }
+        }
+      }
+    }
+  }
+  .color-picker {
+    position: absolute;
+    top: 20px;
+    right: 0px;
+    z-index: 1000;
+    background: $color-extra-light;
+    padding: 2px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.5);
+  }
   .search {
     flex: 5;
     display: flex;
     justify-content: center;
     align-items: center;
+
     button.go {
-      background: #d7dbe3;
-      border: #d7dbe3;
+      background: $color-base;
+      border: transparent;
       height: 100%;
       margin-right: -6px;
       border-radius: 4px;
@@ -29,28 +100,35 @@ header {
       align-items: center;
       padding-left: 4px;
       padding-right: 8px;
+      box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.15);
       svg {
-        color: #f9f9f9;
+        color: $color-extra-light;
         height: 24px;
       }
     }
     input {
+      box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.15);
       max-width: 50%;
       width: 50vw;
       margin: 0;
-      color: lighten($color-text, 10);
-      border: 1px solid #d7dbe3;
+      color: $color-text;
+      border: 1px solid $color-base;
       &::placeholder {
-        color: lighten($color-text, 20);
+        filter: brightness(140%);
       }
     }
     &:focus-within {
+      input,
+      button {
+        box-shadow: none;
+      }
       input {
-        border: 1px solid #a8b3cb;
+        border: 1px solid transparent;
         outline: 0;
+        filter: saturate(1);
       }
       button {
-        background: #a8b3cb;
+        filter: brightness(110%);
       }
     }
   }
