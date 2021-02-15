@@ -5,9 +5,7 @@ nav.sidebar {
   width: 100%;
 
   min-width: 150px;
-  padding: 20px;
-  padding-top: 0px;
-  padding-left: 0px;
+  padding: 0px;
   font-size: 0.85em;
   background-color: white;
   ul {
@@ -19,6 +17,10 @@ nav.sidebar {
   a:active,
   a:hover {
     color: inherit;
+    border-bottom: none;
+  }
+  a:last-child {
+    padding-right: 20px;
   }
   > ul {
     > li {
@@ -26,7 +28,6 @@ nav.sidebar {
         background: $color-bg;
         margin-left: -20px;
         padding-left: 20px;
-        margin-right: -20px;
         box-sizing: content-box;
         height: 30px;
         display: flex;
@@ -34,7 +35,7 @@ nav.sidebar {
         color: white;
         margin-bottom: 10px;
       }
-      > a:first-child {
+      > .navbar-item-label a:first-child {
         &,
         &:link,
         &:active,
@@ -44,6 +45,47 @@ nav.sidebar {
         &:active,
         &:hover {
           filter: brightness(90%);
+        }
+      }
+    }
+  }
+  .navbar-item {
+    .navbar-item-label {
+      display: flex;
+      align-items: center;
+      a {
+        flex: auto;
+      }
+      button {
+        color: inherit;
+        border: 0;
+        background: none;
+        padding: 0;
+        margin: 0;
+        border-radius: 50%;
+        overflow: hidden;
+        box-sizing: content-box;
+        border: 3px solid transparent;
+        flex: 1;
+        max-width: 12px;
+        height: 12px;
+        width: 12px;
+        color: inherit;
+        svg {
+          height: 12px;
+          width: 12px;
+          color: inherit;
+          transition: transform 0.3s;
+        }
+        &:hover {
+          border: 3px solid $color-fade;
+          color: $color-extra-light;
+          background: $color-fade;
+        }
+      }
+      &:not(.open) {
+        svg {
+          transform: rotate(180deg);
         }
       }
     }

@@ -34,16 +34,17 @@ function findHeadings(document: string): DocumentHeading[] {
   return headings;
 }
 
-export function buildNavbar(navbarJSON: NavbarJSON): Navbar {
+export function buildNavbar(navbarJSON: NavbarJSON, depth: number = 1): Navbar {
   let navbar: Navbar = {};
   for (const title of Object.keys(navbarJSON)) {
     const entry: string | NavbarJSON = navbarJSON[title];
     if (typeof entry === "object") {
       navbar[title] = {
         type: NavbarItemType.CATEGORY,
-        children: buildNavbar(entry),
+        children: buildNavbar(entry, depth + 1),
         slug: slugify(title),
-        title
+        title,
+        depth
       };
     } else {
       const slug: string = slugify(entry);
@@ -51,6 +52,7 @@ export function buildNavbar(navbarJSON: NavbarJSON): Navbar {
         type: NavbarItemType.DOCUMENT,
         slug: slug,
         path: entry,
+        depth,
         title
       };
     }

@@ -44,7 +44,10 @@ const compare = (result1: any, result2: any) => {
   if (result1 !== result2) {
     if (result1 instanceof Array && result2 instanceof Array) {
       if (result1.length === result2.length) {
-        return !result1.find((value, index) => !compare(result2[index], value));
+        const hasUnequalValue =
+          result1.findIndex((value, index) => !compare(result2[index], value)) >
+          -1;
+        return !hasUnequalValue;
       }
     }
     return false;

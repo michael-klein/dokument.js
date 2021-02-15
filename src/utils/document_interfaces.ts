@@ -14,6 +14,7 @@ export enum NavbarItemType {
 export interface NavbarItem {
   type: NavbarItemType;
   title: string;
+  depth: number;
   path?: string;
   slug?: string;
   headings?: DocumentHeading[];
