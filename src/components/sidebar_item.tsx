@@ -9,7 +9,7 @@ export const SidebarItem = (props: { item: NavbarItem }) => {
   const { headings = [], depth, path } = item;
   const hasHeadings = headings.length > 0;
   const [collapsed, setCollapsed] = useSidebarCollapsedState(
-    state =>
+    (state) =>
       [state.isCollapsed[path] ?? depth > 1, state.setCollapsed] as [
         boolean,
         (path: string, producer: (current: boolean) => boolean) => void
@@ -18,12 +18,16 @@ export const SidebarItem = (props: { item: NavbarItem }) => {
 
   return (
     <li key={item.path + item.slug} className="navbar-item">
-      <div className={`navbar-item-label${!collapsed ? " open" : ""}`}>
+      <div
+        className={`navbar-item-label${!collapsed ? " open" : ""}${
+          hasHeadings ? " header" : ""
+        } depth-${depth}`}
+      >
         <SidebarLink item={item}></SidebarLink>
         {hasHeadings && (
           <button
             onClick={() =>
-              setCollapsed(path, isCollapsedBefore => {
+              setCollapsed(path, (isCollapsedBefore) => {
                 return !(isCollapsedBefore ?? depth > 1);
               })
             }
@@ -46,7 +50,7 @@ export const SidebarItem = (props: { item: NavbarItem }) => {
       </div>
       {hasHeadings && !collapsed && (
         <ul>
-          {headings.map(heading => {
+          {headings.map((heading) => {
             return (
               <li className={`sidebar-heading sidebar-heading-${heading.size}`}>
                 <SidebarLink item={item} heading={heading}></SidebarLink>

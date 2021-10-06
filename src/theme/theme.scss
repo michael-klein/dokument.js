@@ -1,11 +1,12 @@
-@import "./reset.scss";
-@import "../../node_modules/sakura.css/scss/sakura.scss";
+@import './reset.scss';
+@import '../../node_modules/sakura.css/scss/sakura.scss';
 
 :root {
-  --color-base: #236a7f;
-  --color-base2: #3a99b6;
-  --color-text: #236a7f;
-  --color-extra-light: #ffffff;
+    --sidebar-padding: 10px;
+    --color-base: #236a7f;
+    --color-base2: #3a99b6;
+    --color-text: #236a7f;
+    --color-extra-light: #ffffff;
 }
 $color-base: var(--color-base, #236a7f);
 $color-base2: var(--color-base2, #3a99b6);
@@ -19,23 +20,23 @@ $color-bg: $color-base2;
 $gradient: linear-gradient(to right, $color-bg, $color-base);
 $color-bg-alt: #dcdfe6;
 
-@import "../../node_modules/sakura.css/scss/_main.scss";
-@import "./header.scss";
-@import "./sidebar.scss";
-@import "./content.scss";
+@import '../../node_modules/sakura.css/scss/_main.scss';
+@import './header.scss';
+@import './sidebar.scss';
+@import './content.scss';
 body {
-  font-family: "Roboto", sand-serif;
-  max-width: initial;
-  padding: 0px;
-  display: flex;
-  height: 100vh;
-  flex-direction: column;
+    font-family: 'Roboto', sand-serif;
+    max-width: initial;
+    padding: 0px;
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
 
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  grid-template-rows: max-content 1fr;
-  gap: 0px 0px;
-  grid-template-areas:
-    ". ."
-    ". .";
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    grid-template-rows: max-content 1fr;
+    gap: 0px 0px;
+    grid-template-areas:
+        '. .'
+        '. .';
 }

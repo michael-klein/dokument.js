@@ -20,5 +20,6 @@ export declare const componentList: {
     Main: () => import("preact").JSX.Element;
     SidebarMenu: () => import("preact").JSX.Element;
     DocumentRenderer: typeof DocumentRenderer;
+    BreadCrumbs: () => import("preact").JSX.Element;
 };
 export declare type ComponentList = typeof componentList;

@@ -19,6 +19,7 @@ export declare const componentListContext: import("preact").Context<{
     Main: () => import("preact").JSX.Element;
     SidebarMenu: () => import("preact").JSX.Element;
     DocumentRenderer: typeof import("../components/document_renderer").DocumentRenderer;
+    BreadCrumbs: () => import("preact").JSX.Element;
 }>;
 export declare const useComponentList: () => {
     Header: () => import("preact").JSX.Element;
@@ -41,4 +42,5 @@ export declare const useComponentList: () => {
     Main: () => import("preact").JSX.Element;
     SidebarMenu: () => import("preact").JSX.Element;
     DocumentRenderer: typeof import("../components/document_renderer").DocumentRenderer;
+    BreadCrumbs: () => import("preact").JSX.Element;
 };

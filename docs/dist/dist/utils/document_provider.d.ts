@@ -1,5 +1,5 @@
 import { Navbar, NavbarJSON, NavbarItem } from "./document_interfaces";
-export declare function buildNavbar(navbarJSON: NavbarJSON): Navbar;
+export declare function buildNavbar(navbarJSON: NavbarJSON, depth?: number): Navbar;
 export declare function fetchNavbar(rootPath: string, navbarPath: string): Promise<Navbar>;
 export declare function slugify(path: string): string;
 export declare const fetchDocumentNowBySlug: (rootPath: string, flatNavbar: NavbarItem[], slug: string) => Promise<void>;

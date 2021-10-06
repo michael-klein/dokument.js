@@ -24,30 +24,30 @@ export const colors = create<ColorsState>(
         value: string
       ) =>
         set({
-          [key]: value
-        }),
+          [key]: value,
+        } as any),
       resetColors: () => {
-        Object.keys(get()).forEach(key => {
+        Object.keys(get()).forEach((key) => {
           if (key.startsWith("--")) {
             document.documentElement.style.removeProperty(key);
             set({
               [key]: getComputedStyle(
                 document.documentElement
-              ).getPropertyValue(key)
-            });
+              ).getPropertyValue(key),
+            } as any);
           }
         });
-      }
+      },
     }),
     {
       name: "dokjs-colors-storage",
-      getStorage: () => localStorage
+      getStorage: () => localStorage,
     }
   )
 );
 
-colors.subscribe(state => {
-  Object.keys(state).forEach(key => {
+colors.subscribe((state) => {
+  Object.keys(state).forEach((key) => {
     if (key.startsWith("--")) {
       document.documentElement.style.setProperty(key, state[key]);
     }
