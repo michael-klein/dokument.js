@@ -5,7 +5,7 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
-  useState
+  useState,
 } from "preact/compat";
 import { useComponentList } from "../utils/component_list_context";
 import { HexColorPicker } from "react-colorful";
@@ -25,10 +25,10 @@ const ColorPicker = (props: {
 const Color = (props: { name: string }) => {
   const { name } = props;
 
-  const [color, setColor, resetColors] = useColors(state => [
+  const [color, setColor, resetColors] = useColors((state) => [
     state[name],
     state.setColor,
-    state.resetColors
+    state.resetColors,
   ]);
   if (color === "") {
     resetColors();
@@ -38,14 +38,14 @@ const Color = (props: { name: string }) => {
       <figure>
         <div
           style={{
-            backgroundColor: color
+            backgroundColor: color,
           }}
         ></div>
         <label>{name}</label>
       </figure>
       <ColorPicker
         color={color}
-        setColor={value => setColor(name, value)}
+        setColor={(value) => setColor(name, value)}
       ></ColorPicker>
     </div>
   );
@@ -55,7 +55,7 @@ const Colors = () => {
   const colorRef = useRef<HTMLDivElement>();
   useEffect(() => {
     if (show) {
-      const handler = e => {
+      const handler = (e) => {
         if (!colorRef.current.contains((e as any).target)) {
           setShow(false);
         }
@@ -67,15 +67,15 @@ const Colors = () => {
     }
   }, [show]);
   const [colorNames, resetColors] = useColors(
-    state =>
+    (state) =>
       [
-        Object.keys(state).filter(key => key.startsWith("--")),
-        state.resetColors
+        Object.keys(state).filter((key) => key.startsWith("--")),
+        state.resetColors,
       ] as [string[], () => void]
   );
   return (
     <div className="colors" ref={colorRef}>
-      <button className="colors-toggle" onClick={() => setShow(s => !s)}>
+      <button className="colors-toggle" onClick={() => setShow((s) => !s)}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -95,7 +95,7 @@ const Colors = () => {
           <div>
             <button onClick={resetColors}>reset</button>
           </div>
-          {colorNames.map(name => {
+          {colorNames.map((name) => {
             return <Color key={name} name={name}></Color>;
           })}
         </div>
@@ -107,8 +107,8 @@ export const Header = () => {
   const { Logo, Search } = useComponentList();
   return (
     <>
-      <Logo></Logo>
       <header>
+        <Logo></Logo>
         <Suspense fallback="...">
           <Search></Search>
         </Suspense>

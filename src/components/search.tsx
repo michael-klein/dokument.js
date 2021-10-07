@@ -3,6 +3,7 @@ import { useComponentList } from "../utils/component_list_context";
 import { search } from "ss-search";
 import { useDocuments } from "../state/hooks/use_documents";
 import { useCallback } from "preact/hooks";
+import { searchDocs } from "../utils/search";
 
 export const Search = () => {
   const { SearchInput } = useComponentList();
@@ -10,7 +11,7 @@ export const Search = () => {
   const handleQuery = useCallback(
     (query: string) => {
       const result = search(documents, ["title", "content"], query);
-      console.log(result);
+      console.log(searchDocs(query));
     },
     [documents.length]
   );

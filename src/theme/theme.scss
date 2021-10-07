@@ -3,20 +3,20 @@
 
 :root {
     --sidebar-padding: 10px;
-    --color-base: #236a7f;
-    --color-base2: #3a99b6;
-    --color-text: #236a7f;
+    --color-base: #004e98;
+    --color-base2: #3a6ea5;
+    --color-text: #3a6ea5;
     --color-extra-light: #ffffff;
+    --color-bg: white;
 }
-$color-base: var(--color-base, #236a7f);
-$color-base2: var(--color-base2, #3a99b6);
-
+$color-base: var(--color-base, #004e98);
+$color-base2: var(--color-base2, #3a6ea5);
 $color-text: var(--color-text, #246b81);
 
 $color-extra-light: var(--color-extra-light, white);
-$color-fade: #0f4956;
+$color-fade: #004e98;
 
-$color-bg: $color-base2;
+$color-bg: var(--color-bg, white);
 $gradient: linear-gradient(to right, $color-bg, $color-base);
 $color-bg-alt: #dcdfe6;
 
@@ -33,10 +33,10 @@ body {
     flex-direction: column;
 
     display: grid;
-    grid-template-columns: max-content 1fr;
+    grid-template-columns: 1fr max-content max-content 1fr;
     grid-template-rows: max-content 1fr;
     gap: 0px 0px;
     grid-template-areas:
-        '. .'
-        '. .';
+        '. . . .'
+        '. . . .';
 }

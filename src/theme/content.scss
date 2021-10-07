@@ -1,95 +1,151 @@
 .content {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  overflow: auto;
-
-  .bread-crumb {
-    margin: 0;
-    padding: 10px;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    width: 100%;
-    background: $color-bg-alt;
-    font-size: 0.7em;
-    overflow: hidden;
-    flex: none;
-    position: sticky;
-    top: 0px;
-    .bread-icon {
-      height: 1.2em;
-      transform: translateY(0.2em);
-      margin-right: 5px;
-    }
-    > span {
-      display: inline-block;
-      position: relative;
-      z-index: 1;
-      padding-left: 10px;
-      padding-right: 10px;
-      padding-top: 5px;
-      padding-bottom: 5px;
-      filter: brightness(98%);
-      &:after {
-        position: absolute;
-        background: $color-bg-alt;
-        filter: brightness(100%);
-        content: "";
-        left: 1px;
-        right: 0px;
-        transform: skewX(-30deg);
-        box-shadow: 1px 1px 20px $color-extra-light;
-        top: 0px;
-        bottom: 0px;
-        z-index: -1;
-      }
-      &:first-child {
-        &:after {
-          left: -30px;
-        }
-      }
-    }
-  }
-  .main-wrapper {
-    width: 100%;
-    padding: 40px;
-    background: #eff1f4;
-    box-shadow: inset 0px 7px 40px #3945590d;
+    grid-column: 3;
     display: flex;
     align-items: center;
     flex-direction: column;
-    flex: auto;
-    main {
-      flex: auto;
-      max-width: 800px;
-      padding: 0px;
-      background-color: white;
-      font-size: 0.9em;
-      article > h1:first-child {
-        color: white;
-        background: $gradient;
-        padding: 20px;
-        padding-bottom: 10px;
-        margin-left: -20px;
-        margin-right: -20px;
-        margin-top: -20px;
-      }
-      pre:not(.bread-crumb) {
-        margin-left: -20px;
-        margin-right: -20px;
-        padding-left: 20px;
-        padding-right: 20px;
-      }
-      article {
-        padding: 20px;
-      }
-      a,
-      a:link,
-      a:active,
-      a:hover {
-        color: #800100;
-      }
-      text-align: justify;
+
+    .bread-crumb {
+        margin: 0;
+        padding: 10px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        width: 100%;
+        background: $color-bg-alt;
+        font-size: 0.7em;
+        overflow: hidden;
+        flex: none;
+        position: sticky;
+        top: 0px;
+        .bread-icon {
+            height: 1.2em;
+            transform: translateY(0.2em);
+            margin-right: 5px;
+        }
+        > span {
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            filter: brightness(98%);
+            &:after {
+                position: absolute;
+                background: $color-bg-alt;
+                filter: brightness(100%);
+                content: '';
+                left: 1px;
+                right: 0px;
+                transform: skewX(-30deg);
+                box-shadow: 1px 1px 20px $color-extra-light;
+                top: 0px;
+                bottom: 0px;
+                z-index: -1;
+            }
+            &:first-child {
+                &:after {
+                    left: -30px;
+                }
+            }
+        }
     }
-  }
+    .main-wrapper {
+        width: 100%;
+        background: $color-bg;
+        box-shadow: inset 0px 7px 40px #3945590d;
+        display: flex;
+        align-items: flex-start;
+        flex-direction: row;
+        flex: auto;
+        main {
+            flex: auto;
+            max-width: 1000px;
+            width: 100vw;
+            background-color: white;
+            font-size: 0.9em;
+            display: flex;
+            align-items: flex-start;
+            flex-direction: row;
+            height: 100%;
+            padding: 50px;
+
+            > aside {
+                min-width: 200px;
+                height: 100%;
+                background: white;
+                padding: 30px;
+                padding-top: 0px;
+                max-width: 300px;
+                > div {
+                    position: sticky;
+                    padding-top: 30px;
+                    top: 30px;
+                    overflow: hidden;
+                    ul {
+                        padding: 0;
+                        margin: 0;
+                        list-style: none;
+                        a,
+                        a:link,
+                        a:active,
+                        a:hover {
+                            color: inherit;
+                            border-bottom: none;
+                            position: relative;
+                        }
+                        a:hover:before {
+                            content: '';
+                            display: block;
+                            position: absolute;
+                            left: -1000px;
+                            right: -1000px;
+                            top: -3px;
+                            bottom: -3px;
+                            background: $color-base;
+                            opacity: 0.2;
+                            z-index: 1000;
+                        }
+                        li.sidebar-heading:not(:first-child) {
+                            margin-top: -5px;
+                            color: $color-text;
+                        }
+                        @for $i from 1 through 10 {
+                            li.sidebar-heading-#{$i} {
+                                padding-left: #{$i * 0.3}em;
+                            }
+                        }
+                        li.sidebar-heading.last {
+                            margin-bottom: 10px;
+                        }
+                    }
+                }
+            }
+            article > h1:first-child {
+                color: white;
+                background: $color-base;
+                padding: 20px;
+                padding-bottom: 10px;
+                margin-left: -20px;
+                margin-right: -20px;
+                margin-top: -20px;
+            }
+            pre:not(.bread-crumb) {
+                margin-left: -20px;
+                margin-right: -20px;
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            article {
+                padding: 20px;
+            }
+            a,
+            a:link,
+            a:active,
+            a:hover {
+                color: #800100;
+            }
+            text-align: justify;
+        }
+    }
 }

@@ -4,9 +4,10 @@ import {
   Navbar,
   DocumentData,
   DocumentHeading,
-  NavbarItem
+  NavbarItem,
 } from "../utils/document_interfaces";
 import produce from "immer";
+import { updateIndex } from "../utils/search";
 
 const findNavbarItem = (navbar: Navbar, slug: string) => {
   for (const key of Object.keys(navbar)) {
@@ -25,12 +26,12 @@ const findNavbarItem = (navbar: Navbar, slug: string) => {
 };
 
 const flattenNavbar = (navbar: Navbar): NavbarItem[] => {
-  return Object.keys(navbar).flatMap(key => {
+  return Object.keys(navbar).flatMap((key) => {
     const item = navbar[key];
     return [
       item,
-      ...(item.children ? flattenNavbar(item.children) : [])
-    ].filter(i => i.path);
+      ...(item.children ? flattenNavbar(item.children) : []),
+    ].filter((i) => i.path);
   });
 };
 export type DocState = {
@@ -43,23 +44,23 @@ export type DocState = {
   addDocument: (document: DocumentData) => void;
   addHeadingsToNavbarItem: (slug: string, headings: DocumentHeading[]) => void;
 };
-export const docs = create<DocState>(set => ({
+export const docs = create<DocState>((set) => ({
   setNavBar: (navbar: Navbar) =>
     set(
-      produce(state => {
+      produce((state) => {
         state.navbar = navbar;
         state.flatNavbar = flattenNavbar(navbar);
       })
     ),
   setCurrentDocument: (document: DocumentData) =>
     set(
-      produce(state => {
+      produce((state) => {
         state.currentDocument = document;
       })
     ),
   addDocument: (document: DocumentData) =>
     set(
-      produce(state => {
+      produce((state) => {
         if (!state.documents) {
           state.documents = {};
         }
@@ -68,12 +69,15 @@ export const docs = create<DocState>(set => ({
     ),
   addHeadingsToNavbarItem: (slug: string, headings: DocumentHeading[]) =>
     set(
-      produce(state => {
+      produce((state) => {
         const item = findNavbarItem(state.navbar, slug);
         if (item) {
           item.headings = headings;
           state.flatNavbar = flattenNavbar(state.navbar);
         }
       })
-    )
+    ),
 }));
+docs.subscribe((data) => {
+  updateIndex(data.documents);
+});

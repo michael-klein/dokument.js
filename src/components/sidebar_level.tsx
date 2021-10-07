@@ -4,9 +4,10 @@ import { Navbar } from "../utils/document_interfaces";
 
 export const SidebarLevel = (level: Navbar) => {
   const { SidebarItem, SidebarCategory } = useComponentList();
+  const itemKeys = Object.keys(level);
   return (
     <ul>
-      {Object.keys(level).map(key => {
+      {itemKeys.map((key, index) => {
         const item = level[key];
         if (!item.children) {
           return <SidebarItem key={key} item={item}></SidebarItem>;

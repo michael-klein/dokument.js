@@ -4,6 +4,8 @@ import { useDocsOptions } from "../utils/docs_options_context";
 
 import { htmdx } from "htmdx";
 import { useCurrentDocument } from "../state/hooks/use_current_document";
+import { useComponentList } from "../utils/component_list_context";
+import { useFlatNavbar } from "../state/hooks/use_flat_navbar";
 const components: { [key: string]: FunctionComponent } = {};
 /*
 let hCount: number = 0;
@@ -43,16 +45,21 @@ export interface DocumentRendererProps {
 }
 
 export function DocumentRenderer(): JSX.Element {
+  const { TOC } = useComponentList();
   const currentDocument = useCurrentDocument();
   const { htmdxOptions = { components: {} } } = useDocsOptions();
+  const navbarItems = useFlatNavbar();
   return (
     <>
       <article>
         {htmdx(currentDocument.content, h, {
           ...htmdxOptions,
-          components: { ...components, ...htmdxOptions.components }
+          components: { ...components, ...htmdxOptions.components },
         })}
       </article>
+      <TOC
+        item={navbarItems.find((i) => i.slug === currentDocument.slug)}
+      ></TOC>
     </>
   );
 }

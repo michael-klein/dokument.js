@@ -1,5 +1,5 @@
 nav.sidebar {
-    overflow: auto;
+    grid-column: 2;
     flex: auto;
     max-width: 250px;
     width: 100%;
@@ -11,6 +11,11 @@ nav.sidebar {
     ul {
         padding-left: var(--sidebar-padding);
         list-style: none;
+    }
+    > ul {
+        position: sticky;
+        top: 0;
+        overflow: hidden;
     }
     a,
     a:link,
@@ -26,12 +31,19 @@ nav.sidebar {
         position: absolute;
         left: -1000px;
         right: -1000px;
-        top: -1px;
-        bottom: -1px;
-        background: #00000021;
+        top: -3px;
+        bottom: -3px;
+        background: $color-base;
+        opacity: 0.2;
+        z-index: 1000;
     }
     a:last-child {
         padding-right: 20px;
+    }
+    .sidebar-link {
+        line-height: 1.1em;
+        padding-top: 2px;
+        padding-bottom: 2px;
     }
     > ul {
         > li {
@@ -40,7 +52,7 @@ nav.sidebar {
                 font-weight: bold;
             }
             > *:first-child {
-                background: $color-bg;
+                background: $color-base;
                 margin-left: calc(-1 * var(--sidebar-padding));
                 padding-left: var(--sidebar-padding);
                 box-sizing: content-box;
@@ -68,7 +80,7 @@ nav.sidebar {
         .navbar-item-label {
             display: flex;
             align-items: center;
-            a {
+            > .sidebar-link {
                 flex: auto;
             }
             button {
@@ -120,5 +132,8 @@ nav.sidebar {
         li.sidebar-heading-#{$i} {
             padding-left: #{$i - 1}em;
         }
+    }
+    li.sidebar-heading.last {
+        margin-bottom: 10px;
     }
 }

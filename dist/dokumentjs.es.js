@@ -720,6 +720,1797 @@ an$1.applyPatches.bind(an$1);
 an$1.createDraft.bind(an$1);
 an$1.finishDraft.bind(an$1);
 var produce = fn$1;
+var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
+function getDefaultExportFromCjs(x2) {
+  return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
+}
+function getAugmentedNamespace(n2) {
+  if (n2.__esModule)
+    return n2;
+  var a2 = Object.defineProperty({}, "__esModule", { value: true });
+  Object.keys(n2).forEach(function(k2) {
+    var d2 = Object.getOwnPropertyDescriptor(n2, k2);
+    Object.defineProperty(a2, k2, d2.get ? d2 : {
+      enumerable: true,
+      get: function() {
+        return n2[k2];
+      }
+    });
+  });
+  return a2;
+}
+var lunr$1 = { exports: {} };
+/**
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.9
+ * Copyright (C) 2020 Oliver Nightingale
+ * @license MIT
+ */
+(function(module, exports) {
+  (function() {
+    var lunr2 = function(config) {
+      var builder = new lunr2.Builder();
+      builder.pipeline.add(lunr2.trimmer, lunr2.stopWordFilter, lunr2.stemmer);
+      builder.searchPipeline.add(lunr2.stemmer);
+      config.call(builder, builder);
+      return builder.build();
+    };
+    lunr2.version = "2.3.9";
+    /*!
+     * lunr.utils
+     * Copyright (C) 2020 Oliver Nightingale
+     */
+    lunr2.utils = {};
+    lunr2.utils.warn = function(global2) {
+      return function(message) {
+        if (global2.console && console.warn) {
+          console.warn(message);
+        }
+      };
+    }(this);
+    lunr2.utils.asString = function(obj) {
+      if (obj === void 0 || obj === null) {
+        return "";
+      } else {
+        return obj.toString();
+      }
+    };
+    lunr2.utils.clone = function(obj) {
+      if (obj === null || obj === void 0) {
+        return obj;
+      }
+      var clone = Object.create(null), keys = Object.keys(obj);
+      for (var i2 = 0; i2 < keys.length; i2++) {
+        var key = keys[i2], val = obj[key];
+        if (Array.isArray(val)) {
+          clone[key] = val.slice();
+          continue;
+        }
+        if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") {
+          clone[key] = val;
+          continue;
+        }
+        throw new TypeError("clone is not deep and does not support nested objects");
+      }
+      return clone;
+    };
+    lunr2.FieldRef = function(docRef, fieldName, stringValue) {
+      this.docRef = docRef;
+      this.fieldName = fieldName;
+      this._stringValue = stringValue;
+    };
+    lunr2.FieldRef.joiner = "/";
+    lunr2.FieldRef.fromString = function(s2) {
+      var n2 = s2.indexOf(lunr2.FieldRef.joiner);
+      if (n2 === -1) {
+        throw "malformed field ref string";
+      }
+      var fieldRef = s2.slice(0, n2), docRef = s2.slice(n2 + 1);
+      return new lunr2.FieldRef(docRef, fieldRef, s2);
+    };
+    lunr2.FieldRef.prototype.toString = function() {
+      if (this._stringValue == void 0) {
+        this._stringValue = this.fieldName + lunr2.FieldRef.joiner + this.docRef;
+      }
+      return this._stringValue;
+    };
+    /*!
+     * lunr.Set
+     * Copyright (C) 2020 Oliver Nightingale
+     */
+    lunr2.Set = function(elements) {
+      this.elements = Object.create(null);
+      if (elements) {
+        this.length = elements.length;
+        for (var i2 = 0; i2 < this.length; i2++) {
+          this.elements[elements[i2]] = true;
+        }
+      } else {
+        this.length = 0;
+      }
+    };
+    lunr2.Set.complete = {
+      intersect: function(other) {
+        return other;
+      },
+      union: function() {
+        return this;
+      },
+      contains: function() {
+        return true;
+      }
+    };
+    lunr2.Set.empty = {
+      intersect: function() {
+        return this;
+      },
+      union: function(other) {
+        return other;
+      },
+      contains: function() {
+        return false;
+      }
+    };
+    lunr2.Set.prototype.contains = function(object) {
+      return !!this.elements[object];
+    };
+    lunr2.Set.prototype.intersect = function(other) {
+      var a2, b2, elements, intersection = [];
+      if (other === lunr2.Set.complete) {
+        return this;
+      }
+      if (other === lunr2.Set.empty) {
+        return other;
+      }
+      if (this.length < other.length) {
+        a2 = this;
+        b2 = other;
+      } else {
+        a2 = other;
+        b2 = this;
+      }
+      elements = Object.keys(a2.elements);
+      for (var i2 = 0; i2 < elements.length; i2++) {
+        var element = elements[i2];
+        if (element in b2.elements) {
+          intersection.push(element);
+        }
+      }
+      return new lunr2.Set(intersection);
+    };
+    lunr2.Set.prototype.union = function(other) {
+      if (other === lunr2.Set.complete) {
+        return lunr2.Set.complete;
+      }
+      if (other === lunr2.Set.empty) {
+        return this;
+      }
+      return new lunr2.Set(Object.keys(this.elements).concat(Object.keys(other.elements)));
+    };
+    lunr2.idf = function(posting, documentCount) {
+      var documentsWithTerm = 0;
+      for (var fieldName in posting) {
+        if (fieldName == "_index")
+          continue;
+        documentsWithTerm += Object.keys(posting[fieldName]).length;
+      }
+      var x2 = (documentCount - documentsWithTerm + 0.5) / (documentsWithTerm + 0.5);
+      return Math.log(1 + Math.abs(x2));
+    };
+    lunr2.Token = function(str, metadata) {
+      this.str = str || "";
+      this.metadata = metadata || {};
+    };
+    lunr2.Token.prototype.toString = function() {
+      return this.str;
+    };
+    lunr2.Token.prototype.update = function(fn2) {
+      this.str = fn2(this.str, this.metadata);
+      return this;
+    };
+    lunr2.Token.prototype.clone = function(fn2) {
+      fn2 = fn2 || function(s2) {
+        return s2;
+      };
+      return new lunr2.Token(fn2(this.str, this.metadata), this.metadata);
+    };
+    /*!
+     * lunr.tokenizer
+     * Copyright (C) 2020 Oliver Nightingale
+     */
+    lunr2.tokenizer = function(obj, metadata) {
+      if (obj == null || obj == void 0) {
+        return [];
+      }
+      if (Array.isArray(obj)) {
+        return obj.map(function(t3) {
+          return new lunr2.Token(lunr2.utils.asString(t3).toLowerCase(), lunr2.utils.clone(metadata));
+        });
+      }
+      var str = obj.toString().toLowerCase(), len = str.length, tokens = [];
+      for (var sliceEnd = 0, sliceStart = 0; sliceEnd <= len; sliceEnd++) {
+        var char = str.charAt(sliceEnd), sliceLength = sliceEnd - sliceStart;
+        if (char.match(lunr2.tokenizer.separator) || sliceEnd == len) {
+          if (sliceLength > 0) {
+            var tokenMetadata = lunr2.utils.clone(metadata) || {};
+            tokenMetadata["position"] = [sliceStart, sliceLength];
+            tokenMetadata["index"] = tokens.length;
+            tokens.push(new lunr2.Token(str.slice(sliceStart, sliceEnd), tokenMetadata));
+          }
+          sliceStart = sliceEnd + 1;
+        }
+      }
+      return tokens;
+    };
+    lunr2.tokenizer.separator = /[\s\-]+/;
+    /*!
+     * lunr.Pipeline
+     * Copyright (C) 2020 Oliver Nightingale
+     */
+    lunr2.Pipeline = function() {
+      this._stack = [];
+    };
+    lunr2.Pipeline.registeredFunctions = Object.create(null);
+    lunr2.Pipeline.registerFunction = function(fn2, label) {
+      if (label in this.registeredFunctions) {
+        lunr2.utils.warn("Overwriting existing registered function: " + label);
+      }
+      fn2.label = label;
+      lunr2.Pipeline.registeredFunctions[fn2.label] = fn2;
+    };
+    lunr2.Pipeline.warnIfFunctionNotRegistered = function(fn2) {
+      var isRegistered = fn2.label && fn2.label in this.registeredFunctions;
+      if (!isRegistered) {
+        lunr2.utils.warn("Function is not registered with pipeline. This may cause problems when serialising the index.\n", fn2);
+      }
+    };
+    lunr2.Pipeline.load = function(serialised) {
+      var pipeline = new lunr2.Pipeline();
+      serialised.forEach(function(fnName) {
+        var fn2 = lunr2.Pipeline.registeredFunctions[fnName];
+        if (fn2) {
+          pipeline.add(fn2);
+        } else {
+          throw new Error("Cannot load unregistered function: " + fnName);
+        }
+      });
+      return pipeline;
+    };
+    lunr2.Pipeline.prototype.add = function() {
+      var fns = Array.prototype.slice.call(arguments);
+      fns.forEach(function(fn2) {
+        lunr2.Pipeline.warnIfFunctionNotRegistered(fn2);
+        this._stack.push(fn2);
+      }, this);
+    };
+    lunr2.Pipeline.prototype.after = function(existingFn, newFn) {
+      lunr2.Pipeline.warnIfFunctionNotRegistered(newFn);
+      var pos = this._stack.indexOf(existingFn);
+      if (pos == -1) {
+        throw new Error("Cannot find existingFn");
+      }
+      pos = pos + 1;
+      this._stack.splice(pos, 0, newFn);
+    };
+    lunr2.Pipeline.prototype.before = function(existingFn, newFn) {
+      lunr2.Pipeline.warnIfFunctionNotRegistered(newFn);
+      var pos = this._stack.indexOf(existingFn);
+      if (pos == -1) {
+        throw new Error("Cannot find existingFn");
+      }
+      this._stack.splice(pos, 0, newFn);
+    };
+    lunr2.Pipeline.prototype.remove = function(fn2) {
+      var pos = this._stack.indexOf(fn2);
+      if (pos == -1) {
+        return;
+      }
+      this._stack.splice(pos, 1);
+    };
+    lunr2.Pipeline.prototype.run = function(tokens) {
+      var stackLength = this._stack.length;
+      for (var i2 = 0; i2 < stackLength; i2++) {
+        var fn2 = this._stack[i2];
+        var memo = [];
+        for (var j2 = 0; j2 < tokens.length; j2++) {
+          var result = fn2(tokens[j2], j2, tokens);
+          if (result === null || result === void 0 || result === "")
+            continue;
+          if (Array.isArray(result)) {
+            for (var k2 = 0; k2 < result.length; k2++) {
+              memo.push(result[k2]);
+            }
+          } else {
+            memo.push(result);
+          }
+        }
+        tokens = memo;
+      }
+      return tokens;
+    };
+    lunr2.Pipeline.prototype.runString = function(str, metadata) {
+      var token = new lunr2.Token(str, metadata);
+      return this.run([token]).map(function(t3) {
+        return t3.toString();
+      });
+    };
+    lunr2.Pipeline.prototype.reset = function() {
+      this._stack = [];
+    };
+    lunr2.Pipeline.prototype.toJSON = function() {
+      return this._stack.map(function(fn2) {
+        lunr2.Pipeline.warnIfFunctionNotRegistered(fn2);
+        return fn2.label;
+      });
+    };
+    /*!
+     * lunr.Vector
+     * Copyright (C) 2020 Oliver Nightingale
+     */
+    lunr2.Vector = function(elements) {
+      this._magnitude = 0;
+      this.elements = elements || [];
+    };
+    lunr2.Vector.prototype.positionForIndex = function(index) {
+      if (this.elements.length == 0) {
+        return 0;
+      }
+      var start = 0, end = this.elements.length / 2, sliceLength = end - start, pivotPoint = Math.floor(sliceLength / 2), pivotIndex = this.elements[pivotPoint * 2];
+      while (sliceLength > 1) {
+        if (pivotIndex < index) {
+          start = pivotPoint;
+        }
+        if (pivotIndex > index) {
+          end = pivotPoint;
+        }
+        if (pivotIndex == index) {
+          break;
+        }
+        sliceLength = end - start;
+        pivotPoint = start + Math.floor(sliceLength / 2);
+        pivotIndex = this.elements[pivotPoint * 2];
+      }
+      if (pivotIndex == index) {
+        return pivotPoint * 2;
+      }
+      if (pivotIndex > index) {
+        return pivotPoint * 2;
+      }
+      if (pivotIndex < index) {
+        return (pivotPoint + 1) * 2;
+      }
+    };
+    lunr2.Vector.prototype.insert = function(insertIdx, val) {
+      this.upsert(insertIdx, val, function() {
+        throw "duplicate index";
+      });
+    };
+    lunr2.Vector.prototype.upsert = function(insertIdx, val, fn2) {
+      this._magnitude = 0;
+      var position = this.positionForIndex(insertIdx);
+      if (this.elements[position] == insertIdx) {
+        this.elements[position + 1] = fn2(this.elements[position + 1], val);
+      } else {
+        this.elements.splice(position, 0, insertIdx, val);
+      }
+    };
+    lunr2.Vector.prototype.magnitude = function() {
+      if (this._magnitude)
+        return this._magnitude;
+      var sumOfSquares = 0, elementsLength = this.elements.length;
+      for (var i2 = 1; i2 < elementsLength; i2 += 2) {
+        var val = this.elements[i2];
+        sumOfSquares += val * val;
+      }
+      return this._magnitude = Math.sqrt(sumOfSquares);
+    };
+    lunr2.Vector.prototype.dot = function(otherVector) {
+      var dotProduct = 0, a2 = this.elements, b2 = otherVector.elements, aLen = a2.length, bLen = b2.length, aVal = 0, bVal = 0, i2 = 0, j2 = 0;
+      while (i2 < aLen && j2 < bLen) {
+        aVal = a2[i2], bVal = b2[j2];
+        if (aVal < bVal) {
+          i2 += 2;
+        } else if (aVal > bVal) {
+          j2 += 2;
+        } else if (aVal == bVal) {
+          dotProduct += a2[i2 + 1] * b2[j2 + 1];
+          i2 += 2;
+          j2 += 2;
+        }
+      }
+      return dotProduct;
+    };
+    lunr2.Vector.prototype.similarity = function(otherVector) {
+      return this.dot(otherVector) / this.magnitude() || 0;
+    };
+    lunr2.Vector.prototype.toArray = function() {
+      var output = new Array(this.elements.length / 2);
+      for (var i2 = 1, j2 = 0; i2 < this.elements.length; i2 += 2, j2++) {
+        output[j2] = this.elements[i2];
+      }
+      return output;
+    };
+    lunr2.Vector.prototype.toJSON = function() {
+      return this.elements;
+    };
+    /*!
+     * lunr.stemmer
+     * Copyright (C) 2020 Oliver Nightingale
+     * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
+     */
+    lunr2.stemmer = function() {
+      var step2list = {
+        "ational": "ate",
+        "tional": "tion",
+        "enci": "ence",
+        "anci": "ance",
+        "izer": "ize",
+        "bli": "ble",
+        "alli": "al",
+        "entli": "ent",
+        "eli": "e",
+        "ousli": "ous",
+        "ization": "ize",
+        "ation": "ate",
+        "ator": "ate",
+        "alism": "al",
+        "iveness": "ive",
+        "fulness": "ful",
+        "ousness": "ous",
+        "aliti": "al",
+        "iviti": "ive",
+        "biliti": "ble",
+        "logi": "log"
+      }, step3list = {
+        "icate": "ic",
+        "ative": "",
+        "alize": "al",
+        "iciti": "ic",
+        "ical": "ic",
+        "ful": "",
+        "ness": ""
+      }, c2 = "[^aeiou]", v2 = "[aeiouy]", C2 = c2 + "[^aeiouy]*", V2 = v2 + "[aeiou]*", mgr0 = "^(" + C2 + ")?" + V2 + C2, meq1 = "^(" + C2 + ")?" + V2 + C2 + "(" + V2 + ")?$", mgr1 = "^(" + C2 + ")?" + V2 + C2 + V2 + C2, s_v = "^(" + C2 + ")?" + v2;
+      var re_mgr0 = new RegExp(mgr0);
+      var re_mgr1 = new RegExp(mgr1);
+      var re_meq1 = new RegExp(meq1);
+      var re_s_v = new RegExp(s_v);
+      var re_1a = /^(.+?)(ss|i)es$/;
+      var re2_1a = /^(.+?)([^s])s$/;
+      var re_1b = /^(.+?)eed$/;
+      var re2_1b = /^(.+?)(ed|ing)$/;
+      var re_1b_2 = /.$/;
+      var re2_1b_2 = /(at|bl|iz)$/;
+      var re3_1b_2 = new RegExp("([^aeiouylsz])\\1$");
+      var re4_1b_2 = new RegExp("^" + C2 + v2 + "[^aeiouwxy]$");
+      var re_1c = /^(.+?[^aeiou])y$/;
+      var re_2 = /^(.+?)(ational|tional|enci|anci|izer|bli|alli|entli|eli|ousli|ization|ation|ator|alism|iveness|fulness|ousness|aliti|iviti|biliti|logi)$/;
+      var re_3 = /^(.+?)(icate|ative|alize|iciti|ical|ful|ness)$/;
+      var re_4 = /^(.+?)(al|ance|ence|er|ic|able|ible|ant|ement|ment|ent|ou|ism|ate|iti|ous|ive|ize)$/;
+      var re2_4 = /^(.+?)(s|t)(ion)$/;
+      var re_5 = /^(.+?)e$/;
+      var re_5_1 = /ll$/;
+      var re3_5 = new RegExp("^" + C2 + v2 + "[^aeiouwxy]$");
+      var porterStemmer = function porterStemmer2(w2) {
+        var stem, suffix, firstch, re2, re22, re3, re4;
+        if (w2.length < 3) {
+          return w2;
+        }
+        firstch = w2.substr(0, 1);
+        if (firstch == "y") {
+          w2 = firstch.toUpperCase() + w2.substr(1);
+        }
+        re2 = re_1a;
+        re22 = re2_1a;
+        if (re2.test(w2)) {
+          w2 = w2.replace(re2, "$1$2");
+        } else if (re22.test(w2)) {
+          w2 = w2.replace(re22, "$1$2");
+        }
+        re2 = re_1b;
+        re22 = re2_1b;
+        if (re2.test(w2)) {
+          var fp = re2.exec(w2);
+          re2 = re_mgr0;
+          if (re2.test(fp[1])) {
+            re2 = re_1b_2;
+            w2 = w2.replace(re2, "");
+          }
+        } else if (re22.test(w2)) {
+          var fp = re22.exec(w2);
+          stem = fp[1];
+          re22 = re_s_v;
+          if (re22.test(stem)) {
+            w2 = stem;
+            re22 = re2_1b_2;
+            re3 = re3_1b_2;
+            re4 = re4_1b_2;
+            if (re22.test(w2)) {
+              w2 = w2 + "e";
+            } else if (re3.test(w2)) {
+              re2 = re_1b_2;
+              w2 = w2.replace(re2, "");
+            } else if (re4.test(w2)) {
+              w2 = w2 + "e";
+            }
+          }
+        }
+        re2 = re_1c;
+        if (re2.test(w2)) {
+          var fp = re2.exec(w2);
+          stem = fp[1];
+          w2 = stem + "i";
+        }
+        re2 = re_2;
+        if (re2.test(w2)) {
+          var fp = re2.exec(w2);
+          stem = fp[1];
+          suffix = fp[2];
+          re2 = re_mgr0;
+          if (re2.test(stem)) {
+            w2 = stem + step2list[suffix];
+          }
+        }
+        re2 = re_3;
+        if (re2.test(w2)) {
+          var fp = re2.exec(w2);
+          stem = fp[1];
+          suffix = fp[2];
+          re2 = re_mgr0;
+          if (re2.test(stem)) {
+            w2 = stem + step3list[suffix];
+          }
+        }
+        re2 = re_4;
+        re22 = re2_4;
+        if (re2.test(w2)) {
+          var fp = re2.exec(w2);
+          stem = fp[1];
+          re2 = re_mgr1;
+          if (re2.test(stem)) {
+            w2 = stem;
+          }
+        } else if (re22.test(w2)) {
+          var fp = re22.exec(w2);
+          stem = fp[1] + fp[2];
+          re22 = re_mgr1;
+          if (re22.test(stem)) {
+            w2 = stem;
+          }
+        }
+        re2 = re_5;
+        if (re2.test(w2)) {
+          var fp = re2.exec(w2);
+          stem = fp[1];
+          re2 = re_mgr1;
+          re22 = re_meq1;
+          re3 = re3_5;
+          if (re2.test(stem) || re22.test(stem) && !re3.test(stem)) {
+            w2 = stem;
+          }
+        }
+        re2 = re_5_1;
+        re22 = re_mgr1;
+        if (re2.test(w2) && re22.test(w2)) {
+          re2 = re_1b_2;
+          w2 = w2.replace(re2, "");
+        }
+        if (firstch == "y") {
+          w2 = firstch.toLowerCase() + w2.substr(1);
+        }
+        return w2;
+      };
+      return function(token) {
+        return token.update(porterStemmer);
+      };
+    }();
+    lunr2.Pipeline.registerFunction(lunr2.stemmer, "stemmer");
+    /*!
+     * lunr.stopWordFilter
+     * Copyright (C) 2020 Oliver Nightingale
+     */
+    lunr2.generateStopWordFilter = function(stopWords) {
+      var words = stopWords.reduce(function(memo, stopWord) {
+        memo[stopWord] = stopWord;
+        return memo;
+      }, {});
+      return function(token) {
+        if (token && words[token.toString()] !== token.toString())
+          return token;
+      };
+    };
+    lunr2.stopWordFilter = lunr2.generateStopWordFilter([
+      "a",
+      "able",
+      "about",
+      "across",
+      "after",
+      "all",
+      "almost",
+      "also",
+      "am",
+      "among",
+      "an",
+      "and",
+      "any",
+      "are",
+      "as",
+      "at",
+      "be",
+      "because",
+      "been",
+      "but",
+      "by",
+      "can",
+      "cannot",
+      "could",
+      "dear",
+      "did",
+      "do",
+      "does",
+      "either",
+      "else",
+      "ever",
+      "every",
+      "for",
+      "from",
+      "get",
+      "got",
+      "had",
+      "has",
+      "have",
+      "he",
+      "her",
+      "hers",
+      "him",
+      "his",
+      "how",
+      "however",
+      "i",
+      "if",
+      "in",
+      "into",
+      "is",
+      "it",
+      "its",
+      "just",
+      "least",
+      "let",
+      "like",
+      "likely",
+      "may",
+      "me",
+      "might",
+      "most",
+      "must",
+      "my",
+      "neither",
+      "no",
+      "nor",
+      "not",
+      "of",
+      "off",
+      "often",
+      "on",
+      "only",
+      "or",
+      "other",
+      "our",
+      "own",
+      "rather",
+      "said",
+      "say",
+      "says",
+      "she",
+      "should",
+      "since",
+      "so",
+      "some",
+      "than",
+      "that",
+      "the",
+      "their",
+      "them",
+      "then",
+      "there",
+      "these",
+      "they",
+      "this",
+      "tis",
+      "to",
+      "too",
+      "twas",
+      "us",
+      "wants",
+      "was",
+      "we",
+      "were",
+      "what",
+      "when",
+      "where",
+      "which",
+      "while",
+      "who",
+      "whom",
+      "why",
+      "will",
+      "with",
+      "would",
+      "yet",
+      "you",
+      "your"
+    ]);
+    lunr2.Pipeline.registerFunction(lunr2.stopWordFilter, "stopWordFilter");
+    /*!
+     * lunr.trimmer
+     * Copyright (C) 2020 Oliver Nightingale
+     */
+    lunr2.trimmer = function(token) {
+      return token.update(function(s2) {
+        return s2.replace(/^\W+/, "").replace(/\W+$/, "");
+      });
+    };
+    lunr2.Pipeline.registerFunction(lunr2.trimmer, "trimmer");
+    /*!
+     * lunr.TokenSet
+     * Copyright (C) 2020 Oliver Nightingale
+     */
+    lunr2.TokenSet = function() {
+      this.final = false;
+      this.edges = {};
+      this.id = lunr2.TokenSet._nextId;
+      lunr2.TokenSet._nextId += 1;
+    };
+    lunr2.TokenSet._nextId = 1;
+    lunr2.TokenSet.fromArray = function(arr) {
+      var builder = new lunr2.TokenSet.Builder();
+      for (var i2 = 0, len = arr.length; i2 < len; i2++) {
+        builder.insert(arr[i2]);
+      }
+      builder.finish();
+      return builder.root;
+    };
+    lunr2.TokenSet.fromClause = function(clause) {
+      if ("editDistance" in clause) {
+        return lunr2.TokenSet.fromFuzzyString(clause.term, clause.editDistance);
+      } else {
+        return lunr2.TokenSet.fromString(clause.term);
+      }
+    };
+    lunr2.TokenSet.fromFuzzyString = function(str, editDistance) {
+      var root = new lunr2.TokenSet();
+      var stack = [{
+        node: root,
+        editsRemaining: editDistance,
+        str
+      }];
+      while (stack.length) {
+        var frame = stack.pop();
+        if (frame.str.length > 0) {
+          var char = frame.str.charAt(0), noEditNode;
+          if (char in frame.node.edges) {
+            noEditNode = frame.node.edges[char];
+          } else {
+            noEditNode = new lunr2.TokenSet();
+            frame.node.edges[char] = noEditNode;
+          }
+          if (frame.str.length == 1) {
+            noEditNode.final = true;
+          }
+          stack.push({
+            node: noEditNode,
+            editsRemaining: frame.editsRemaining,
+            str: frame.str.slice(1)
+          });
+        }
+        if (frame.editsRemaining == 0) {
+          continue;
+        }
+        if ("*" in frame.node.edges) {
+          var insertionNode = frame.node.edges["*"];
+        } else {
+          var insertionNode = new lunr2.TokenSet();
+          frame.node.edges["*"] = insertionNode;
+        }
+        if (frame.str.length == 0) {
+          insertionNode.final = true;
+        }
+        stack.push({
+          node: insertionNode,
+          editsRemaining: frame.editsRemaining - 1,
+          str: frame.str
+        });
+        if (frame.str.length > 1) {
+          stack.push({
+            node: frame.node,
+            editsRemaining: frame.editsRemaining - 1,
+            str: frame.str.slice(1)
+          });
+        }
+        if (frame.str.length == 1) {
+          frame.node.final = true;
+        }
+        if (frame.str.length >= 1) {
+          if ("*" in frame.node.edges) {
+            var substitutionNode = frame.node.edges["*"];
+          } else {
+            var substitutionNode = new lunr2.TokenSet();
+            frame.node.edges["*"] = substitutionNode;
+          }
+          if (frame.str.length == 1) {
+            substitutionNode.final = true;
+          }
+          stack.push({
+            node: substitutionNode,
+            editsRemaining: frame.editsRemaining - 1,
+            str: frame.str.slice(1)
+          });
+        }
+        if (frame.str.length > 1) {
+          var charA = frame.str.charAt(0), charB = frame.str.charAt(1), transposeNode;
+          if (charB in frame.node.edges) {
+            transposeNode = frame.node.edges[charB];
+          } else {
+            transposeNode = new lunr2.TokenSet();
+            frame.node.edges[charB] = transposeNode;
+          }
+          if (frame.str.length == 1) {
+            transposeNode.final = true;
+          }
+          stack.push({
+            node: transposeNode,
+            editsRemaining: frame.editsRemaining - 1,
+            str: charA + frame.str.slice(2)
+          });
+        }
+      }
+      return root;
+    };
+    lunr2.TokenSet.fromString = function(str) {
+      var node = new lunr2.TokenSet(), root = node;
+      for (var i2 = 0, len = str.length; i2 < len; i2++) {
+        var char = str[i2], final = i2 == len - 1;
+        if (char == "*") {
+          node.edges[char] = node;
+          node.final = final;
+        } else {
+          var next = new lunr2.TokenSet();
+          next.final = final;
+          node.edges[char] = next;
+          node = next;
+        }
+      }
+      return root;
+    };
+    lunr2.TokenSet.prototype.toArray = function() {
+      var words = [];
+      var stack = [{
+        prefix: "",
+        node: this
+      }];
+      while (stack.length) {
+        var frame = stack.pop(), edges = Object.keys(frame.node.edges), len = edges.length;
+        if (frame.node.final) {
+          frame.prefix.charAt(0);
+          words.push(frame.prefix);
+        }
+        for (var i2 = 0; i2 < len; i2++) {
+          var edge = edges[i2];
+          stack.push({
+            prefix: frame.prefix.concat(edge),
+            node: frame.node.edges[edge]
+          });
+        }
+      }
+      return words;
+    };
+    lunr2.TokenSet.prototype.toString = function() {
+      if (this._str) {
+        return this._str;
+      }
+      var str = this.final ? "1" : "0", labels = Object.keys(this.edges).sort(), len = labels.length;
+      for (var i2 = 0; i2 < len; i2++) {
+        var label = labels[i2], node = this.edges[label];
+        str = str + label + node.id;
+      }
+      return str;
+    };
+    lunr2.TokenSet.prototype.intersect = function(b2) {
+      var output = new lunr2.TokenSet(), frame = void 0;
+      var stack = [{
+        qNode: b2,
+        output,
+        node: this
+      }];
+      while (stack.length) {
+        frame = stack.pop();
+        var qEdges = Object.keys(frame.qNode.edges), qLen = qEdges.length, nEdges = Object.keys(frame.node.edges), nLen = nEdges.length;
+        for (var q2 = 0; q2 < qLen; q2++) {
+          var qEdge = qEdges[q2];
+          for (var n2 = 0; n2 < nLen; n2++) {
+            var nEdge = nEdges[n2];
+            if (nEdge == qEdge || qEdge == "*") {
+              var node = frame.node.edges[nEdge], qNode = frame.qNode.edges[qEdge], final = node.final && qNode.final, next = void 0;
+              if (nEdge in frame.output.edges) {
+                next = frame.output.edges[nEdge];
+                next.final = next.final || final;
+              } else {
+                next = new lunr2.TokenSet();
+                next.final = final;
+                frame.output.edges[nEdge] = next;
+              }
+              stack.push({
+                qNode,
+                output: next,
+                node
+              });
+            }
+          }
+        }
+      }
+      return output;
+    };
+    lunr2.TokenSet.Builder = function() {
+      this.previousWord = "";
+      this.root = new lunr2.TokenSet();
+      this.uncheckedNodes = [];
+      this.minimizedNodes = {};
+    };
+    lunr2.TokenSet.Builder.prototype.insert = function(word) {
+      var node, commonPrefix = 0;
+      if (word < this.previousWord) {
+        throw new Error("Out of order word insertion");
+      }
+      for (var i2 = 0; i2 < word.length && i2 < this.previousWord.length; i2++) {
+        if (word[i2] != this.previousWord[i2])
+          break;
+        commonPrefix++;
+      }
+      this.minimize(commonPrefix);
+      if (this.uncheckedNodes.length == 0) {
+        node = this.root;
+      } else {
+        node = this.uncheckedNodes[this.uncheckedNodes.length - 1].child;
+      }
+      for (var i2 = commonPrefix; i2 < word.length; i2++) {
+        var nextNode = new lunr2.TokenSet(), char = word[i2];
+        node.edges[char] = nextNode;
+        this.uncheckedNodes.push({
+          parent: node,
+          char,
+          child: nextNode
+        });
+        node = nextNode;
+      }
+      node.final = true;
+      this.previousWord = word;
+    };
+    lunr2.TokenSet.Builder.prototype.finish = function() {
+      this.minimize(0);
+    };
+    lunr2.TokenSet.Builder.prototype.minimize = function(downTo) {
+      for (var i2 = this.uncheckedNodes.length - 1; i2 >= downTo; i2--) {
+        var node = this.uncheckedNodes[i2], childKey = node.child.toString();
+        if (childKey in this.minimizedNodes) {
+          node.parent.edges[node.char] = this.minimizedNodes[childKey];
+        } else {
+          node.child._str = childKey;
+          this.minimizedNodes[childKey] = node.child;
+        }
+        this.uncheckedNodes.pop();
+      }
+    };
+    /*!
+     * lunr.Index
+     * Copyright (C) 2020 Oliver Nightingale
+     */
+    lunr2.Index = function(attrs) {
+      this.invertedIndex = attrs.invertedIndex;
+      this.fieldVectors = attrs.fieldVectors;
+      this.tokenSet = attrs.tokenSet;
+      this.fields = attrs.fields;
+      this.pipeline = attrs.pipeline;
+    };
+    lunr2.Index.prototype.search = function(queryString) {
+      return this.query(function(query) {
+        var parser = new lunr2.QueryParser(queryString, query);
+        parser.parse();
+      });
+    };
+    lunr2.Index.prototype.query = function(fn2) {
+      var query = new lunr2.Query(this.fields), matchingFields = Object.create(null), queryVectors = Object.create(null), termFieldCache = Object.create(null), requiredMatches = Object.create(null), prohibitedMatches = Object.create(null);
+      for (var i2 = 0; i2 < this.fields.length; i2++) {
+        queryVectors[this.fields[i2]] = new lunr2.Vector();
+      }
+      fn2.call(query, query);
+      for (var i2 = 0; i2 < query.clauses.length; i2++) {
+        var clause = query.clauses[i2], terms = null, clauseMatches = lunr2.Set.empty;
+        if (clause.usePipeline) {
+          terms = this.pipeline.runString(clause.term, {
+            fields: clause.fields
+          });
+        } else {
+          terms = [clause.term];
+        }
+        for (var m2 = 0; m2 < terms.length; m2++) {
+          var term = terms[m2];
+          clause.term = term;
+          var termTokenSet = lunr2.TokenSet.fromClause(clause), expandedTerms = this.tokenSet.intersect(termTokenSet).toArray();
+          if (expandedTerms.length === 0 && clause.presence === lunr2.Query.presence.REQUIRED) {
+            for (var k2 = 0; k2 < clause.fields.length; k2++) {
+              var field = clause.fields[k2];
+              requiredMatches[field] = lunr2.Set.empty;
+            }
+            break;
+          }
+          for (var j2 = 0; j2 < expandedTerms.length; j2++) {
+            var expandedTerm = expandedTerms[j2], posting = this.invertedIndex[expandedTerm], termIndex = posting._index;
+            for (var k2 = 0; k2 < clause.fields.length; k2++) {
+              var field = clause.fields[k2], fieldPosting = posting[field], matchingDocumentRefs = Object.keys(fieldPosting), termField = expandedTerm + "/" + field, matchingDocumentsSet = new lunr2.Set(matchingDocumentRefs);
+              if (clause.presence == lunr2.Query.presence.REQUIRED) {
+                clauseMatches = clauseMatches.union(matchingDocumentsSet);
+                if (requiredMatches[field] === void 0) {
+                  requiredMatches[field] = lunr2.Set.complete;
+                }
+              }
+              if (clause.presence == lunr2.Query.presence.PROHIBITED) {
+                if (prohibitedMatches[field] === void 0) {
+                  prohibitedMatches[field] = lunr2.Set.empty;
+                }
+                prohibitedMatches[field] = prohibitedMatches[field].union(matchingDocumentsSet);
+                continue;
+              }
+              queryVectors[field].upsert(termIndex, clause.boost, function(a2, b2) {
+                return a2 + b2;
+              });
+              if (termFieldCache[termField]) {
+                continue;
+              }
+              for (var l2 = 0; l2 < matchingDocumentRefs.length; l2++) {
+                var matchingDocumentRef = matchingDocumentRefs[l2], matchingFieldRef = new lunr2.FieldRef(matchingDocumentRef, field), metadata = fieldPosting[matchingDocumentRef], fieldMatch;
+                if ((fieldMatch = matchingFields[matchingFieldRef]) === void 0) {
+                  matchingFields[matchingFieldRef] = new lunr2.MatchData(expandedTerm, field, metadata);
+                } else {
+                  fieldMatch.add(expandedTerm, field, metadata);
+                }
+              }
+              termFieldCache[termField] = true;
+            }
+          }
+        }
+        if (clause.presence === lunr2.Query.presence.REQUIRED) {
+          for (var k2 = 0; k2 < clause.fields.length; k2++) {
+            var field = clause.fields[k2];
+            requiredMatches[field] = requiredMatches[field].intersect(clauseMatches);
+          }
+        }
+      }
+      var allRequiredMatches = lunr2.Set.complete, allProhibitedMatches = lunr2.Set.empty;
+      for (var i2 = 0; i2 < this.fields.length; i2++) {
+        var field = this.fields[i2];
+        if (requiredMatches[field]) {
+          allRequiredMatches = allRequiredMatches.intersect(requiredMatches[field]);
+        }
+        if (prohibitedMatches[field]) {
+          allProhibitedMatches = allProhibitedMatches.union(prohibitedMatches[field]);
+        }
+      }
+      var matchingFieldRefs = Object.keys(matchingFields), results = [], matches = Object.create(null);
+      if (query.isNegated()) {
+        matchingFieldRefs = Object.keys(this.fieldVectors);
+        for (var i2 = 0; i2 < matchingFieldRefs.length; i2++) {
+          var matchingFieldRef = matchingFieldRefs[i2];
+          var fieldRef = lunr2.FieldRef.fromString(matchingFieldRef);
+          matchingFields[matchingFieldRef] = new lunr2.MatchData();
+        }
+      }
+      for (var i2 = 0; i2 < matchingFieldRefs.length; i2++) {
+        var fieldRef = lunr2.FieldRef.fromString(matchingFieldRefs[i2]), docRef = fieldRef.docRef;
+        if (!allRequiredMatches.contains(docRef)) {
+          continue;
+        }
+        if (allProhibitedMatches.contains(docRef)) {
+          continue;
+        }
+        var fieldVector = this.fieldVectors[fieldRef], score = queryVectors[fieldRef.fieldName].similarity(fieldVector), docMatch;
+        if ((docMatch = matches[docRef]) !== void 0) {
+          docMatch.score += score;
+          docMatch.matchData.combine(matchingFields[fieldRef]);
+        } else {
+          var match2 = {
+            ref: docRef,
+            score,
+            matchData: matchingFields[fieldRef]
+          };
+          matches[docRef] = match2;
+          results.push(match2);
+        }
+      }
+      return results.sort(function(a2, b2) {
+        return b2.score - a2.score;
+      });
+    };
+    lunr2.Index.prototype.toJSON = function() {
+      var invertedIndex = Object.keys(this.invertedIndex).sort().map(function(term) {
+        return [term, this.invertedIndex[term]];
+      }, this);
+      var fieldVectors = Object.keys(this.fieldVectors).map(function(ref) {
+        return [ref, this.fieldVectors[ref].toJSON()];
+      }, this);
+      return {
+        version: lunr2.version,
+        fields: this.fields,
+        fieldVectors,
+        invertedIndex,
+        pipeline: this.pipeline.toJSON()
+      };
+    };
+    lunr2.Index.load = function(serializedIndex) {
+      var attrs = {}, fieldVectors = {}, serializedVectors = serializedIndex.fieldVectors, invertedIndex = Object.create(null), serializedInvertedIndex = serializedIndex.invertedIndex, tokenSetBuilder = new lunr2.TokenSet.Builder(), pipeline = lunr2.Pipeline.load(serializedIndex.pipeline);
+      if (serializedIndex.version != lunr2.version) {
+        lunr2.utils.warn("Version mismatch when loading serialised index. Current version of lunr '" + lunr2.version + "' does not match serialized index '" + serializedIndex.version + "'");
+      }
+      for (var i2 = 0; i2 < serializedVectors.length; i2++) {
+        var tuple = serializedVectors[i2], ref = tuple[0], elements = tuple[1];
+        fieldVectors[ref] = new lunr2.Vector(elements);
+      }
+      for (var i2 = 0; i2 < serializedInvertedIndex.length; i2++) {
+        var tuple = serializedInvertedIndex[i2], term = tuple[0], posting = tuple[1];
+        tokenSetBuilder.insert(term);
+        invertedIndex[term] = posting;
+      }
+      tokenSetBuilder.finish();
+      attrs.fields = serializedIndex.fields;
+      attrs.fieldVectors = fieldVectors;
+      attrs.invertedIndex = invertedIndex;
+      attrs.tokenSet = tokenSetBuilder.root;
+      attrs.pipeline = pipeline;
+      return new lunr2.Index(attrs);
+    };
+    /*!
+     * lunr.Builder
+     * Copyright (C) 2020 Oliver Nightingale
+     */
+    lunr2.Builder = function() {
+      this._ref = "id";
+      this._fields = Object.create(null);
+      this._documents = Object.create(null);
+      this.invertedIndex = Object.create(null);
+      this.fieldTermFrequencies = {};
+      this.fieldLengths = {};
+      this.tokenizer = lunr2.tokenizer;
+      this.pipeline = new lunr2.Pipeline();
+      this.searchPipeline = new lunr2.Pipeline();
+      this.documentCount = 0;
+      this._b = 0.75;
+      this._k1 = 1.2;
+      this.termIndex = 0;
+      this.metadataWhitelist = [];
+    };
+    lunr2.Builder.prototype.ref = function(ref) {
+      this._ref = ref;
+    };
+    lunr2.Builder.prototype.field = function(fieldName, attributes) {
+      if (/\//.test(fieldName)) {
+        throw new RangeError("Field '" + fieldName + "' contains illegal character '/'");
+      }
+      this._fields[fieldName] = attributes || {};
+    };
+    lunr2.Builder.prototype.b = function(number) {
+      if (number < 0) {
+        this._b = 0;
+      } else if (number > 1) {
+        this._b = 1;
+      } else {
+        this._b = number;
+      }
+    };
+    lunr2.Builder.prototype.k1 = function(number) {
+      this._k1 = number;
+    };
+    lunr2.Builder.prototype.add = function(doc, attributes) {
+      var docRef = doc[this._ref], fields = Object.keys(this._fields);
+      this._documents[docRef] = attributes || {};
+      this.documentCount += 1;
+      for (var i2 = 0; i2 < fields.length; i2++) {
+        var fieldName = fields[i2], extractor = this._fields[fieldName].extractor, field = extractor ? extractor(doc) : doc[fieldName], tokens = this.tokenizer(field, {
+          fields: [fieldName]
+        }), terms = this.pipeline.run(tokens), fieldRef = new lunr2.FieldRef(docRef, fieldName), fieldTerms = Object.create(null);
+        this.fieldTermFrequencies[fieldRef] = fieldTerms;
+        this.fieldLengths[fieldRef] = 0;
+        this.fieldLengths[fieldRef] += terms.length;
+        for (var j2 = 0; j2 < terms.length; j2++) {
+          var term = terms[j2];
+          if (fieldTerms[term] == void 0) {
+            fieldTerms[term] = 0;
+          }
+          fieldTerms[term] += 1;
+          if (this.invertedIndex[term] == void 0) {
+            var posting = Object.create(null);
+            posting["_index"] = this.termIndex;
+            this.termIndex += 1;
+            for (var k2 = 0; k2 < fields.length; k2++) {
+              posting[fields[k2]] = Object.create(null);
+            }
+            this.invertedIndex[term] = posting;
+          }
+          if (this.invertedIndex[term][fieldName][docRef] == void 0) {
+            this.invertedIndex[term][fieldName][docRef] = Object.create(null);
+          }
+          for (var l2 = 0; l2 < this.metadataWhitelist.length; l2++) {
+            var metadataKey = this.metadataWhitelist[l2], metadata = term.metadata[metadataKey];
+            if (this.invertedIndex[term][fieldName][docRef][metadataKey] == void 0) {
+              this.invertedIndex[term][fieldName][docRef][metadataKey] = [];
+            }
+            this.invertedIndex[term][fieldName][docRef][metadataKey].push(metadata);
+          }
+        }
+      }
+    };
+    lunr2.Builder.prototype.calculateAverageFieldLengths = function() {
+      var fieldRefs = Object.keys(this.fieldLengths), numberOfFields = fieldRefs.length, accumulator = {}, documentsWithField = {};
+      for (var i2 = 0; i2 < numberOfFields; i2++) {
+        var fieldRef = lunr2.FieldRef.fromString(fieldRefs[i2]), field = fieldRef.fieldName;
+        documentsWithField[field] || (documentsWithField[field] = 0);
+        documentsWithField[field] += 1;
+        accumulator[field] || (accumulator[field] = 0);
+        accumulator[field] += this.fieldLengths[fieldRef];
+      }
+      var fields = Object.keys(this._fields);
+      for (var i2 = 0; i2 < fields.length; i2++) {
+        var fieldName = fields[i2];
+        accumulator[fieldName] = accumulator[fieldName] / documentsWithField[fieldName];
+      }
+      this.averageFieldLength = accumulator;
+    };
+    lunr2.Builder.prototype.createFieldVectors = function() {
+      var fieldVectors = {}, fieldRefs = Object.keys(this.fieldTermFrequencies), fieldRefsLength = fieldRefs.length, termIdfCache = Object.create(null);
+      for (var i2 = 0; i2 < fieldRefsLength; i2++) {
+        var fieldRef = lunr2.FieldRef.fromString(fieldRefs[i2]), fieldName = fieldRef.fieldName, fieldLength = this.fieldLengths[fieldRef], fieldVector = new lunr2.Vector(), termFrequencies = this.fieldTermFrequencies[fieldRef], terms = Object.keys(termFrequencies), termsLength = terms.length;
+        var fieldBoost = this._fields[fieldName].boost || 1, docBoost = this._documents[fieldRef.docRef].boost || 1;
+        for (var j2 = 0; j2 < termsLength; j2++) {
+          var term = terms[j2], tf = termFrequencies[term], termIndex = this.invertedIndex[term]._index, idf, score, scoreWithPrecision;
+          if (termIdfCache[term] === void 0) {
+            idf = lunr2.idf(this.invertedIndex[term], this.documentCount);
+            termIdfCache[term] = idf;
+          } else {
+            idf = termIdfCache[term];
+          }
+          score = idf * ((this._k1 + 1) * tf) / (this._k1 * (1 - this._b + this._b * (fieldLength / this.averageFieldLength[fieldName])) + tf);
+          score *= fieldBoost;
+          score *= docBoost;
+          scoreWithPrecision = Math.round(score * 1e3) / 1e3;
+          fieldVector.insert(termIndex, scoreWithPrecision);
+        }
+        fieldVectors[fieldRef] = fieldVector;
+      }
+      this.fieldVectors = fieldVectors;
+    };
+    lunr2.Builder.prototype.createTokenSet = function() {
+      this.tokenSet = lunr2.TokenSet.fromArray(Object.keys(this.invertedIndex).sort());
+    };
+    lunr2.Builder.prototype.build = function() {
+      this.calculateAverageFieldLengths();
+      this.createFieldVectors();
+      this.createTokenSet();
+      return new lunr2.Index({
+        invertedIndex: this.invertedIndex,
+        fieldVectors: this.fieldVectors,
+        tokenSet: this.tokenSet,
+        fields: Object.keys(this._fields),
+        pipeline: this.searchPipeline
+      });
+    };
+    lunr2.Builder.prototype.use = function(fn2) {
+      var args = Array.prototype.slice.call(arguments, 1);
+      args.unshift(this);
+      fn2.apply(this, args);
+    };
+    lunr2.MatchData = function(term, field, metadata) {
+      var clonedMetadata = Object.create(null), metadataKeys = Object.keys(metadata || {});
+      for (var i2 = 0; i2 < metadataKeys.length; i2++) {
+        var key = metadataKeys[i2];
+        clonedMetadata[key] = metadata[key].slice();
+      }
+      this.metadata = Object.create(null);
+      if (term !== void 0) {
+        this.metadata[term] = Object.create(null);
+        this.metadata[term][field] = clonedMetadata;
+      }
+    };
+    lunr2.MatchData.prototype.combine = function(otherMatchData) {
+      var terms = Object.keys(otherMatchData.metadata);
+      for (var i2 = 0; i2 < terms.length; i2++) {
+        var term = terms[i2], fields = Object.keys(otherMatchData.metadata[term]);
+        if (this.metadata[term] == void 0) {
+          this.metadata[term] = Object.create(null);
+        }
+        for (var j2 = 0; j2 < fields.length; j2++) {
+          var field = fields[j2], keys = Object.keys(otherMatchData.metadata[term][field]);
+          if (this.metadata[term][field] == void 0) {
+            this.metadata[term][field] = Object.create(null);
+          }
+          for (var k2 = 0; k2 < keys.length; k2++) {
+            var key = keys[k2];
+            if (this.metadata[term][field][key] == void 0) {
+              this.metadata[term][field][key] = otherMatchData.metadata[term][field][key];
+            } else {
+              this.metadata[term][field][key] = this.metadata[term][field][key].concat(otherMatchData.metadata[term][field][key]);
+            }
+          }
+        }
+      }
+    };
+    lunr2.MatchData.prototype.add = function(term, field, metadata) {
+      if (!(term in this.metadata)) {
+        this.metadata[term] = Object.create(null);
+        this.metadata[term][field] = metadata;
+        return;
+      }
+      if (!(field in this.metadata[term])) {
+        this.metadata[term][field] = metadata;
+        return;
+      }
+      var metadataKeys = Object.keys(metadata);
+      for (var i2 = 0; i2 < metadataKeys.length; i2++) {
+        var key = metadataKeys[i2];
+        if (key in this.metadata[term][field]) {
+          this.metadata[term][field][key] = this.metadata[term][field][key].concat(metadata[key]);
+        } else {
+          this.metadata[term][field][key] = metadata[key];
+        }
+      }
+    };
+    lunr2.Query = function(allFields) {
+      this.clauses = [];
+      this.allFields = allFields;
+    };
+    lunr2.Query.wildcard = new String("*");
+    lunr2.Query.wildcard.NONE = 0;
+    lunr2.Query.wildcard.LEADING = 1;
+    lunr2.Query.wildcard.TRAILING = 2;
+    lunr2.Query.presence = {
+      OPTIONAL: 1,
+      REQUIRED: 2,
+      PROHIBITED: 3
+    };
+    lunr2.Query.prototype.clause = function(clause) {
+      if (!("fields" in clause)) {
+        clause.fields = this.allFields;
+      }
+      if (!("boost" in clause)) {
+        clause.boost = 1;
+      }
+      if (!("usePipeline" in clause)) {
+        clause.usePipeline = true;
+      }
+      if (!("wildcard" in clause)) {
+        clause.wildcard = lunr2.Query.wildcard.NONE;
+      }
+      if (clause.wildcard & lunr2.Query.wildcard.LEADING && clause.term.charAt(0) != lunr2.Query.wildcard) {
+        clause.term = "*" + clause.term;
+      }
+      if (clause.wildcard & lunr2.Query.wildcard.TRAILING && clause.term.slice(-1) != lunr2.Query.wildcard) {
+        clause.term = "" + clause.term + "*";
+      }
+      if (!("presence" in clause)) {
+        clause.presence = lunr2.Query.presence.OPTIONAL;
+      }
+      this.clauses.push(clause);
+      return this;
+    };
+    lunr2.Query.prototype.isNegated = function() {
+      for (var i2 = 0; i2 < this.clauses.length; i2++) {
+        if (this.clauses[i2].presence != lunr2.Query.presence.PROHIBITED) {
+          return false;
+        }
+      }
+      return true;
+    };
+    lunr2.Query.prototype.term = function(term, options) {
+      if (Array.isArray(term)) {
+        term.forEach(function(t3) {
+          this.term(t3, lunr2.utils.clone(options));
+        }, this);
+        return this;
+      }
+      var clause = options || {};
+      clause.term = term.toString();
+      this.clause(clause);
+      return this;
+    };
+    lunr2.QueryParseError = function(message, start, end) {
+      this.name = "QueryParseError";
+      this.message = message;
+      this.start = start;
+      this.end = end;
+    };
+    lunr2.QueryParseError.prototype = new Error();
+    lunr2.QueryLexer = function(str) {
+      this.lexemes = [];
+      this.str = str;
+      this.length = str.length;
+      this.pos = 0;
+      this.start = 0;
+      this.escapeCharPositions = [];
+    };
+    lunr2.QueryLexer.prototype.run = function() {
+      var state = lunr2.QueryLexer.lexText;
+      while (state) {
+        state = state(this);
+      }
+    };
+    lunr2.QueryLexer.prototype.sliceString = function() {
+      var subSlices = [], sliceStart = this.start, sliceEnd = this.pos;
+      for (var i2 = 0; i2 < this.escapeCharPositions.length; i2++) {
+        sliceEnd = this.escapeCharPositions[i2];
+        subSlices.push(this.str.slice(sliceStart, sliceEnd));
+        sliceStart = sliceEnd + 1;
+      }
+      subSlices.push(this.str.slice(sliceStart, this.pos));
+      this.escapeCharPositions.length = 0;
+      return subSlices.join("");
+    };
+    lunr2.QueryLexer.prototype.emit = function(type) {
+      this.lexemes.push({
+        type,
+        str: this.sliceString(),
+        start: this.start,
+        end: this.pos
+      });
+      this.start = this.pos;
+    };
+    lunr2.QueryLexer.prototype.escapeCharacter = function() {
+      this.escapeCharPositions.push(this.pos - 1);
+      this.pos += 1;
+    };
+    lunr2.QueryLexer.prototype.next = function() {
+      if (this.pos >= this.length) {
+        return lunr2.QueryLexer.EOS;
+      }
+      var char = this.str.charAt(this.pos);
+      this.pos += 1;
+      return char;
+    };
+    lunr2.QueryLexer.prototype.width = function() {
+      return this.pos - this.start;
+    };
+    lunr2.QueryLexer.prototype.ignore = function() {
+      if (this.start == this.pos) {
+        this.pos += 1;
+      }
+      this.start = this.pos;
+    };
+    lunr2.QueryLexer.prototype.backup = function() {
+      this.pos -= 1;
+    };
+    lunr2.QueryLexer.prototype.acceptDigitRun = function() {
+      var char, charCode;
+      do {
+        char = this.next();
+        charCode = char.charCodeAt(0);
+      } while (charCode > 47 && charCode < 58);
+      if (char != lunr2.QueryLexer.EOS) {
+        this.backup();
+      }
+    };
+    lunr2.QueryLexer.prototype.more = function() {
+      return this.pos < this.length;
+    };
+    lunr2.QueryLexer.EOS = "EOS";
+    lunr2.QueryLexer.FIELD = "FIELD";
+    lunr2.QueryLexer.TERM = "TERM";
+    lunr2.QueryLexer.EDIT_DISTANCE = "EDIT_DISTANCE";
+    lunr2.QueryLexer.BOOST = "BOOST";
+    lunr2.QueryLexer.PRESENCE = "PRESENCE";
+    lunr2.QueryLexer.lexField = function(lexer) {
+      lexer.backup();
+      lexer.emit(lunr2.QueryLexer.FIELD);
+      lexer.ignore();
+      return lunr2.QueryLexer.lexText;
+    };
+    lunr2.QueryLexer.lexTerm = function(lexer) {
+      if (lexer.width() > 1) {
+        lexer.backup();
+        lexer.emit(lunr2.QueryLexer.TERM);
+      }
+      lexer.ignore();
+      if (lexer.more()) {
+        return lunr2.QueryLexer.lexText;
+      }
+    };
+    lunr2.QueryLexer.lexEditDistance = function(lexer) {
+      lexer.ignore();
+      lexer.acceptDigitRun();
+      lexer.emit(lunr2.QueryLexer.EDIT_DISTANCE);
+      return lunr2.QueryLexer.lexText;
+    };
+    lunr2.QueryLexer.lexBoost = function(lexer) {
+      lexer.ignore();
+      lexer.acceptDigitRun();
+      lexer.emit(lunr2.QueryLexer.BOOST);
+      return lunr2.QueryLexer.lexText;
+    };
+    lunr2.QueryLexer.lexEOS = function(lexer) {
+      if (lexer.width() > 0) {
+        lexer.emit(lunr2.QueryLexer.TERM);
+      }
+    };
+    lunr2.QueryLexer.termSeparator = lunr2.tokenizer.separator;
+    lunr2.QueryLexer.lexText = function(lexer) {
+      while (true) {
+        var char = lexer.next();
+        if (char == lunr2.QueryLexer.EOS) {
+          return lunr2.QueryLexer.lexEOS;
+        }
+        if (char.charCodeAt(0) == 92) {
+          lexer.escapeCharacter();
+          continue;
+        }
+        if (char == ":") {
+          return lunr2.QueryLexer.lexField;
+        }
+        if (char == "~") {
+          lexer.backup();
+          if (lexer.width() > 0) {
+            lexer.emit(lunr2.QueryLexer.TERM);
+          }
+          return lunr2.QueryLexer.lexEditDistance;
+        }
+        if (char == "^") {
+          lexer.backup();
+          if (lexer.width() > 0) {
+            lexer.emit(lunr2.QueryLexer.TERM);
+          }
+          return lunr2.QueryLexer.lexBoost;
+        }
+        if (char == "+" && lexer.width() === 1) {
+          lexer.emit(lunr2.QueryLexer.PRESENCE);
+          return lunr2.QueryLexer.lexText;
+        }
+        if (char == "-" && lexer.width() === 1) {
+          lexer.emit(lunr2.QueryLexer.PRESENCE);
+          return lunr2.QueryLexer.lexText;
+        }
+        if (char.match(lunr2.QueryLexer.termSeparator)) {
+          return lunr2.QueryLexer.lexTerm;
+        }
+      }
+    };
+    lunr2.QueryParser = function(str, query) {
+      this.lexer = new lunr2.QueryLexer(str);
+      this.query = query;
+      this.currentClause = {};
+      this.lexemeIdx = 0;
+    };
+    lunr2.QueryParser.prototype.parse = function() {
+      this.lexer.run();
+      this.lexemes = this.lexer.lexemes;
+      var state = lunr2.QueryParser.parseClause;
+      while (state) {
+        state = state(this);
+      }
+      return this.query;
+    };
+    lunr2.QueryParser.prototype.peekLexeme = function() {
+      return this.lexemes[this.lexemeIdx];
+    };
+    lunr2.QueryParser.prototype.consumeLexeme = function() {
+      var lexeme = this.peekLexeme();
+      this.lexemeIdx += 1;
+      return lexeme;
+    };
+    lunr2.QueryParser.prototype.nextClause = function() {
+      var completedClause = this.currentClause;
+      this.query.clause(completedClause);
+      this.currentClause = {};
+    };
+    lunr2.QueryParser.parseClause = function(parser) {
+      var lexeme = parser.peekLexeme();
+      if (lexeme == void 0) {
+        return;
+      }
+      switch (lexeme.type) {
+        case lunr2.QueryLexer.PRESENCE:
+          return lunr2.QueryParser.parsePresence;
+        case lunr2.QueryLexer.FIELD:
+          return lunr2.QueryParser.parseField;
+        case lunr2.QueryLexer.TERM:
+          return lunr2.QueryParser.parseTerm;
+        default:
+          var errorMessage = "expected either a field or a term, found " + lexeme.type;
+          if (lexeme.str.length >= 1) {
+            errorMessage += " with value '" + lexeme.str + "'";
+          }
+          throw new lunr2.QueryParseError(errorMessage, lexeme.start, lexeme.end);
+      }
+    };
+    lunr2.QueryParser.parsePresence = function(parser) {
+      var lexeme = parser.consumeLexeme();
+      if (lexeme == void 0) {
+        return;
+      }
+      switch (lexeme.str) {
+        case "-":
+          parser.currentClause.presence = lunr2.Query.presence.PROHIBITED;
+          break;
+        case "+":
+          parser.currentClause.presence = lunr2.Query.presence.REQUIRED;
+          break;
+        default:
+          var errorMessage = "unrecognised presence operator'" + lexeme.str + "'";
+          throw new lunr2.QueryParseError(errorMessage, lexeme.start, lexeme.end);
+      }
+      var nextLexeme = parser.peekLexeme();
+      if (nextLexeme == void 0) {
+        var errorMessage = "expecting term or field, found nothing";
+        throw new lunr2.QueryParseError(errorMessage, lexeme.start, lexeme.end);
+      }
+      switch (nextLexeme.type) {
+        case lunr2.QueryLexer.FIELD:
+          return lunr2.QueryParser.parseField;
+        case lunr2.QueryLexer.TERM:
+          return lunr2.QueryParser.parseTerm;
+        default:
+          var errorMessage = "expecting term or field, found '" + nextLexeme.type + "'";
+          throw new lunr2.QueryParseError(errorMessage, nextLexeme.start, nextLexeme.end);
+      }
+    };
+    lunr2.QueryParser.parseField = function(parser) {
+      var lexeme = parser.consumeLexeme();
+      if (lexeme == void 0) {
+        return;
+      }
+      if (parser.query.allFields.indexOf(lexeme.str) == -1) {
+        var possibleFields = parser.query.allFields.map(function(f2) {
+          return "'" + f2 + "'";
+        }).join(", "), errorMessage = "unrecognised field '" + lexeme.str + "', possible fields: " + possibleFields;
+        throw new lunr2.QueryParseError(errorMessage, lexeme.start, lexeme.end);
+      }
+      parser.currentClause.fields = [lexeme.str];
+      var nextLexeme = parser.peekLexeme();
+      if (nextLexeme == void 0) {
+        var errorMessage = "expecting term, found nothing";
+        throw new lunr2.QueryParseError(errorMessage, lexeme.start, lexeme.end);
+      }
+      switch (nextLexeme.type) {
+        case lunr2.QueryLexer.TERM:
+          return lunr2.QueryParser.parseTerm;
+        default:
+          var errorMessage = "expecting term, found '" + nextLexeme.type + "'";
+          throw new lunr2.QueryParseError(errorMessage, nextLexeme.start, nextLexeme.end);
+      }
+    };
+    lunr2.QueryParser.parseTerm = function(parser) {
+      var lexeme = parser.consumeLexeme();
+      if (lexeme == void 0) {
+        return;
+      }
+      parser.currentClause.term = lexeme.str.toLowerCase();
+      if (lexeme.str.indexOf("*") != -1) {
+        parser.currentClause.usePipeline = false;
+      }
+      var nextLexeme = parser.peekLexeme();
+      if (nextLexeme == void 0) {
+        parser.nextClause();
+        return;
+      }
+      switch (nextLexeme.type) {
+        case lunr2.QueryLexer.TERM:
+          parser.nextClause();
+          return lunr2.QueryParser.parseTerm;
+        case lunr2.QueryLexer.FIELD:
+          parser.nextClause();
+          return lunr2.QueryParser.parseField;
+        case lunr2.QueryLexer.EDIT_DISTANCE:
+          return lunr2.QueryParser.parseEditDistance;
+        case lunr2.QueryLexer.BOOST:
+          return lunr2.QueryParser.parseBoost;
+        case lunr2.QueryLexer.PRESENCE:
+          parser.nextClause();
+          return lunr2.QueryParser.parsePresence;
+        default:
+          var errorMessage = "Unexpected lexeme type '" + nextLexeme.type + "'";
+          throw new lunr2.QueryParseError(errorMessage, nextLexeme.start, nextLexeme.end);
+      }
+    };
+    lunr2.QueryParser.parseEditDistance = function(parser) {
+      var lexeme = parser.consumeLexeme();
+      if (lexeme == void 0) {
+        return;
+      }
+      var editDistance = parseInt(lexeme.str, 10);
+      if (isNaN(editDistance)) {
+        var errorMessage = "edit distance must be numeric";
+        throw new lunr2.QueryParseError(errorMessage, lexeme.start, lexeme.end);
+      }
+      parser.currentClause.editDistance = editDistance;
+      var nextLexeme = parser.peekLexeme();
+      if (nextLexeme == void 0) {
+        parser.nextClause();
+        return;
+      }
+      switch (nextLexeme.type) {
+        case lunr2.QueryLexer.TERM:
+          parser.nextClause();
+          return lunr2.QueryParser.parseTerm;
+        case lunr2.QueryLexer.FIELD:
+          parser.nextClause();
+          return lunr2.QueryParser.parseField;
+        case lunr2.QueryLexer.EDIT_DISTANCE:
+          return lunr2.QueryParser.parseEditDistance;
+        case lunr2.QueryLexer.BOOST:
+          return lunr2.QueryParser.parseBoost;
+        case lunr2.QueryLexer.PRESENCE:
+          parser.nextClause();
+          return lunr2.QueryParser.parsePresence;
+        default:
+          var errorMessage = "Unexpected lexeme type '" + nextLexeme.type + "'";
+          throw new lunr2.QueryParseError(errorMessage, nextLexeme.start, nextLexeme.end);
+      }
+    };
+    lunr2.QueryParser.parseBoost = function(parser) {
+      var lexeme = parser.consumeLexeme();
+      if (lexeme == void 0) {
+        return;
+      }
+      var boost = parseInt(lexeme.str, 10);
+      if (isNaN(boost)) {
+        var errorMessage = "boost must be numeric";
+        throw new lunr2.QueryParseError(errorMessage, lexeme.start, lexeme.end);
+      }
+      parser.currentClause.boost = boost;
+      var nextLexeme = parser.peekLexeme();
+      if (nextLexeme == void 0) {
+        parser.nextClause();
+        return;
+      }
+      switch (nextLexeme.type) {
+        case lunr2.QueryLexer.TERM:
+          parser.nextClause();
+          return lunr2.QueryParser.parseTerm;
+        case lunr2.QueryLexer.FIELD:
+          parser.nextClause();
+          return lunr2.QueryParser.parseField;
+        case lunr2.QueryLexer.EDIT_DISTANCE:
+          return lunr2.QueryParser.parseEditDistance;
+        case lunr2.QueryLexer.BOOST:
+          return lunr2.QueryParser.parseBoost;
+        case lunr2.QueryLexer.PRESENCE:
+          parser.nextClause();
+          return lunr2.QueryParser.parsePresence;
+        default:
+          var errorMessage = "Unexpected lexeme type '" + nextLexeme.type + "'";
+          throw new lunr2.QueryParseError(errorMessage, nextLexeme.start, nextLexeme.end);
+      }
+    };
+    (function(root, factory) {
+      {
+        module.exports = factory();
+      }
+    })(this, function() {
+      return lunr2;
+    });
+  })();
+})(lunr$1);
+var lunr = lunr$1.exports;
+let idx;
+let currentDocs;
+const searchDocs = (query) => {
+  return idx.search(query).map((result) => {
+    return __spreadProps(__spreadValues({}, currentDocs[result.ref]), { score: result.score });
+  });
+};
+const updateIndex = (docs2) => {
+  if (docs2) {
+    currentDocs = docs2;
+    idx = lunr(function() {
+      this.field("title");
+      this.field("content");
+      for (const doc of Object.values(docs2)) {
+        this.add({ id: doc.slug, title: doc.title, content: doc.content });
+      }
+    });
+  }
+};
 const findNavbarItem = (navbar, slug) => {
   for (const key of Object.keys(navbar)) {
     const item = navbar[key];
@@ -766,6 +2557,9 @@ const docs = create((set) => ({
     }
   }))
 }));
+docs.subscribe((data) => {
+  updateIndex(data.documents);
+});
 var theme = "";
 class HTTPError extends Error {
   constructor(response, request, options) {
@@ -1137,25 +2931,6 @@ async function getFile(filePath) {
 }
 async function getJSON(filePath) {
   return ky$1.get(filePath).json();
-}
-var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
-function getDefaultExportFromCjs(x2) {
-  return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
-}
-function getAugmentedNamespace(n2) {
-  if (n2.__esModule)
-    return n2;
-  var a2 = Object.defineProperty({}, "__esModule", { value: true });
-  Object.keys(n2).forEach(function(k2) {
-    var d2 = Object.getOwnPropertyDescriptor(n2, k2);
-    Object.defineProperty(a2, k2, d2.get ? d2 : {
-      enumerable: true,
-      get: function() {
-        return n2[k2];
-      }
-    });
-  });
-  return a2;
 }
 var removeMarkdown = function(md, options) {
   options = options || {};
@@ -2151,7 +3926,7 @@ const Colors = () => {
 };
 const Header = () => {
   const { Logo: Logo2, Search: Search2 } = useComponentList();
-  return /* @__PURE__ */ a$3(y$4, null, /* @__PURE__ */ a$3(Logo2, null), /* @__PURE__ */ a$3("header", null, /* @__PURE__ */ a$3(L$2, {
+  return /* @__PURE__ */ a$3(y$4, null, /* @__PURE__ */ a$3("header", null, /* @__PURE__ */ a$3(Logo2, null), /* @__PURE__ */ a$3(L$2, {
     fallback: "..."
   }, /* @__PURE__ */ a$3(Search2, null)), /* @__PURE__ */ a$3(Colors, null)));
 };
@@ -2502,8 +4277,8 @@ const Search = () => {
   const { SearchInput: SearchInput2 } = useComponentList();
   const documents = Object.values(useDocuments());
   const handleQuery = A$3((query) => {
-    const result = search(documents, ["title", "content"], query);
-    console.log(result);
+    search(documents, ["title", "content"], query);
+    console.log(searchDocs(query));
   }, [documents.length]);
   return /* @__PURE__ */ a$3("div", {
     className: "search"
@@ -2543,7 +4318,8 @@ const Sidebar = () => {
 };
 const SidebarLevel = (level) => {
   const { SidebarItem: SidebarItem2, SidebarCategory: SidebarCategory2 } = useComponentList();
-  return /* @__PURE__ */ a$3("ul", null, Object.keys(level).map((key) => {
+  const itemKeys = Object.keys(level);
+  return /* @__PURE__ */ a$3("ul", null, itemKeys.map((key, index) => {
     const item = level[key];
     if (!item.children) {
       return /* @__PURE__ */ a$3(SidebarItem2, {
@@ -2985,7 +4761,7 @@ const SidebarLink = (props) => {
 const SidebarItem = (props) => {
   const { item } = props;
   const { headings = [], depth, path } = item;
-  const hasHeadings = headings.length > 0;
+  const hasHeadings = false;
   const [collapsed, setCollapsed] = useSidebarCollapsedState((state) => {
     var _a;
     return [(_a = state.isCollapsed[path]) != null ? _a : depth > 1, state.setCollapsed];
@@ -2994,31 +4770,12 @@ const SidebarItem = (props) => {
     key: item.path + item.slug,
     className: "navbar-item"
   }, /* @__PURE__ */ a$3("div", {
-    className: `navbar-item-label${!collapsed ? " open" : ""}${hasHeadings ? " header" : ""} depth-${depth}`
+    className: `navbar-item-label${!collapsed ? " open" : ""}${""} depth-${depth}`
+  }, /* @__PURE__ */ a$3("div", {
+    className: "sidebar-link"
   }, /* @__PURE__ */ a$3(SidebarLink, {
     item
-  }), hasHeadings && /* @__PURE__ */ a$3("button", {
-    onClick: () => setCollapsed(path, (isCollapsedBefore) => {
-      return !(isCollapsedBefore != null ? isCollapsedBefore : depth > 1);
-    })
-  }, /* @__PURE__ */ a$3("svg", {
-    xmlns: "http://www.w3.org/2000/svg",
-    fill: "none",
-    viewBox: "0 0 24 24",
-    stroke: "currentColor"
-  }, /* @__PURE__ */ a$3("path", {
-    "stroke-linecap": "round",
-    "stroke-linejoin": "round",
-    "stroke-width": "2",
-    d: "M5 11l7-7 7 7M5 19l7-7 7 7"
-  })))), hasHeadings && !collapsed && /* @__PURE__ */ a$3("ul", null, headings.map((heading) => {
-    return /* @__PURE__ */ a$3("li", {
-      className: `sidebar-heading sidebar-heading-${heading.size}`
-    }, /* @__PURE__ */ a$3(SidebarLink, {
-      item,
-      heading
-    }));
-  })));
+  })), hasHeadings));
 };
 const useNavbar = () => useDocs((state) => state.navbar);
 const SidebarMenu = () => {
@@ -7337,17 +9094,21 @@ function htmdx(m2, h2, options) {
 const useCurrentDocument = () => {
   return useDocs((state) => state.currentDocument);
 };
-const components = {};
-function DocumentRenderer() {
-  const currentDocument = useCurrentDocument();
-  const { htmdxOptions = { components: {} } } = useDocsOptions();
-  return /* @__PURE__ */ a$3(y$4, null, /* @__PURE__ */ a$3("article", null, htmdx(currentDocument.content, a$3, __spreadProps(__spreadValues({}, htmdxOptions), {
-    components: __spreadValues(__spreadValues({}, components), htmdxOptions.components)
-  }))));
-}
 const useFlatNavbar = () => {
   return useDocs((state) => state.flatNavbar);
 };
+const components = {};
+function DocumentRenderer() {
+  const { TOC: TOC2 } = useComponentList();
+  const currentDocument = useCurrentDocument();
+  const { htmdxOptions = { components: {} } } = useDocsOptions();
+  const navbarItems = useFlatNavbar();
+  return /* @__PURE__ */ a$3(y$4, null, /* @__PURE__ */ a$3("article", null, htmdx(currentDocument.content, a$3, __spreadProps(__spreadValues({}, htmdxOptions), {
+    components: __spreadValues(__spreadValues({}, components), htmdxOptions.components)
+  }))), /* @__PURE__ */ a$3(TOC2, {
+    item: navbarItems.find((i2) => i2.slug === currentDocument.slug)
+  }));
+}
 function _extends() {
   _extends = Object.assign || function(target) {
     for (var i2 = 1; i2 < arguments.length; i2++) {
@@ -7605,6 +9366,22 @@ const BreadCrumbs = () => {
     }));
   });
 };
+const TOC = (props) => {
+  const { item } = props;
+  const { headings = [] } = item;
+  const usableHeadings = headings.filter((h2) => h2.size > 1);
+  const hasHeadings = usableHeadings.length > 0;
+  return /* @__PURE__ */ a$3("aside", null, /* @__PURE__ */ a$3("div", null, /* @__PURE__ */ a$3("b", null, "table of contents"), hasHeadings && /* @__PURE__ */ a$3("ul", null, usableHeadings.map((heading, index) => {
+    const next = usableHeadings[index + 1];
+    const link = /* @__PURE__ */ a$3("li", {
+      className: `sidebar-heading sidebar-heading-${heading.size}${!next || next.size < heading.size ? " last" : ""} sidebar-link`
+    }, /* @__PURE__ */ a$3(SidebarLink, {
+      item,
+      heading
+    }));
+    return link;
+  }))));
+};
 const componentList = {
   Header,
   App,
@@ -7618,7 +9395,8 @@ const componentList = {
   Main,
   SidebarMenu,
   DocumentRenderer,
-  BreadCrumbs
+  BreadCrumbs,
+  TOC
 };
 async function load(options) {
   const navbar = await fetchNavbar(options.rootPath, options.navbarPath);

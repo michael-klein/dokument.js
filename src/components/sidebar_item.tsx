@@ -7,7 +7,7 @@ import { SidebarLink } from "./sidebar_link";
 export const SidebarItem = (props: { item: NavbarItem }) => {
   const { item } = props;
   const { headings = [], depth, path } = item;
-  const hasHeadings = headings.length > 0;
+  const hasHeadings = false;
   const [collapsed, setCollapsed] = useSidebarCollapsedState(
     (state) =>
       [state.isCollapsed[path] ?? depth > 1, state.setCollapsed] as [
@@ -15,7 +15,6 @@ export const SidebarItem = (props: { item: NavbarItem }) => {
         (path: string, producer: (current: boolean) => boolean) => void
       ]
   );
-
   return (
     <li key={item.path + item.slug} className="navbar-item">
       <div
@@ -23,7 +22,9 @@ export const SidebarItem = (props: { item: NavbarItem }) => {
           hasHeadings ? " header" : ""
         } depth-${depth}`}
       >
-        <SidebarLink item={item}></SidebarLink>
+        <div className="sidebar-link">
+          <SidebarLink item={item}></SidebarLink>
+        </div>
         {hasHeadings && (
           <button
             onClick={() =>
@@ -48,17 +49,6 @@ export const SidebarItem = (props: { item: NavbarItem }) => {
           </button>
         )}
       </div>
-      {hasHeadings && !collapsed && (
-        <ul>
-          {headings.map((heading) => {
-            return (
-              <li className={`sidebar-heading sidebar-heading-${heading.size}`}>
-                <SidebarLink item={item} heading={heading}></SidebarLink>
-              </li>
-            );
-          })}
-        </ul>
-      )}
     </li>
   );
 };

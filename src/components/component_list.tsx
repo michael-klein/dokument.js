@@ -11,6 +11,7 @@ import { SidebarMenu } from "./sidebar_menu";
 import { DocumentRenderer } from "./document_renderer";
 import { Main } from "./main";
 import { BreadCrumbs } from "./bread_crumbs";
+import { TOC } from "./toc";
 
 export const componentList = {
   Header,
@@ -25,7 +26,8 @@ export const componentList = {
   Main,
   SidebarMenu,
   DocumentRenderer,
-  BreadCrumbs
+  BreadCrumbs,
+  TOC,
 };
 
 export type ComponentList = typeof componentList;
